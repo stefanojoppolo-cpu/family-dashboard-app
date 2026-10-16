@@ -1168,17 +1168,25 @@ const ELENCHI_CAMPI = {
 function defaultSettings(){
   const moduli = {}; MODULI_IDS.forEach(id => { moduli[id] = {on:true, nome:MODULI_DEFAULT_NOMI[id]}; });
   const elenchi = {}; Object.keys(ELENCHI_DEF).forEach(k => { elenchi[k] = ELENCHI_DEF[k].default.slice(); });
-  return {versione:1, configurato:false, sanitaModalita:'semplice', massimali:{fasiPsico:400, secondoPsico:1500}, moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}};
+  return {versione:1, configurato:false, sanitaModalita:'semplice', massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}};
 }
 function normalizeSettings(raw){
   const d = defaultSettings();
   if(!raw || typeof raw !== 'object') return d;
   if(raw.configurato === true) d.configurato = true;
   if(raw.sanitaModalita === 'completa') d.sanitaModalita = 'completa';
-  if(raw.massimali){
-    const f = parseFloat(raw.massimali.fasiPsico), s = parseFloat(raw.massimali.secondoPsico);
-    if(!isNaN(f) && f >= 0) d.massimali.fasiPsico = f;
-    if(!isNaN(s) && s >= 0) d.massimali.secondoPsico = s;
+  if(Array.isArray(raw.massimali)){
+    d.massimali = raw.massimali.filter(x => x && typeof x === 'object').map(x => ({
+      id: typeof x.id === 'string' && x.id ? x.id : uid(),
+      nome: String(x.nome || '').trim(),
+      parole: String(x.parole || '').trim(),
+      ambito: x.ambito === 'persona' ? 'persona' : 'nucleo',
+      importo1: Math.max(0, parseFloat(x.importo1) || 0),
+      importo2: Math.max(0, parseFloat(x.importo2) || 0)
+    })).filter(x => x.nome);
+  } else if(raw.massimali && typeof raw.massimali === 'object' && (raw.massimali.fasiPsico !== undefined || raw.massimali.secondoPsico !== undefined)){
+    // vecchio formato: un solo massimale "psicologia" per tutto il nucleo
+    d.massimali = [{id:uid(), nome:'Psicologia', parole:'psicolog, psicoterap', ambito:'nucleo', importo1:Math.max(0, parseFloat(raw.massimali.fasiPsico) || 0), importo2:Math.max(0, parseFloat(raw.massimali.secondoPsico) || 0)}];
   }
   MODULI_IDS.forEach(id => {
     const m = raw.moduli && raw.moduli[id];
@@ -1314,6 +1322,35 @@ function metricsRecurring(){
   ];
 }
 
+function massimaleMatch(mx, m){
+  const parole = mx.parole.toLowerCase().split(/[,;]/).map(x => x.trim()).filter(Boolean);
+  const d = (m.descrizione || '').toLowerCase();
+  return parole.length > 0 && parole.some(p => d.includes(p));
+}
+function massimaliMetrics(){
+  const anno = String(new Date().getFullYear());
+  const out = [];
+  settings.massimali.forEach(mx => {
+    const righe = medical.filter(m => (m.dataDocumento || '').slice(0,4) === anno && massimaleMatch(mx, m));
+    const gruppi = [];
+    if(mx.ambito === 'persona'){
+      const nomi = [...new Set(settings.elenchi.persone.concat(righe.map(m => (m.richiedente || '').trim()).filter(Boolean)))];
+      nomi.forEach(n => gruppi.push({n, suff:' — ' + n, righe:righe.filter(m => (m.richiedente || '').trim() === n)}));
+    } else {
+      gruppi.push({n:'', suff:'', righe});
+    }
+    gruppi.forEach(g => {
+      const livelli = modalitaSemplificata ? [[1, mx.importo1, 'fasiPagato', '']] : [[1, mx.importo1, 'fasiPagato', ' 1° livello'], [2, mx.importo2, 'assRimborsato', ' 2° livello']];
+      livelli.forEach(([lv, importo, campo, etichetta]) => {
+        if(!(importo > 0)) return;
+        const usato = g.righe.reduce((s, m) => s + medicalRowNumbers(m)[campo], 0);
+        const residuo = Math.max(0, importo - usato);
+        out.push({k:`mx_${mx.id}_${lv}_${g.n}`, valore: euro(residuo), label: `Massimale ${escHtml(mx.nome)}${etichetta}${escHtml(g.suff)} residuo (${anno}) · ${g.righe.length} prest.`, cls: residuo <= 0.004 ? 'warn' : ''});
+      });
+    });
+  });
+  return out;
+}
 function metricsMedical(conMassimali){
   const fasiAperte = medical.filter(m => ['da_aprire_fasi','aperta_fasi'].includes(m.stato)).length;
   const secondoAperte = medical.filter(m => ['da_aprire_secondo','aperta_secondo'].includes(m.stato)).length;
@@ -1324,10 +1361,11 @@ function metricsMedical(conMassimali){
     .filter(m => ['da_aprire_secondo','aperta_secondo'].includes(m.stato))
     .reduce((sum, m) => { const {richiestoSecondo, assRimborsato} = medicalRowNumbers(m); return sum + Math.max(0, richiestoSecondo - assRimborsato); }, 0);
   if(modalitaSemplificata){
-    return [
+    const semplici = [
       {valore: fasiAperte, label: 'Pratiche aperte', cls: fasiAperte ? 'pend' : ''},
       {valore: euro(pendenteFasi), label: 'Ancora da rimborsare', cls: pendenteFasi > 0 ? 'pend' : ''}
     ];
+    return conMassimali ? semplici.concat(massimaliMetrics()) : semplici;
   }
   const items = [
     {valore: fasiAperte, label: 'In attesa di rimborso FASI', cls: fasiAperte ? 'pend' : ''},
@@ -1335,20 +1373,7 @@ function metricsMedical(conMassimali){
     {valore: euro(pendenteFasi), label: 'Ancora da rimborsare da FASI', cls: pendenteFasi > 0 ? 'pend' : ''},
     {valore: euro(pendenteSecondo), label: 'Ancora da rimborsare dal 2° livello', cls: pendenteSecondo > 0 ? 'pend' : ''}
   ];
-  if(conMassimali){
-    const annoCorrente = new Date().getFullYear();
-    const massimaleFasiPsico = settings.massimali.fasiPsico;
-    const massimaleSecondoPsico = settings.massimali.secondoPsico;
-    const psicoAnno = medical.filter(m => /psicolog|psicoterap/i.test(m.descrizione||'') && (m.dataDocumento||'').slice(0,4) === String(annoCorrente));
-    const fasiPsicoUsato = psicoAnno.reduce((sum, m) => sum + medicalRowNumbers(m).fasiPagato, 0);
-    const secondoPsicoUsato = psicoAnno.reduce((sum, m) => sum + medicalRowNumbers(m).assRimborsato, 0);
-    const residuoFasiPsico = Math.max(0, massimaleFasiPsico - fasiPsicoUsato);
-    const residuoSecondoPsico = Math.max(0, massimaleSecondoPsico - secondoPsicoUsato);
-    items.push(
-      {valore: euro(residuoFasiPsico), label: `Massimale FASI psicologico residuo (${annoCorrente})`, cls: residuoFasiPsico <= 0.004 ? 'warn' : ''},
-      {valore: euro(residuoSecondoPsico), label: `Massimale 2° livello psicologico residuo (${annoCorrente})`, cls: residuoSecondoPsico <= 0.004 ? 'warn' : ''}
-    );
-  }
+  if(conMassimali) items.push(...massimaliMetrics());
   return items;
 }
 
@@ -2359,6 +2384,11 @@ async function saveByName(name){
   if(name === 'detrazioni') return saveDetrazioni();
 }
 let impDraft = null;
+function impBarHtml(){ return `<div style="position:sticky;top:0;z-index:5;background:var(--gold-soft);border:1px solid var(--gold);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><span style="flex:1;font-size:13px;">Hai modifiche non salvate a moduli e sanità.</span><button type="button" class="btn ghost small" id="imp-cancel">Annulla</button><button type="button" class="btn small" id="imp-save">Salva e attiva</button></div>`; }
+function impMarkDirty(){
+  const el = document.getElementById('panel-impostazioni');
+  if(!document.getElementById('imp-save')) el.insertAdjacentHTML('afterbegin', impBarHtml());
+}
 function impView(){ return impDraft || {moduli:settings.moduli, sanitaModalita:settings.sanitaModalita, massimali:settings.massimali}; }
 function impEnsureDraft(){
   if(!impDraft) impDraft = JSON.parse(JSON.stringify({moduli:settings.moduli, sanitaModalita:settings.sanitaModalita, massimali:settings.massimali}));
@@ -2383,7 +2413,7 @@ function renderImpostazioni(){
       <div class="add-val"><input type="text" id="addval-${k}" data-list-add-input="${k}" placeholder="Nuovo valore"><button type="button" class="btn small" data-list-add="${k}">Aggiungi</button></div>
     </div>`).join('');
   el.innerHTML = `
-    ${impDraft ? `<div style="position:sticky;top:0;z-index:5;background:var(--gold-soft);border:1px solid var(--gold);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><span style="flex:1;font-size:13px;">Hai modifiche non salvate a moduli e sanità.</span><button type="button" class="btn ghost small" id="imp-cancel">Annulla</button><button type="button" class="btn small" id="imp-save">Salva e attiva</button></div>` : ''}
+    ${impDraft ? impBarHtml() : ''}
     <div class="set-card">
       <h3>Moduli</h3>
       <p class="hint">Attiva solo le schede che ti servono e dai loro il nome che preferisci. I dati dei moduli spenti non vengono cancellati.</p>
@@ -2391,16 +2421,25 @@ function renderImpostazioni(){
     </div>
     <div class="set-card">
       <h3>${escHtml(V.moduli.medical.nome)}</h3>
-      <p class="hint">Modalità semplice: stato della pratica in 4 passi, importo rimborsato e residuo da portare in detrazione. Modalità completa: doppio livello di rimborso (es. fondo sanitario + assicurazione di 2° livello) con stati e massimali dedicati.</p>
+      <p class="hint">Modalità semplice: stato della pratica in 4 passi, importo rimborsato e residuo da portare in detrazione. Modalità completa: doppio livello di rimborso (es. fondo sanitario + assicurazione di 2° livello) con stati dedicati.</p>
       <div class="set-row">
         <select id="set-sanita-modalita" style="max-width:360px;">
           <option value="semplice" ${V.sanitaModalita === 'semplice' ? 'selected' : ''}>Semplice (un solo rimborso)</option>
           <option value="completa" ${V.sanitaModalita === 'completa' ? 'selected' : ''}>Completa (primo e secondo livello)</option>
         </select>
       </div>
-      ${V.sanitaModalita === 'completa' ? `
-      <div class="set-row"><span style="font-size:13px;min-width:260px;">Massimale annuo psicologia — primo livello (€)</span><input type="number" step="0.01" min="0" id="set-mass-fasi" value="${V.massimali.fasiPsico}" style="width:120px;"></div>
-      <div class="set-row"><span style="font-size:13px;min-width:260px;">Massimale annuo psicologia — secondo livello (€)</span><input type="number" step="0.01" min="0" id="set-mass-secondo" value="${V.massimali.secondoPsico}" style="width:120px;"></div>` : ''}
+      <h3 style="margin:16px 0 4px;font-size:13.5px;">Massimali annui</h3>
+      <p class="hint">Aggiungi i tetti di rimborso che vuoi tenere d'occhio. Le <b>parole chiave</b> (separate da virgola) vengono cercate nel campo Prestazione delle spese dell'anno corrente. In Panoramica compare il residuo${V.sanitaModalita === 'completa' ? ', uno per ogni livello' : ''}. Conta i rimborsi già pagati.</p>
+      ${V.massimali.length ? V.massimali.map((mx, i) => `
+      <div class="set-row" style="border-top:1px solid var(--line);padding-top:10px;align-items:flex-end;">
+        <div style="min-width:150px;"><label style="font-size:11.5px;color:var(--ink-soft);">Nome</label><input type="text" data-mass-i="${i}" data-mass-f="nome" value="${escHtml(mx.nome)}" maxlength="40" placeholder="es. Psicologia" style="min-width:0;width:100%;"></div>
+        <div style="flex:1;min-width:190px;"><label style="font-size:11.5px;color:var(--ink-soft);">Parole chiave</label><input type="text" data-mass-i="${i}" data-mass-f="parole" value="${escHtml(mx.parole)}" placeholder="es. psicolog, psicoterap" style="min-width:0;width:100%;"></div>
+        <div><label style="font-size:11.5px;color:var(--ink-soft);">Vale per</label><select data-mass-i="${i}" data-mass-f="ambito"><option value="nucleo" ${mx.ambito === 'nucleo' ? 'selected' : ''}>Tutto il nucleo</option><option value="persona" ${mx.ambito === 'persona' ? 'selected' : ''}>Ogni persona</option></select></div>
+        <div><label style="font-size:11.5px;color:var(--ink-soft);">${V.sanitaModalita === 'completa' ? '1° livello (€/anno)' : 'Importo (€/anno)'}</label><input type="number" step="0.01" min="0" data-mass-i="${i}" data-mass-f="importo1" value="${mx.importo1 || ''}" style="width:120px;"></div>
+        ${V.sanitaModalita === 'completa' ? `<div><label style="font-size:11.5px;color:var(--ink-soft);">2° livello (€/anno)</label><input type="number" step="0.01" min="0" data-mass-i="${i}" data-mass-f="importo2" value="${mx.importo2 || ''}" style="width:120px;"></div>` : ''}
+        <button type="button" class="btn ghost small" data-mass-del="${i}" title="Rimuovi">✕</button>
+      </div>`).join('') : '<p class="doc-ref" style="margin:0 0 8px;">Nessun massimale impostato.</p>'}
+      <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
@@ -2417,12 +2456,15 @@ document.getElementById('panel-impostazioni').addEventListener('change', (e) => 
     D.moduli[t.dataset.setModuloNome].nome = v || MODULI_DEFAULT_NOMI[t.dataset.setModuloNome];
   } else if(t.id === 'set-sanita-modalita'){
     impEnsureDraft().sanitaModalita = t.value;
-  } else if(t.id === 'set-mass-fasi' || t.id === 'set-mass-secondo'){
-    const v = parseFloat(t.value); if(isNaN(v) || v < 0) return;
+  } else if(t.dataset.massI !== undefined){
     const D = impEnsureDraft();
-    if(t.id === 'set-mass-fasi') D.massimali.fasiPsico = v; else D.massimali.secondoPsico = v;
+    const mx = D.massimali[parseInt(t.dataset.massI, 10)]; if(!mx) return;
+    const f = t.dataset.massF;
+    if(f === 'importo1' || f === 'importo2') mx[f] = Math.max(0, parseFloat(t.value) || 0);
+    else mx[f] = t.value;
   } else return;
-  renderImpostazioni();
+  if(t.id === 'set-sanita-modalita' || (t.dataset.massI !== undefined && t.dataset.massF === 'ambito')) renderImpostazioni();
+  else impMarkDirty();
 });
 async function impSave(){
   if(!impDraft) return;
@@ -2430,7 +2472,9 @@ async function impSave(){
   const cambioModalita = impDraft.sanitaModalita !== settings.sanitaModalita;
   settings.moduli = impDraft.moduli;
   settings.sanitaModalita = impDraft.sanitaModalita;
-  settings.massimali = impDraft.massimali;
+  const incompleti = impDraft.massimali.filter(x => x.nome.trim() && !x.parole.trim());
+  if(incompleti.length){ showNotice(`Il massimale "${incompleti[0].nome}" non ha parole chiave: aggiungile per poterlo calcolare.`); return; }
+  settings.massimali = normalizeSettings({massimali:impDraft.massimali}).massimali;
   if(cambioModalita) settings.dashboard.sezioni = settings.dashboard.sezioni.map(s => s.id === 'medical' ? {...s, box:[]} : s);
   impDraft = null;
   applySettings();
@@ -2439,6 +2483,9 @@ async function impSave(){
   showNotice('Impostazioni salvate e attivate.', 'success');
 }
 document.getElementById('panel-impostazioni').addEventListener('click', (e) => {
+  if(e.target.id === 'mass-add'){ impEnsureDraft().massimali.push({id:uid(), nome:'', parole:'', ambito:'nucleo', importo1:0, importo2:0}); renderImpostazioni(); }
+  const md = e.target.closest('[data-mass-del]');
+  if(md){ impEnsureDraft().massimali.splice(parseInt(md.dataset.massDel, 10), 1); renderImpostazioni(); }
   if(e.target.id === 'imp-save') impSave();
   if(e.target.id === 'imp-cancel'){ impDraft = null; renderImpostazioni(); }
 });
