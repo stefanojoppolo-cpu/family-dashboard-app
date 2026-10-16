@@ -1535,6 +1535,10 @@ function metricsMedical(conMassimali){
     const n = medical.filter(m => rimborsoDi(m, p.id).stato === 'attesa').length;
     items.push({k:'att_' + p.id, valore: n, label: piu ? 'In attesa di ' + escHtml(p.nome) : 'In attesa di risposta', cls: n ? 'pend' : ''});
   });
+  pags.forEach(p => {
+    const n = medical.filter(m => { const r = medicalRowNumbers(m).prossimo; return r && r.p.id === p.id && r.stato === 'da_inviare'; }).length;
+    items.push({k:'dainv_' + p.id, valore: n, label: piu ? 'Pratiche da inviare a ' + escHtml(p.nome) : 'Pratiche da inviare', cls: n ? 'pend' : ''});
+  });
   items.push({k:'ancora', valore: euro(ancora), label:'Ancora da rimborsare', cls: ancora > 0 ? 'pend' : ''});
   items.push({k:'detr', valore: euro(detr), label:`Da portare in detrazione ${anno}`, cls:''});
   if(conMassimali) items.push(...massimaliMetrics());
