@@ -356,6 +356,16 @@
   .pano-edit .pano-box{outline:1px dashed #b9b9b9;}
   .pano-box{position:relative;}
   .pano-box .pano-tools{position:absolute;top:3px;right:3px;}
+  #welcome{position:fixed;inset:0;background:rgba(24,24,24,.55);z-index:1000;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px;}
+  #welcome .box{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;margin:auto;}
+  #welcome h2{margin:0 0 4px;font-size:20px;}
+  #welcome .sub{margin:0 0 16px;color:var(--ink-soft);font-size:13.5px;}
+  #welcome .blk{margin-bottom:16px;}
+  #welcome .blk h4{margin:0 0 6px;font-size:13px;}
+  #welcome label.opt{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:3px 0;}
+  #welcome label.opt input{width:auto;}
+  #welcome textarea{width:100%;font:inherit;font-size:13px;padding:8px;border:1px solid var(--line);border-radius:4px;}
+  #welcome .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
 </style>
 </head>
 <body>
@@ -392,6 +402,18 @@
   </div>
 </div>
 
+<div id="welcome"><div class="box">
+  <h2>Benvenuto! Configuriamo la tua dashboard</h2>
+  <p class="sub">Bastano pochi secondi. Potrai cambiare tutto più tardi dalla scheda Impostazioni.</p>
+  <div class="blk"><h4>Quali schede vuoi usare?</h4><div id="welcome-moduli"></div></div>
+  <div class="blk" id="welcome-sanita-blk"><h4>Sanità integrativa: come vuoi gestirla?</h4>
+    <label class="opt"><input type="radio" name="welcome-sanita" value="semplice" checked> Semplice: un solo rimborso (assicurazione o fondo)</label>
+    <label class="opt"><input type="radio" name="welcome-sanita" value="completa"> Completa: primo e secondo livello di rimborso</label>
+  </div>
+  <div class="blk"><h4>Chi fa parte della famiglia? (un nome per riga, facoltativo)</h4>
+    <textarea id="welcome-persone" rows="3" placeholder="es.&#10;Mario&#10;Anna"></textarea></div>
+  <div class="acts"><button type="button" class="btn ghost" id="welcome-skip">Salta, userò le impostazioni di base</button><button type="button" class="btn" id="welcome-ok">Inizia</button></div>
+</div></div>
 <div id="app-content" style="display:none;">
 <div id="logout-bar" style="display:none;align-items:center;justify-content:flex-end;gap:10px;padding:8px 24px;background:var(--paper);font-size:12.5px;color:var(--ink-soft);">
   <span id="logout-email"></span>
@@ -1146,11 +1168,12 @@ const ELENCHI_CAMPI = {
 function defaultSettings(){
   const moduli = {}; MODULI_IDS.forEach(id => { moduli[id] = {on:true, nome:MODULI_DEFAULT_NOMI[id]}; });
   const elenchi = {}; Object.keys(ELENCHI_DEF).forEach(k => { elenchi[k] = ELENCHI_DEF[k].default.slice(); });
-  return {versione:1, sanitaModalita:'semplice', massimali:{fasiPsico:400, secondoPsico:1500}, moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}};
+  return {versione:1, configurato:false, sanitaModalita:'semplice', massimali:{fasiPsico:400, secondoPsico:1500}, moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}};
 }
 function normalizeSettings(raw){
   const d = defaultSettings();
   if(!raw || typeof raw !== 'object') return d;
+  if(raw.configurato === true) d.configurato = true;
   if(raw.sanitaModalita === 'completa') d.sanitaModalita = 'completa';
   if(raw.massimali){
     const f = parseFloat(raw.massimali.fasiPsico), s = parseFloat(raw.massimali.secondoPsico);
@@ -2281,6 +2304,32 @@ function applyModuliLabels(){
     if(settings.moduli[id] && btn.lastChild) btn.lastChild.textContent = settings.moduli[id].nome;
   });
 }
+function showWelcome(){
+  document.getElementById('welcome-moduli').innerHTML = MODULI_IDS.map(id => `<label class="opt"><input type="checkbox" data-w-mod="${id}" checked> ${escHtml(MODULI_DEFAULT_NOMI[id])}</label>`).join('');
+  const sb = document.getElementById('welcome-sanita-blk');
+  const sync = () => { sb.style.display = document.querySelector('[data-w-mod=medical]').checked ? '' : 'none'; };
+  document.querySelector('[data-w-mod=medical]').onchange = sync; sync();
+  document.getElementById('welcome').style.display = 'flex';
+}
+async function closeWelcome(applyChoices){
+  if(applyChoices){
+    const on = {};
+    document.querySelectorAll('[data-w-mod]').forEach(cb => { on[cb.dataset.wMod] = cb.checked; });
+    if(!MODULI_IDS.some(id => on[id])){ showNotice('Seleziona almeno una scheda.'); return; }
+    MODULI_IDS.forEach(id => { settings.moduli[id].on = !!on[id]; });
+    const r = document.querySelector('input[name=welcome-sanita]:checked');
+    settings.sanitaModalita = r && r.value === 'completa' ? 'completa' : 'semplice';
+    const nomi = document.getElementById('welcome-persone').value.split('\n').map(x => x.trim()).filter(Boolean);
+    nomi.forEach(n => { if(!settings.elenchi.persone.some(p => p.toLowerCase() === n.toLowerCase())) settings.elenchi.persone.push(n); });
+  }
+  settings.configurato = true;
+  document.getElementById('welcome').style.display = 'none';
+  applySettings();
+  renderAll();
+  await saveSettings();
+}
+document.getElementById('welcome-ok').addEventListener('click', () => closeWelcome(true));
+document.getElementById('welcome-skip').addEventListener('click', () => closeWelcome(false));
 function applySettings(){
   modalitaSemplificata = settings.sanitaModalita !== 'completa';
   const spenti = MODULI_IDS.filter(id => !settings.moduli[id].on);
@@ -3192,7 +3241,9 @@ document.getElementById('backup-import-btn').addEventListener('click', async () 
   contratti = parsed.contratti || [];
   documenti = parsed.documenti || [];
   detrazioni = parsed.detrazioni || [];
-  if(parsed.settings){ settings = normalizeSettings(parsed.settings); await saveSettings(); applySettings(); }
+  if(parsed.settings){ settings = normalizeSettings(parsed.settings); }
+  settings.configurato = true;
+  await saveSettings(); applySettings();
   await saveRecurring();
   await saveMedical();
   await saveBilancio();
@@ -3695,6 +3746,7 @@ onAuthStateChanged(auth, async (user) => {
     await loadData();
     applySettings();
     renderAll();
+    if(!settings.configurato) showWelcome();
   } else {
     document.getElementById('auth-gate').style.display = 'flex';
     document.getElementById('app-content').style.display = 'none';
