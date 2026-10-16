@@ -1,0 +1,3714 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230176D3'/%3E%3Ccircle cx='8' cy='8' r='3' fill='white'/%3E%3Ccircle cx='17' cy='9' r='2.5' fill='white'/%3E%3Cpath d='M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M14 20c0-2.8 1.8-4.8 4-4.8s4 2 4 4.8' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0176D3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Family Dashboard">
+<style>
+  :root{
+    --paper:#F3F3F6;
+    --paper-raised:#FFFFFF;
+    --ink:#181818;
+    --ink-soft:#706E6B;
+    --line:#DDDBDA;
+    --stamp:#C23934;
+    --stamp-soft:#FEF0EE;
+    --gold:#B67300;
+    --gold-soft:#FDF3E4;
+    --teal:#2E844A;
+    --teal-soft:#E4F6E9;
+    --accent:#0176D3;
+    --accent-hover:#014486;
+    --accent-soft:#EAF5FE;
+    --page-bg:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--page-bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:1720px;
+    margin:0 auto;
+    padding:40px 24px 80px;
+  }
+  header{
+    margin-bottom:24px;
+  }
+  h1{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-weight:600;
+    font-size:32px;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:14.5px;
+  }
+  .summary{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:24px;
+  }
+  .summary-item{
+    flex:1;
+    min-width:160px;
+    padding:16px 18px;
+    border:1px solid var(--line);
+    border-radius:8px;
+  }
+  .summary-num{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:24px;
+    font-weight:500;
+    display:block;
+    line-height:1.1;
+  }
+  .summary-label{
+    color:var(--ink-soft);
+    font-size:12.5px;
+    margin-top:4px;
+    display:block;
+  }
+  .summary-item.warn .summary-num{color:var(--stamp);}
+  .summary-item.pend .summary-num{color:var(--gold);}
+  nav.tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;
+    font-weight:500;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    padding:9px 18px;
+    cursor:pointer;
+    border-radius:16px;
+  }
+  .tab-btn.active{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+  section.panel{
+    display:none;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--paper-raised);
+    padding:24px;
+  }
+  section.panel.active{display:block;}
+  .table-scroll{
+    overflow:auto;
+    max-height:60vh;
+    border:1px solid var(--line);
+    border-radius:4px;
+    margin-bottom:20px;
+  }
+  .table-scroll table{margin-bottom:0;}
+  #panel-medical .table-scroll table{
+    min-width:1180px;
+  }
+  #panel-medical thead th{
+    white-space:normal;
+    max-width:100px;
+    line-height:1.25;
+  }
+  .table-scroll thead th{
+    position:sticky;
+    top:0;
+    background:var(--paper-raised);
+    z-index:1;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:20px;
+  }
+  th{
+    text-align:left;
+    font-weight:500;
+    font-size:12px;
+    color:var(--ink-soft);
+    padding:0 10px 8px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  th[data-sort-key]{cursor:pointer;user-select:none;}
+  th[data-sort-key]:hover{color:var(--ink);}
+  .sort-ind{font-size:10px;display:inline-block;width:8px;}
+  td{
+    padding:10px 8px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+    font-size:12px;
+  }
+  tr.row-overdue td:first-child{border-left:3px solid var(--stamp);}
+  tr.row-soon td:first-child{border-left:3px solid var(--gold);}
+  tr.row-ok td:first-child{border-left:3px solid var(--teal);}
+  .badge{
+    display:inline-block;
+    padding:3px 11px;
+    border-radius:12px;
+    font-size:12.5px;
+    font-weight:500;
+  }
+  .badge.overdue{background:var(--stamp-soft);color:var(--stamp);}
+  .badge.soon{background:var(--gold-soft);color:var(--gold);}
+  .badge.paid{background:var(--teal-soft);color:var(--teal);}
+  .badge.pending{background:var(--gold-soft);color:var(--gold);}
+  .badge.refunded{background:var(--teal-soft);color:var(--teal);}
+  .badge.refused{background:var(--stamp-soft);color:var(--stamp);}
+  .amount{font-variant-numeric:tabular-nums;}
+  button{
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:8px 16px;
+    border-radius:4px;
+    font-size:13.5px;
+    font-weight:500;
+  }
+  .btn:hover{background:var(--accent-hover);}
+  .btn.ghost{
+    background:none;
+    color:var(--accent);
+    border:1px solid var(--line);
+  }
+  .btn.small{padding:5px 11px;font-size:12.5px;}
+  .btn.danger{color:var(--stamp);}
+  .row-actions{display:flex;gap:6px;}
+  .add-toggle{
+    border:1px dashed var(--line);
+    background:none;
+    width:100%;
+    padding:10px;
+    color:var(--ink-soft);
+    border-radius:4px;
+    font-size:14px;
+    margin-top:4px;
+  }
+  .add-toggle:hover{border-color:var(--ink);color:var(--ink);}
+  .entry-form{
+    display:none;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-top:14px;
+    padding:18px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:6px;
+  }
+  .entry-form.open{display:grid;}
+  .entry-form .field{display:flex;flex-direction:column;gap:5px;}
+  .entry-form .field.span2{grid-column:span 2;}
+  .entry-form .field.span3{grid-column:span 3;}
+  #medical-form.open{display:block;}
+  #bilancio-form.open{display:block;}
+  #contratti-form.open{display:block;}
+  #documenti-form.open{display:block;}
+  .form-section{margin-bottom:20px;}
+  .form-section:last-of-type{margin-bottom:0;}
+  .form-section-title{
+    font-size:12px;font-weight:600;color:var(--ink-soft);
+    text-transform:uppercase;letter-spacing:0.03em;margin:0 0 4px;
+  }
+  .form-section-hint{font-size:12px;color:var(--ink-soft);margin:0 0 10px;}
+  .form-row{display:grid;gap:14px;margin-bottom:12px;}
+  .form-row:last-child{margin-bottom:0;}
+  .form-row-3{grid-template-columns:repeat(3,1fr);}
+  .form-row-modstato{grid-template-columns:1fr 2fr;}
+  .form-row-importi{grid-template-columns:1fr 1fr 1fr 0.8fr;}
+  .form-row-mamma{
+    display:flex;align-items:center;gap:16px;
+    background:var(--paper);border-radius:4px;padding:10px 14px;
+  }
+  label{font-size:12.5px;color:var(--ink-soft);}
+  input, select, textarea{
+    font-family:inherit;
+    font-size:14px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fff;
+    color:var(--ink);
+  }
+  input:disabled{background:var(--paper);color:var(--ink-soft);cursor:not-allowed;}
+  .form-actions{
+    grid-column:1/-1;
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+  }
+  .refund-block{
+    display:flex;
+    gap:18px;
+    font-size:13px;
+  }
+  .refund-col{flex:1;}
+  .refund-col h4{
+    margin:0 0 4px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  .empty-state{
+    color:var(--ink-soft);
+    font-size:14px;
+    padding:20px 0;
+    text-align:center;
+  }
+  .filter-bar{
+    margin-bottom:14px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    flex-wrap:nowrap;
+    white-space:nowrap;
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+  .filter-bar label, .filter-bar select, .filter-bar input{flex-shrink:0;}
+  .filter-bar select{padding:6px 9px;font-size:13.5px;}
+  .filter-bar input[type="text"]{padding:6px 9px;font-size:13.5px;}
+  .doc-ref{color:inherit;font-size:inherit;}
+  .modalita-badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:3px;
+    font-size:12px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+  }
+  .subtotal-row td{
+    font-weight:600;
+    border-bottom:none;
+    border-top:1px solid var(--ink);
+  }
+  @media (max-width:640px){
+    .entry-form{grid-template-columns:1fr 1fr;}
+    .entry-form .field.span2, .entry-form .field.span3{grid-column:span 2;}
+    .form-row-3, .form-row-modstato, .form-row-importi{grid-template-columns:1fr 1fr;}
+    .table-scroll{max-height:none;overflow:visible;border:none;}
+    .table-scroll thead th{position:static;}
+    table, thead, tbody, th, td, tr{display:block;}
+    #panel-medical .table-scroll table{min-width:0;}
+    thead{display:none;}
+    tr{border-bottom:1px solid var(--line);padding:10px 0;}
+    tr.subtotal-row{border:none;}
+    td{border:none;padding:3px 0;}
+    .summary{flex-direction:column;}
+    .filter-bar{flex-wrap:wrap;overflow-x:visible;white-space:normal;padding-bottom:0;row-gap:8px;}
+    .filter-bar label{margin-left:0 !important;}
+    td[data-label]::before{
+      content: attr(data-label) ": ";
+      font-weight:600;
+      color:var(--ink-soft);
+    }
+  }
+
+  /* Impostazioni e Panoramica personalizzabile */
+  .set-card{border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px;background:var(--paper-raised);}
+  .set-card h3{margin:0 0 4px;font-size:14px;font-weight:600;}
+  .set-card .hint{margin:0 0 12px;font-size:12.5px;color:var(--ink-soft);}
+  .set-row{display:flex;align-items:center;gap:10px;padding:6px 0;flex-wrap:wrap;}
+  .set-row input[type=text]{flex:1;min-width:180px;max-width:360px;}
+  .set-row label.chk{display:flex;align-items:center;gap:6px;font-size:13px;min-width:70px;}
+  .set-row input[type=checkbox]{width:auto;}
+  .chips-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .vchip{display:inline-flex;align-items:center;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:2px 4px 2px 10px;font-size:12.5px;}
+  .vchip button{border:0;background:transparent;cursor:pointer;color:var(--ink-soft);font-size:13px;padding:0 4px;line-height:1;}
+  .vchip button:hover{color:var(--stamp);}
+  .vchip .vname{cursor:text;}
+  .add-val{display:flex;gap:6px;}
+  .add-val input{flex:1;max-width:280px;}
+  .pano-edit .pano-sec{border:1px dashed var(--line);border-radius:10px;padding:10px;}
+  .pano-sec.off,.pano-box.off,.pano-urg.off{opacity:.4;}
+  .pano-tools{display:none;gap:4px;align-items:center;}
+  .pano-edit .pano-tools{display:inline-flex;}
+  .pano-tools button{padding:1px 8px;font-size:12px;border:1px solid var(--line);background:#fff;border-radius:5px;cursor:pointer;line-height:20px;}
+  .pano-tools button:hover{background:var(--paper);}
+  .pano-edit .pano-box{outline:1px dashed #b9b9b9;}
+  .pano-box{position:relative;}
+  .pano-box .pano-tools{position:absolute;top:3px;right:3px;}
+</style>
+</head>
+<body>
+
+<div id="auth-gate" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--page-bg);">
+  <div style="width:100%;max-width:360px;padding:2rem;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M14 20c0-2.8 1.8-4.8 4-4.8s4 2 4 4.8"/></svg>
+      </div>
+      <div>
+        <p style="font-size:18px;font-weight:500;margin:0;">Family Dashboard</p>
+        <p style="font-size:12.5px;color:var(--ink-soft);margin:2px 0 0;">Accedi al tuo registro personale</p>
+      </div>
+    </div>
+    <div id="auth-error" style="display:none;background:var(--stamp-soft);color:var(--stamp);padding:10px 12px;border-radius:6px;font-size:13px;margin-bottom:14px;"></div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="tuaemail@esempio.it" style="width:100%;">
+    </div>
+    <div class="field" style="margin-bottom:18px;">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="Almeno 6 caratteri" style="width:100%;">
+    </div>
+    <button class="btn" id="auth-login-btn" style="width:100%;margin-bottom:8px;">Accedi</button>
+    <button class="btn ghost" id="auth-register-btn" style="width:100%;margin-bottom:18px;">Crea un nuovo account</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;color:var(--ink-soft);font-size:12px;">
+      <div style="flex:1;height:1px;background:var(--line);"></div>oppure<div style="flex:1;height:1px;background:var(--line);"></div>
+    </div>
+    <button class="btn ghost" id="auth-google-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Accedi con Google
+    </button>
+  </div>
+</div>
+
+<div id="app-content" style="display:none;">
+<div id="logout-bar" style="display:none;align-items:center;justify-content:flex-end;gap:10px;padding:8px 24px;background:var(--paper);font-size:12.5px;color:var(--ink-soft);">
+  <span id="logout-email"></span>
+  <button class="btn ghost small" id="logout-btn" style="padding:4px 10px;">Esci</button>
+</div>
+<div class="wrap">
+  <header>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:52px;height:52px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M14 20c0-2.8 1.8-4.8 4-4.8s4 2 4 4.8"/></svg>
+        </div>
+        <div>
+          <h1 style="margin:0;">Family Dashboard</h1>
+          <p style="margin:4px 0 0;">Scadenze, rimborsi, contratti e documenti di famiglia in un unico posto.</p>
+        </div>
+      </div>
+      <button class="btn ghost" id="toggle-backup-panel" style="white-space:nowrap;">⤓ Backup dati</button>
+    </div>
+  </header>
+
+  <div id="backup-panel" style="display:none;margin:0 0 28px;padding:18px;background:var(--paper-raised);border:1px solid var(--line);border-radius:6px;">
+    <p style="margin:0 0 12px;font-size:13px;color:var(--ink-soft);">
+      Prima di pubblicare o ripubblicare l'app, esporta un backup: se lo storage dovesse azzerarsi, potrai ripristinarlo qui in pochi secondi senza reinserire nulla a mano.
+    </p>
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <button type="button" class="btn" id="backup-export-btn">Genera backup</button>
+      <button type="button" class="btn ghost" id="backup-copy-btn">Copia backup</button>
+      <a id="backup-download-link" class="btn ghost" href="#" download="registro-pagamenti-backup.csv" style="text-decoration:none;">Scarica file .csv</a>
+    </div>
+    <textarea id="backup-export-text" readonly rows="4" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;padding:10px;border:1px solid var(--line);border-radius:4px;margin-bottom:16px;" placeholder="Clicca 'Genera backup' per creare il testo da copiare o scaricare."></textarea>
+    <hr style="border:none;border-top:1px solid var(--line);margin:0 0 16px;">
+    <p style="margin:0 0 8px;font-size:13px;color:var(--ink-soft);">Per ripristinare un backup, incolla qui il testo e clicca "Importa" (sovrascrive tutti i dati attuali, con conferma):</p>
+    <textarea id="backup-import-text" rows="4" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;padding:10px;border:1px solid var(--line);border-radius:4px;margin-bottom:10px;" placeholder="Incolla qui il testo CSV del backup"></textarea>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button type="button" class="btn" id="backup-import-btn">Importa backup</button>
+    </div>
+    <p id="backup-feedback" style="margin:10px 0 0;font-size:13px;"></p>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="panoramica"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Panoramica</button>
+    <button class="tab-btn" data-tab="recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>Pagamenti ricorrenti</button>
+    <button class="tab-btn" data-tab="medical"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Sanità integrativa</button>
+    <button class="tab-btn" data-tab="bilancio"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="17" y1="20" x2="17" y2="15"/></svg>Bilancio annuale</button>
+    <button class="tab-btn" data-tab="contratti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Contratti a scadenza</button>
+    <button class="tab-btn" data-tab="documenti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.3"/><path d="M8 17c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>Documenti personali</button>
+    <button class="tab-btn" data-tab="detrazioni"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="9" cy="9" r="0.6" fill="currentColor"/><circle cx="15" cy="15" r="0.6" fill="currentColor"/></svg>Detrazioni fiscali</button>
+    <button class="tab-btn" data-tab="impostazioni"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Impostazioni</button>
+  </nav>
+
+  <section class="panel active" id="panel-panoramica">
+    <div id="pano-toolbar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;"></div>
+    <div id="pano-urgenti-block" class="pano-urg" style="margin-bottom:28px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <p class="form-section-title" style="margin:0;flex:1;">In scadenza a breve</p>
+        <span class="pano-tools"><button type="button" data-act="urg-eye" title="Mostra/nascondi">👁</button></span>
+      </div>
+      <div id="panoramica-urgenti" style="background:var(--paper-raised);border:1px solid var(--line);border-radius:8px;overflow:hidden;"></div>
+    </div>
+    <div id="panoramica-cards"></div>
+  </section>
+
+  <section class="panel" id="panel-impostazioni"></section>
+
+  <section class="panel" id="panel-recurring">
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort-key="nome">Voce <span class="sort-ind"></span></th><th data-sort-key="scadenza">Scadenza <span class="sort-ind"></span></th><th data-sort-key="importo">Importo <span class="sort-ind"></span></th><th data-sort-key="ricorrenza">Ricorrenza <span class="sort-ind"></span></th><th data-sort-key="stato">Stato <span class="sort-ind"></span></th><th></th>
+        </tr>
+      </thead>
+      <tbody id="recurring-body"></tbody>
+    </table>
+    </div>
+    <button class="add-toggle" id="toggle-recurring-form">+ Aggiungi pagamento</button>
+    <div class="entry-form" id="recurring-form">
+      <div class="field">
+        <label>Voce</label>
+        <input list="preset-recurring" id="rf-nome" placeholder="es. TARI">
+        <datalist id="preset-recurring"></datalist>
+      </div>
+      <div class="field">
+        <label>Scadenza</label>
+        <input type="date" id="rf-scadenza">
+      </div>
+      <div class="field">
+        <label>Importo (€)</label>
+        <input type="number" step="0.01" id="rf-importo">
+      </div>
+      <div class="field">
+        <label>Ricorrenza</label>
+        <select id="rf-ricorrenza">
+          <option>Annuale</option><option>Semestrale</option><option>Mensile</option><option>Una tantum</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Stato</label>
+        <select id="rf-stato">
+          <option value="da_pagare">Da pagare</option>
+          <option value="pagato">Pagato</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Note</label>
+        <input id="rf-note" placeholder="opzionale">
+      </div>
+      <div class="field span3">
+        <label style="color:var(--stamp);">Blocco pagamento</label>
+        <label style="display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--stamp-soft);color:var(--stamp);">
+          <input type="checkbox" id="rf-bloccato" style="width:auto;"> Blocca definitivamente questo pagamento (non più modificabile né eliminabile)
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="rf-cancel">Annulla</button>
+        <button type="button" class="btn" id="rf-save">Salva</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-medical">
+    <div class="filter-bar">
+      <label style="margin-right:8px;">Richiedente</label>
+      <select id="medical-filter">
+        <option value="">Tutti</option>
+      </select>
+      <label style="margin-left:18px;margin-right:8px;">Stato pratica</label>
+      <select id="medical-filter-stato">
+        <option value="">Tutti</option>
+      </select>
+      <label style="margin-left:18px;margin-right:8px;">Anno</label>
+      <select id="medical-filter-anno">
+        <option value="">Tutti</option>
+      </select>
+      <label style="margin-left:18px;margin-right:8px;">Prestazione</label>
+      <input type="text" id="medical-filter-prestazione" placeholder="cerca..." style="width:130px;">
+      <label style="margin-left:18px;margin-right:8px;">Documento</label>
+      <input type="text" id="medical-filter-documento" placeholder="cerca..." style="width:130px;">
+      <label style="margin-left:18px;display:flex;align-items:center;gap:6px;">
+        <input type="checkbox" id="medical-filter-hide-closed" style="width:auto;"> Nascondi pratiche chiuse completamente
+      </label>
+    </div>
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th></th><th data-sort-key="dataDocumento">Data <span class="sort-ind"></span></th><th class="solo-completo" data-sort-key="tipoDocumento">Tipo documento <span class="sort-ind"></span></th><th class="solo-completo" data-sort-key="numeroDocumento">Numero documento <span class="sort-ind"></span></th><th data-sort-key="richiedente">Richiedente <span class="sort-ind"></span></th><th data-sort-key="descrizione">Prestazione <span class="sort-ind"></span></th><th data-sort-key="note">Note <span class="sort-ind"></span></th><th class="solo-completo" data-sort-key="modalita">Modalità <span class="sort-ind"></span></th><th data-sort-key="stato">Stato pratica <span class="sort-ind"></span></th><th data-sort-key="totale">Totale <span class="sort-ind"></span></th><th class="solo-completo" data-sort-key="fasiRichiesto">FASI richiesto <span class="sort-ind"></span></th><th id="th-fasi-pagato" data-sort-key="fasiPagato">FASI pagato <span class="sort-ind"></span></th><th class="solo-completo" data-sort-key="richiestoSecondo">2° liv. richiesto <span class="sort-ind"></span></th><th class="solo-completo" data-sort-key="assRimborsato">2° liv. pagato <span class="sort-ind"></span></th><th id="th-residuo" data-sort-key="residuo">Residuo <span class="sort-ind"></span></th><th></th>
+        </tr>
+      </thead>
+      <tbody id="medical-body"></tbody>
+    </table>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="add-toggle" id="toggle-medical-form" style="flex:1;min-width:180px;">+ Aggiungi rimborso sanitario</button>
+      <button class="add-toggle" id="toggle-medical-import" style="flex:1;min-width:180px;">+ Importa più righe insieme</button>
+    </div>
+    <div id="medical-import-panel" style="display:none;margin-top:14px;padding:18px;background:var(--paper);border:1px solid var(--line);border-radius:6px;">
+      <p style="margin:0 0 10px;font-size:13px;color:var(--ink-soft);">
+        Una riga per spesa, campi separati da <strong>punto e virgola</strong>, in quest'ordine:<br>
+        Data (aaaa-mm-gg) ; Tipo documento ; Numero documento ; Richiedente ; Prestazione ; Modalità (Diretta/Indiretta) ; Totale ; Pagato FASI ; Pagato 2° livello ; Stato
+        (usa da_aprire_fasi / aperta_fasi / chiusa_fasi / da_aprire_secondo / aperta_secondo / chiusa_secondo / chiusa_completa)
+      </p>
+      <textarea id="medical-import-text" rows="6" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;padding:10px;border:1px solid var(--line);border-radius:4px;" placeholder="2026-09-01;Fattura;12345;Ela;Visita Dermatologica;Indiretta;120.00;80.00;0.00;aperta_fasi"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+        <button type="button" class="btn ghost" id="medical-import-cancel">Annulla</button>
+        <button type="button" class="btn" id="medical-import-confirm">Importa righe</button>
+      </div>
+      <p id="medical-import-feedback" style="margin:10px 0 0;font-size:13px;"></p>
+    </div>
+    <div class="entry-form" id="medical-form">
+      <div class="form-section">
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Richiedente</label>
+            <input list="preset-richiedente" id="mf-richiedente">
+            <datalist id="preset-richiedente"></datalist>
+          </div>
+          <div class="field solo-completo">
+            <label>Tipo documento</label>
+            <select id="mf-tipodoc">
+              <option>Fattura</option><option>Ricevuta</option><option>Scontrino</option>
+            </select>
+          </div>
+          <div class="field solo-completo">
+            <label>Numero documento</label>
+            <input id="mf-numerodoc" placeholder="es. 41212">
+          </div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Data documento</label>
+            <input type="date" id="mf-data">
+          </div>
+          <div class="field span2">
+            <label>Prestazione</label>
+            <input list="preset-prestazione" id="mf-descrizione" placeholder="es. Visita cardiologica">
+            <datalist id="preset-prestazione"></datalist>
+          </div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="field span3">
+            <label>Note</label>
+            <input id="mf-note" placeholder="opzionale">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">Modalità e stato</p>
+        <div class="form-row form-row-modstato">
+          <div class="field solo-completo">
+            <label>Modalità</label>
+            <select id="mf-modalita">
+              <option value="Indiretta">Indiretta (anticipo e chiedo rimborso)</option>
+              <option value="Diretta">Diretta (paga FASI al fornitore)</option>
+            </select>
+          </div>
+          <div class="field solo-completo">
+            <label>Stato pratica</label>
+            <select id="mf-stato">
+              <option value="da_aprire_fasi">FASI — da aprire</option>
+              <option value="aperta_fasi">FASI — aperta, in attesa di risposta</option>
+              <option value="chiusa_fasi">FASI — chiusa</option>
+              <option value="da_aprire_secondo">2° Livello — da aprire</option>
+              <option value="aperta_secondo">2° Livello — aperta, in attesa di risposta</option>
+              <option value="chiusa_secondo">2° Livello — chiusa</option>
+              <option value="chiusa_completa">Pratica chiusa completamente</option>
+            </select>
+          </div>
+          <div class="field solo-semplice">
+            <label>Stato</label>
+            <select id="mf-stato-semplice">
+              <option value="da_aprire_fasi">Da inviare</option>
+              <option value="aperta_fasi">In attesa di risposta</option>
+              <option value="chiusa_completa">Rimborsata</option>
+              <option value="rifiutata">Rifiutata</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">Importi</p>
+        <p class="form-section-hint">I campi in grigio si calcolano da soli.</p>
+        <div class="form-row form-row-importi">
+          <div class="field">
+            <label>Totale fattura (€)</label>
+            <input type="number" step="0.01" id="mf-totale">
+          </div>
+          <div class="field solo-completo">
+            <label>Richiesto FASI (€)</label>
+            <input type="text" id="mf-fasi-richiesto" disabled>
+          </div>
+          <div class="field">
+            <label id="mf-fasi-pagato-label">Pagato da FASI (€)</label>
+            <input type="number" step="0.01" id="mf-fasi-pagato" value="0">
+          </div>
+          <div class="field solo-completo">
+            <label>FASI rifiutato</label>
+            <label style="display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:8px 10px;height:36px;box-sizing:border-box;">
+              <input type="checkbox" id="mf-fasi-rifiutato" style="width:auto;"> Sì
+            </label>
+          </div>
+        </div>
+        <div class="form-row form-row-importi solo-completo">
+          <div class="field">
+            <label>Richiesta 2° livello (€)</label>
+            <input type="text" id="mf-secondo-richiesto" disabled>
+          </div>
+          <div class="field">
+            <label>Pagato dal 2° livello (€)</label>
+            <input type="number" step="0.01" id="mf-ass-rimborsato" value="0">
+          </div>
+          <div class="field">
+            <label>Residuo (€)</label>
+            <input type="text" id="mf-residuo" disabled>
+          </div>
+          <div class="field">
+            <label>2° livello rifiutato</label>
+            <label style="display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:8px 10px;height:36px;box-sizing:border-box;">
+              <input type="checkbox" id="mf-secondo-rifiutato" style="width:auto;"> Sì
+            </label>
+          </div>
+        </div>
+        <div class="form-row form-row-importi solo-semplice">
+          <div class="field">
+            <label id="mf-residuo-semplice-label">Da portare in detrazione (€)</label>
+            <input type="text" id="mf-residuo-semplice" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">Documenti collegati</p>
+        <p class="form-section-hint">Link a fattura, richiesta del medico e altri documenti utili per il rimborso (es. su Google Drive).</p>
+        <div id="mf-documenti-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="text" id="mf-doc-nome" placeholder="Nome (es. Fattura)" style="width:170px;">
+          <input type="url" id="mf-doc-url" placeholder="Link Google Drive" style="flex:1;min-width:220px;">
+          <button type="button" class="btn small ghost" id="mf-doc-add">+ Aggiungi</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">Blocco pratica</p>
+        <p class="form-section-hint">Una volta bloccata, questa riga non potrà più essere modificata né eliminata. Usalo solo quando la pratica è davvero definitiva.</p>
+        <div class="form-row-mamma" style="background:var(--stamp-soft);">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap;color:var(--stamp);">
+            <input type="checkbox" id="mf-bloccata" style="width:auto;"> Blocca definitivamente questa pratica
+          </label>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="mf-cancel">Annulla</button>
+        <button type="button" class="btn" id="mf-save">Salva</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-bilancio">
+    <div class="filter-bar">
+      <label style="margin-right:8px;">Anno</label>
+      <select id="bilancio-filter-anno">
+        <option value="">Tutti</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort-key="anno">Anno <span class="sort-ind"></span></th>
+          <th data-sort-key="conto">Conto <span class="sort-ind"></span></th>
+          <th data-sort-key="entrate">Entrate <span class="sort-ind"></span></th>
+          <th data-sort-key="uscite">Uscite <span class="sort-ind"></span></th>
+          <th data-sort-key="risparmio">Risparmio <span class="sort-ind"></span></th>
+          <th>Dettaglio</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="bilancio-body"></tbody>
+    </table>
+    </div>
+    <button class="add-toggle" id="toggle-bilancio-form">+ Aggiungi bilancio conto</button>
+    <div class="entry-form" id="bilancio-form">
+      <div class="form-section">
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Anno</label>
+            <input type="number" id="bf-anno" placeholder="es. 2026">
+          </div>
+          <div class="field span2">
+            <label>Conto</label>
+            <input list="preset-conto" id="bf-conto" placeholder="es. Conto principale">
+            <datalist id="preset-conto"></datalist>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <input type="checkbox" id="bf-usa-mensile" style="width:auto;"> Inserisci il dettaglio mensile (facoltativo)
+        </label>
+        <div id="bf-mensile-wrap" style="display:none;margin-bottom:16px;">
+          <p class="form-section-hint">Se compili anche solo un mese, i totali annui qui sotto si calcolano da soli sommando i mesi.</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            <div class="field"><label>Gennaio</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-0-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-0-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Febbraio</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-1-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-1-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Marzo</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-2-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-2-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Aprile</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-3-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-3-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Maggio</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-4-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-4-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Giugno</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-5-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-5-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Luglio</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-6-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-6-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Agosto</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-7-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-7-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Settembre</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-8-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-8-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Ottobre</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-9-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-9-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Novembre</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-10-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-10-uscite" placeholder="Uscite"></div></div>
+            <div class="field"><label>Dicembre</label><div style="display:flex;gap:4px;"><input type="number" step="0.01" id="bf-mese-11-entrate" placeholder="Entrate"><input type="number" step="0.01" id="bf-mese-11-uscite" placeholder="Uscite"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">Totali annui</p>
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Entrate annue (€)</label>
+            <input type="number" step="0.01" id="bf-entrate" value="0">
+          </div>
+          <div class="field">
+            <label>Uscite annue (€)</label>
+            <input type="number" step="0.01" id="bf-uscite" value="0">
+          </div>
+          <div class="field">
+            <label>Risparmio (€)</label>
+            <input type="text" id="bf-risparmio" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title" style="color:var(--stamp);">Blocco bilancio</p>
+        <label style="display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--stamp-soft);color:var(--stamp);">
+          <input type="checkbox" id="bf-bloccato" style="width:auto;"> Blocca definitivamente questo bilancio (non più modificabile né eliminabile)
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="bf-cancel">Annulla</button>
+        <button type="button" class="btn" id="bf-save">Salva</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-contratti">
+    <div class="filter-bar">
+      <label style="margin-right:8px;">Tipo</label>
+      <select id="contratti-filter-tipo">
+        <option value="">Tutti</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort-key="tipo">Tipo <span class="sort-ind"></span></th>
+          <th data-sort-key="controparte">Fornitore/Controparte <span class="sort-ind"></span></th>
+          <th data-sort-key="riferimento">Riferimento <span class="sort-ind"></span></th>
+          <th data-sort-key="dataInizio">Inizio <span class="sort-ind"></span></th>
+          <th data-sort-key="dataFine">Fine/Scadenza <span class="sort-ind"></span></th>
+          <th data-sort-key="dataDisdetta">Limite disdetta <span class="sort-ind"></span></th>
+          <th data-sort-key="canone">Canone mensile <span class="sort-ind"></span></th>
+          <th data-sort-key="prezzoUnitario">Prezzo unitario <span class="sort-ind"></span></th>
+          <th data-sort-key="note">Note <span class="sort-ind"></span></th>
+          <th>Stato contratto</th>
+          <th>Stato disdetta</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="contratti-body"></tbody>
+    </table>
+    </div>
+    <button class="add-toggle" id="toggle-contratti-form">+ Aggiungi contratto</button>
+    <div class="entry-form" id="contratti-form">
+      <div class="form-section">
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Tipo</label>
+            <input list="preset-tipo-contratto" id="cf-tipo" placeholder="es. Luce">
+            <datalist id="preset-tipo-contratto"></datalist>
+          </div>
+          <div class="field span2">
+            <label>Fornitore/Controparte</label>
+            <input id="cf-controparte" placeholder="es. Enel, proprietario casa...">
+          </div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="field span3">
+            <label>Riferimento (facoltativo)</label>
+            <input id="cf-riferimento" placeholder="es. POD/PDR, indirizzo immobile, numero contratto">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">Date</p>
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Data inizio</label>
+            <input type="date" id="cf-data-inizio">
+          </div>
+          <div class="field">
+            <label>Data fine/scadenza</label>
+            <input type="date" id="cf-data-fine">
+          </div>
+          <div class="field">
+            <label>Limite disdetta (facoltativo)</label>
+            <input type="date" id="cf-data-disdetta">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">Prezzi</p>
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Canone mensile (€, facoltativo)</label>
+            <input type="number" step="0.01" id="cf-canone">
+          </div>
+          <div class="field">
+            <label>Prezzo unitario (€, facoltativo)</label>
+            <input type="number" step="0.0001" id="cf-prezzo-unitario">
+          </div>
+          <div class="field">
+            <label>Unità di misura</label>
+            <select id="cf-unita-misura">
+              <option value="">—</option>
+              <option value="kWh">€/kWh (luce)</option>
+              <option value="Smc">€/Smc (gas)</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="field span3">
+            <label>Note</label>
+            <input id="cf-note" placeholder="es. prezzo dopo la promo, referente da chiamare...">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="cf-cancel">Annulla</button>
+        <button type="button" class="btn" id="cf-save">Salva</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-documenti">
+    <div class="filter-bar">
+      <label style="margin-right:8px;">Tipo</label>
+      <select id="documenti-filter-tipo">
+        <option value="">Tutti</option>
+      </select>
+      <label style="margin-left:18px;margin-right:8px;">Intestatario</label>
+      <select id="documenti-filter-intestatario">
+        <option value="">Tutti</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort-key="tipo">Tipo <span class="sort-ind"></span></th>
+          <th data-sort-key="intestatario">Intestatario <span class="sort-ind"></span></th>
+          <th data-sort-key="numero">Numero <span class="sort-ind"></span></th>
+          <th data-sort-key="enteRilascio">Ente rilascio <span class="sort-ind"></span></th>
+          <th data-sort-key="dataRilascio">Rilascio <span class="sort-ind"></span></th>
+          <th data-sort-key="dataScadenza">Scadenza <span class="sort-ind"></span></th>
+          <th data-sort-key="note">Note <span class="sort-ind"></span></th>
+          <th>Documento</th>
+          <th>Stato</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="documenti-body"></tbody>
+    </table>
+    </div>
+    <button class="add-toggle" id="toggle-documenti-form">+ Aggiungi documento</button>
+    <div class="entry-form" id="documenti-form">
+      <div class="form-section">
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Tipo documento</label>
+            <input list="preset-tipo-documento" id="df-tipo" placeholder="es. Carta d'identità">
+            <datalist id="preset-tipo-documento"></datalist>
+          </div>
+          <div class="field">
+            <label>Intestatario</label>
+            <input list="preset-intestatario-documento" id="df-intestatario" placeholder="es. Mario">
+            <datalist id="preset-intestatario-documento"></datalist>
+          </div>
+          <div class="field">
+            <label>Ente rilascio (facoltativo)</label>
+            <input id="df-ente" placeholder="es. Comune di Bologna">
+          </div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Numero documento (facoltativo)</label>
+            <input id="df-numero" placeholder="es. AB1234567">
+          </div>
+          <div class="field span2">
+            <label>Link al documento (facoltativo)</label>
+            <input type="url" id="df-link" placeholder="Link Google Drive">
+          </div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Data rilascio</label>
+            <input type="date" id="df-data-rilascio">
+          </div>
+          <div class="field">
+            <label>Data scadenza</label>
+            <input type="date" id="df-data-scadenza">
+          </div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="field span3">
+            <label>Note</label>
+            <input id="df-note" placeholder="opzionale">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="df-cancel">Annulla</button>
+        <button type="button" class="btn" id="df-save">Salva</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-detrazioni">
+    <div class="filter-bar">
+      <label style="margin-right:8px;">Anno</label>
+      <select id="detrazioni-filter-anno">
+        <option value="">Tutti</option>
+      </select>
+      <label style="margin-left:18px;margin-right:8px;">Categoria</label>
+      <select id="detrazioni-filter-categoria">
+        <option value="">Tutte</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort-key="categoria">Categoria <span class="sort-ind"></span></th>
+          <th data-sort-key="intestatario">Intestatario <span class="sort-ind"></span></th>
+          <th data-sort-key="data">Data <span class="sort-ind"></span></th>
+          <th data-sort-key="importo">Importo <span class="sort-ind"></span></th>
+          <th data-sort-key="note">Note <span class="sort-ind"></span></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="detrazioni-body"></tbody>
+    </table>
+    </div>
+    <button class="add-toggle" id="toggle-detrazioni-form">+ Aggiungi voce detraibile</button>
+    <div class="entry-form" id="detrazioni-form">
+      <div class="form-section">
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Categoria</label>
+            <input list="preset-categoria-detrazione" id="ef-categoria" placeholder="es. Farmaci">
+            <datalist id="preset-categoria-detrazione"></datalist>
+          </div>
+          <div class="field">
+            <label>Intestatario</label>
+            <input list="preset-intestatario-detrazione" id="ef-intestatario" placeholder="es. Mario">
+            <datalist id="preset-intestatario-detrazione"></datalist>
+          </div>
+          <div class="field">
+            <label>Data</label>
+            <input type="date" id="ef-data">
+          </div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="field">
+            <label>Importo (€)</label>
+            <input type="number" step="0.01" id="ef-importo">
+          </div>
+          <div class="field span2">
+            <label>Note</label>
+            <input id="ef-note" placeholder="opzionale">
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="ef-cancel">Annulla</button>
+        <button type="button" class="btn" id="ef-save">Salva</button>
+      </div>
+    </div>
+
+    <div class="form-section" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">
+      <p class="form-section-title">🧾 Modulo per il commercialista</p>
+      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 12px;">
+        Combina automaticamente i rimborsi di sanità integrativa non rimborsati con le voci detraibili aggiunte qui sopra, per l'anno scelto.
+      </p>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+        <label style="margin-right:4px;">Anno</label>
+        <select id="commercialista-anno" style="padding:6px 9px;">
+          <option value="">Tutti gli anni</option>
+        </select>
+        <button type="button" class="btn" id="commercialista-genera">Genera</button>
+      </div>
+      <textarea id="commercialista-text" readonly rows="10" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;padding:10px;border:1px solid var(--line);border-radius:4px;" placeholder="Clicca 'Genera' per creare il modulo."></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+        <button type="button" class="btn ghost" id="commercialista-copy">Copia testo</button>
+        <a id="commercialista-download" class="btn ghost" href="#" download="modulo-commercialista.csv" style="text-decoration:none;">Scarica CSV</a>
+      </div>
+      <p id="commercialista-feedback" style="margin:10px 0 0;font-size:13px;"></p>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+// --- Firebase: autenticazione e salvataggio dati (Firestore) ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC-1H-1PXb0_AjSU8LY8Zu4EsF06Tolv8k",
+  authDomain: "family-dashboard-882b5.firebaseapp.com",
+  projectId: "family-dashboard-882b5",
+  storageBucket: "family-dashboard-882b5.firebasestorage.app",
+  messagingSenderId: "951441964256",
+  appId: "1:951441964256:web:1f7de881a0d01b7c93e485"
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+
+const KEY_RECURRING = "recurring-payments";
+const KEY_MEDICAL = "medical-expenses";
+const KEY_BILANCIO = "annual-balance";
+const KEY_CONTRATTI = "expiring-contracts";
+const KEY_DOCUMENTI = "personal-documents";
+const KEY_DETRAZIONI = "tax-deductions";
+let recurring = [];
+let medical = [];
+let bilancio = [];
+let contratti = [];
+let documenti = [];
+let detrazioni = [];
+
+const KEY_SETTINGS = "settings";
+const MODULI_IDS = ['recurring','medical','bilancio','contratti','documenti','detrazioni'];
+const MODULI_DEFAULT_NOMI = {recurring:'Pagamenti ricorrenti', medical:'Sanità integrativa', bilancio:'Bilancio annuale', contratti:'Contratti a scadenza', documenti:'Documenti personali', detrazioni:'Detrazioni fiscali'};
+const ELENCHI_DEF = {
+  persone: {titolo:'Persone', hint:'Compaiono come suggerimento in Sanità (richiedente), Documenti (intestatario) e Detrazioni (intestatario).', default:[]},
+  prestazioni: {titolo:'Prestazioni sanitarie', hint:'Suggerimenti per il campo Prestazione.', default:['Visita specialistica','Esami del sangue','Visita dentistica','Fisioterapia','Farmaci']},
+  voci: {titolo:'Voci di pagamento', hint:'Suggerimenti per i pagamenti ricorrenti.', default:['TARI','Bollo auto','Assicurazione auto','Assicurazione casa','Condominio']},
+  conti: {titolo:'Conti correnti', hint:'Suggerimenti per il Bilancio annuale.', default:[]},
+  tipiContratto: {titolo:'Tipi di contratto', hint:'Suggerimenti per i Contratti a scadenza.', default:['Luce','Gas','Telefono','Internet casa','TV','Affitto','Assicurazione auto','Assicurazione casa']},
+  tipiDocumento: {titolo:'Tipi di documento', hint:'Suggerimenti per i Documenti personali.', default:["Carta d'identità",'Patente','Passaporto','Tessera sanitaria','Codice fiscale']},
+  categorieDetrazione: {titolo:'Categorie di detrazione', hint:'Suggerimenti per le Detrazioni fiscali.', default:['Farmaci','Interessi mutuo','Spese scolastiche','Attività sportive figli','Assicurazioni vita/infortuni','Ristrutturazioni edilizie','Spese veterinarie','Spese funebri','Erogazioni liberali']}
+};
+const ELENCHI_DATALIST = {
+  persone: ['preset-richiedente','preset-intestatario-documento','preset-intestatario-detrazione'],
+  prestazioni: ['preset-prestazione'],
+  voci: ['preset-recurring'],
+  conti: ['preset-conto'],
+  tipiContratto: ['preset-tipo-contratto'],
+  tipiDocumento: ['preset-tipo-documento'],
+  categorieDetrazione: ['preset-categoria-detrazione']
+};
+// Dove sono usati i valori nei dati già salvati (per "rinomina anche nei dati")
+const ELENCHI_CAMPI = {
+  persone: [['medical','richiedente'],['documenti','intestatario'],['detrazioni','intestatario']],
+  prestazioni: [['medical','descrizione']],
+  voci: [['recurring','nome']],
+  conti: [['bilancio','conto']],
+  tipiContratto: [['contratti','tipo']],
+  tipiDocumento: [['documenti','tipo']],
+  categorieDetrazione: [['detrazioni','categoria']]
+};
+function defaultSettings(){
+  const moduli = {}; MODULI_IDS.forEach(id => { moduli[id] = {on:true, nome:MODULI_DEFAULT_NOMI[id]}; });
+  const elenchi = {}; Object.keys(ELENCHI_DEF).forEach(k => { elenchi[k] = ELENCHI_DEF[k].default.slice(); });
+  return {versione:1, sanitaModalita:'semplice', massimali:{fasiPsico:400, secondoPsico:1500}, moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}};
+}
+function normalizeSettings(raw){
+  const d = defaultSettings();
+  if(!raw || typeof raw !== 'object') return d;
+  if(raw.sanitaModalita === 'completa') d.sanitaModalita = 'completa';
+  if(raw.massimali){
+    const f = parseFloat(raw.massimali.fasiPsico), s = parseFloat(raw.massimali.secondoPsico);
+    if(!isNaN(f) && f >= 0) d.massimali.fasiPsico = f;
+    if(!isNaN(s) && s >= 0) d.massimali.secondoPsico = s;
+  }
+  MODULI_IDS.forEach(id => {
+    const m = raw.moduli && raw.moduli[id];
+    if(m){
+      if(m.on === false) d.moduli[id].on = false;
+      if(typeof m.nome === 'string' && m.nome.trim()) d.moduli[id].nome = m.nome.trim();
+    }
+  });
+  Object.keys(ELENCHI_DEF).forEach(k => {
+    const v = raw.elenchi && raw.elenchi[k];
+    if(Array.isArray(v)) d.elenchi[k] = v.map(x => String(x).trim()).filter(Boolean);
+  });
+  if(raw.dashboard){
+    if(raw.dashboard.urgentiOn === false) d.dashboard.urgentiOn = false;
+    if(Array.isArray(raw.dashboard.sezioni)){
+      d.dashboard.sezioni = raw.dashboard.sezioni
+        .filter(s => s && MODULI_IDS.includes(s.id))
+        .map(s => ({id:s.id, on:s.on !== false, box:Array.isArray(s.box) ? s.box.filter(b => b && typeof b.k === 'string').map(b => ({k:b.k, on:b.on !== false})) : []}));
+    }
+  }
+  return d;
+}
+let settings = defaultSettings();
+let dashEdit = false;
+let editingRecurringId = null;
+let editingMedicalId = null;
+let editingBilancioId = null;
+let editingContrattoId = null;
+let editingDocumentoId = null;
+let editingDetrazioneId = null;
+
+// Salvataggio dati: ogni utente autenticato ha il proprio documento su
+// Firestore (app2/{uid}), quindi i dati di persone diverse restano
+// sempre separati. Ogni campo ("chiave") corrisponde a una delle liste
+// dell'app (pagamenti, spese mediche, bilancio, contratti), salvata
+// come testo JSON, esattamente come funzionava prima con lo storage di Claude.
+const storageAdapter = {
+  async get(key){
+    if(!auth.currentUser) return null;
+    try{
+      const snap = await getDoc(doc(db, 'app2', auth.currentUser.uid));
+      if(!snap.exists()) return null;
+      const value = snap.data()[key];
+      return value !== undefined ? {key, value} : null;
+    }catch(e){
+      console.error('Errore lettura da Firestore', e);
+      return null;
+    }
+  },
+  async set(key, value){
+    if(!auth.currentUser) throw new Error('Utente non autenticato');
+    await setDoc(doc(db, 'app2', auth.currentUser.uid), {[key]: value}, {merge:true});
+    return {key, value};
+  }
+};
+
+function showNotice(msg, type){
+  const isError = type !== 'success';
+  let el = document.getElementById('save-warning');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'save-warning';
+    document.body.appendChild(el);
+  }
+  el.style.cssText = `position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:${isError ? 'var(--stamp-soft)' : 'var(--teal-soft)'};color:${isError ? 'var(--stamp)' : 'var(--teal)'};border:1px solid ${isError ? 'var(--stamp)' : 'var(--teal)'};padding:10px 18px;border-radius:6px;font-size:13.5px;z-index:999;max-width:90vw;`;
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(el._hideTimer);
+  el._hideTimer = setTimeout(() => { el.style.display = 'none'; }, 6000);
+}
+function showSaveWarning(msg){
+  showNotice(msg, 'error');
+}
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function euro(n){ return (Number(n)||0).toLocaleString('it-IT', {style:'currency', currency:'EUR'}); }
+function fmtDate(d){ if(!d) return '—'; const parts=d.split('-'); return parts.length===3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : d; }
+function daysUntil(d){ const today=new Date(); today.setHours(0,0,0,0); const target=new Date(d); return Math.round((target-today)/86400000); }
+
+async function loadData(){
+  try{ const r = await storageAdapter.get(KEY_RECURRING, false); recurring = r ? JSON.parse(r.value) : []; }
+  catch(e){ recurring = []; }
+  try{ const r = await storageAdapter.get(KEY_MEDICAL, false); medical = r ? JSON.parse(r.value) : []; }
+  catch(e){ medical = []; }
+  try{ const r = await storageAdapter.get(KEY_BILANCIO, false); bilancio = r ? JSON.parse(r.value) : []; }
+  catch(e){ bilancio = []; }
+  try{ const r = await storageAdapter.get(KEY_CONTRATTI, false); contratti = r ? JSON.parse(r.value) : []; }
+  catch(e){ contratti = []; }
+  try{ const r = await storageAdapter.get(KEY_DOCUMENTI, false); documenti = r ? JSON.parse(r.value) : []; }
+  catch(e){ documenti = []; }
+  try{ const r = await storageAdapter.get(KEY_DETRAZIONI, false); detrazioni = r ? JSON.parse(r.value) : []; }
+  catch(e){ detrazioni = []; }
+  try{ const r = await storageAdapter.get(KEY_SETTINGS, false); settings = normalizeSettings(r ? JSON.parse(r.value) : null); }
+  catch(e){ settings = defaultSettings(); }
+}
+async function saveSettings(){
+  try{ await storageAdapter.set(KEY_SETTINGS, JSON.stringify(settings), false); }
+  catch(e){ console.error(e); showSaveWarning('Impossibile salvare le impostazioni. Controlla la connessione e riprova.'); }
+}
+async function saveRecurring(){
+  try{ await storageAdapter.set(KEY_RECURRING, JSON.stringify(recurring), false); }
+  catch(e){ console.error('Errore salvataggio pagamenti', e); showSaveWarning('Il salvataggio non è riuscito. Riprova o ricarica la pagina.'); }
+}
+async function saveMedical(){
+  try{ await storageAdapter.set(KEY_MEDICAL, JSON.stringify(medical), false); }
+  catch(e){ console.error('Errore salvataggio spese mediche', e); showSaveWarning('Il salvataggio non è riuscito. Riprova o ricarica la pagina.'); }
+}
+async function saveBilancio(){
+  try{ await storageAdapter.set(KEY_BILANCIO, JSON.stringify(bilancio), false); }
+  catch(e){ console.error('Errore salvataggio bilancio', e); showSaveWarning('Il salvataggio non è riuscito. Riprova o ricarica la pagina.'); }
+}
+async function saveContratti(){
+  try{ await storageAdapter.set(KEY_CONTRATTI, JSON.stringify(contratti), false); }
+  catch(e){ console.error('Errore salvataggio contratti', e); showSaveWarning('Il salvataggio non è riuscito. Riprova o ricarica la pagina.'); }
+}
+async function saveDocumenti(){
+  try{ await storageAdapter.set(KEY_DOCUMENTI, JSON.stringify(documenti), false); }
+  catch(e){ console.error('Errore salvataggio documenti', e); showSaveWarning('Il salvataggio non è riuscito. Riprova o ricarica la pagina.'); }
+}
+async function saveDetrazioni(){
+  try{ await storageAdapter.set(KEY_DETRAZIONI, JSON.stringify(detrazioni), false); }
+  catch(e){ console.error('Errore salvataggio detrazioni', e); showSaveWarning('Il salvataggio non è riuscito. Riprova o ricarica la pagina.'); }
+}
+
+function metricsRecurring(){
+  const upcoming = recurring.filter(p => p.stato==='da_pagare' && daysUntil(p.scadenza) >= 0 && daysUntil(p.scadenza) <= 30);
+  const overdue = recurring.filter(p => p.stato==='da_pagare' && daysUntil(p.scadenza) < 0);
+  const daPagareTotale = recurring.filter(p => p.stato==='da_pagare').reduce((s,p)=> s + (Number(p.importo)||0), 0);
+  return [
+    {valore: overdue.length, label: 'Pagamenti scaduti', cls: overdue.length ? 'warn' : ''},
+    {valore: upcoming.length, label: 'In scadenza nei 30 giorni', cls: upcoming.length ? 'pend' : ''},
+    {valore: euro(daPagareTotale), label: 'Totale ancora da pagare', cls: ''}
+  ];
+}
+
+function metricsMedical(conMassimali){
+  const fasiAperte = medical.filter(m => ['da_aprire_fasi','aperta_fasi'].includes(m.stato)).length;
+  const secondoAperte = medical.filter(m => ['da_aprire_secondo','aperta_secondo'].includes(m.stato)).length;
+  const pendenteFasi = medical
+    .filter(m => ['da_aprire_fasi','aperta_fasi'].includes(m.stato))
+    .reduce((sum, m) => { const {totale, fasiPagato} = medicalRowNumbers(m); return sum + Math.max(0, totale - fasiPagato); }, 0);
+  const pendenteSecondo = medical
+    .filter(m => ['da_aprire_secondo','aperta_secondo'].includes(m.stato))
+    .reduce((sum, m) => { const {richiestoSecondo, assRimborsato} = medicalRowNumbers(m); return sum + Math.max(0, richiestoSecondo - assRimborsato); }, 0);
+  if(modalitaSemplificata){
+    return [
+      {valore: fasiAperte, label: 'Pratiche aperte', cls: fasiAperte ? 'pend' : ''},
+      {valore: euro(pendenteFasi), label: 'Ancora da rimborsare', cls: pendenteFasi > 0 ? 'pend' : ''}
+    ];
+  }
+  const items = [
+    {valore: fasiAperte, label: 'In attesa di rimborso FASI', cls: fasiAperte ? 'pend' : ''},
+    {valore: secondoAperte, label: 'In attesa di rimborso 2° livello', cls: secondoAperte ? 'pend' : ''},
+    {valore: euro(pendenteFasi), label: 'Ancora da rimborsare da FASI', cls: pendenteFasi > 0 ? 'pend' : ''},
+    {valore: euro(pendenteSecondo), label: 'Ancora da rimborsare dal 2° livello', cls: pendenteSecondo > 0 ? 'pend' : ''}
+  ];
+  if(conMassimali){
+    const annoCorrente = new Date().getFullYear();
+    const massimaleFasiPsico = settings.massimali.fasiPsico;
+    const massimaleSecondoPsico = settings.massimali.secondoPsico;
+    const psicoAnno = medical.filter(m => /psicolog|psicoterap/i.test(m.descrizione||'') && (m.dataDocumento||'').slice(0,4) === String(annoCorrente));
+    const fasiPsicoUsato = psicoAnno.reduce((sum, m) => sum + medicalRowNumbers(m).fasiPagato, 0);
+    const secondoPsicoUsato = psicoAnno.reduce((sum, m) => sum + medicalRowNumbers(m).assRimborsato, 0);
+    const residuoFasiPsico = Math.max(0, massimaleFasiPsico - fasiPsicoUsato);
+    const residuoSecondoPsico = Math.max(0, massimaleSecondoPsico - secondoPsicoUsato);
+    items.push(
+      {valore: euro(residuoFasiPsico), label: `Massimale FASI psicologico residuo (${annoCorrente})`, cls: residuoFasiPsico <= 0.004 ? 'warn' : ''},
+      {valore: euro(residuoSecondoPsico), label: `Massimale 2° livello psicologico residuo (${annoCorrente})`, cls: residuoSecondoPsico <= 0.004 ? 'warn' : ''}
+    );
+  }
+  return items;
+}
+
+function metricsBilancio(){
+  const anni = [...new Set(bilancio.map(b => b.anno))].sort((a,b)=>b-a);
+  const ultimoAnno = anni[0];
+  const risparmioUltimoAnno = bilancio.filter(b => b.anno === ultimoAnno).reduce((s,b)=> s + (Number(b.entrate)||0) - (Number(b.uscite)||0), 0);
+  const risparmioTotale = bilancio.reduce((s,b)=> s + (Number(b.entrate)||0) - (Number(b.uscite)||0), 0);
+  return [
+    {valore: bilancio.length, label: 'Conti registrati', cls: ''},
+    {valore: ultimoAnno ? euro(risparmioUltimoAnno) : '—', label: `Risparmio ${ultimoAnno || 'anno più recente'}`, cls: risparmioUltimoAnno < 0 ? 'warn' : ''},
+    {valore: euro(risparmioTotale), label: 'Risparmio totale storico', cls: risparmioTotale < 0 ? 'warn' : ''}
+  ];
+}
+
+function metricsContratti(){
+  const scaduti = contratti.filter(c => c.dataFine && daysUntil(c.dataFine) < 0).length;
+  const inScadenza = contratti.filter(c => c.dataFine && daysUntil(c.dataFine) >= 0 && daysUntil(c.dataFine) <= 90).length;
+  const disdetteUrgenti = contratti.filter(c => c.dataDisdetta && daysUntil(c.dataDisdetta) >= 0 && daysUntil(c.dataDisdetta) <= 90).length;
+  const totaleCanoni = contratti.reduce((s,c) => s + (Number(c.canone)||0), 0);
+  return [
+    {valore: scaduti, label: 'Contratti scaduti', cls: scaduti ? 'warn' : ''},
+    {valore: inScadenza, label: 'In scadenza nei 90 giorni', cls: inScadenza ? 'pend' : ''},
+    {valore: disdetteUrgenti, label: 'Disdette entro 90 giorni', cls: disdetteUrgenti ? 'pend' : ''},
+    {valore: euro(totaleCanoni), label: 'Totale canoni mensili', cls: ''}
+  ];
+}
+
+function metricsDocumenti(){
+  const scaduti = documenti.filter(d => d.dataScadenza && daysUntil(d.dataScadenza) < 0).length;
+  const inScadenza = documenti.filter(d => d.dataScadenza && daysUntil(d.dataScadenza) >= 0 && daysUntil(d.dataScadenza) <= 90).length;
+  return [
+    {valore: documenti.length, label: 'Documenti registrati', cls: ''},
+    {valore: scaduti, label: 'Documenti scaduti', cls: scaduti ? 'warn' : ''},
+    {valore: inScadenza, label: 'In scadenza nei 90 giorni', cls: inScadenza ? 'pend' : ''}
+  ];
+}
+
+function metricsDetrazioni(){
+  const anniPresenti = [...new Set(detrazioni.map(d => (d.data||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  const annoRecente = anniPresenti[0];
+  const totaleAnno = detrazioni.filter(d => (d.data||'').slice(0,4)===annoRecente).reduce((s,d)=> s + (Number(d.importo)||0), 0);
+  const totaleStorico = detrazioni.reduce((s,d)=> s + (Number(d.importo)||0), 0);
+  return [
+    {valore: detrazioni.length, label: 'Voci detraibili registrate', cls: ''},
+    {valore: annoRecente ? euro(totaleAnno) : '—', label: `Totale ${annoRecente || 'anno più recente'}`, cls: ''},
+    {valore: euro(totaleStorico), label: 'Totale voci manuali storico', cls: ''}
+  ];
+}
+
+
+function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function extraMetrics(id){
+  const anno = new Date().getFullYear();
+  if(id === 'recurring'){
+    const prossimi = recurring.filter(p => p.stato === 'da_pagare' && daysUntil(p.scadenza) >= 0).sort((a,b) => daysUntil(a.scadenza) - daysUntil(b.scadenza));
+    return [{k:'xprossima', extra:true, valore: prossimi.length ? `${escHtml(prossimi[0].nome)} · ${fmtDate(prossimi[0].scadenza)}` : '—', label:'Prossima scadenza', cls:''}];
+  }
+  if(id === 'medical'){
+    const tot = medical.filter(m => (m.dataDocumento||'').slice(0,4) === String(anno)).reduce((s,m) => { const n = medicalRowNumbers(m); return s + n.fasiPagato + n.assRimborsato; }, 0);
+    return [{k:'xrimborsi', extra:true, valore: euro(tot), label:`Rimborsi ricevuti nel ${anno}`, cls:''}];
+  }
+  if(id === 'bilancio'){
+    const anni = [...new Set(bilancio.map(b => b.anno))].sort((a,b)=>b-a);
+    const a0 = anni[0];
+    const ent = bilancio.filter(b => b.anno === a0).reduce((s,b) => s + (Number(b.entrate)||0), 0);
+    const usc = bilancio.filter(b => b.anno === a0).reduce((s,b) => s + (Number(b.uscite)||0), 0);
+    return [
+      {k:'xentrate', extra:true, valore: a0 ? euro(ent) : '—', label:`Entrate ${a0 || 'anno più recente'}`, cls:''},
+      {k:'xuscite', extra:true, valore: a0 ? euro(usc) : '—', label:`Uscite ${a0 || 'anno più recente'}`, cls:''}
+    ];
+  }
+  return [];
+}
+function metricsSezione(id, conMassimali){
+  const fn = {recurring:metricsRecurring, medical:() => metricsMedical(conMassimali !== false), bilancio:metricsBilancio, contratti:metricsContratti, documenti:metricsDocumenti, detrazioni:metricsDetrazioni}[id];
+  const items = fn();
+  items.forEach((it, i) => { if(it.k === undefined) it.k = 'm' + i; });
+  return items.concat(extraMetrics(id));
+}
+
+function metricsToHtml(items){
+  return items.map(it => `
+    <div class="summary-item ${it.cls}">
+      <span class="summary-num">${it.valore}</span>
+      <span class="summary-label">${it.label}</span>
+    </div>
+  `).join('');
+}
+
+function renderSummary(){
+  const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'recurring';
+  const el = document.getElementById('summary');
+
+  if(activeTab === 'panoramica'){
+    el.innerHTML = '';
+    return;
+  }
+
+  const map = {
+    recurring: () => metricsRecurring(),
+    medical: () => metricsMedical(false),
+    bilancio: () => metricsBilancio(),
+    contratti: () => metricsContratti(),
+    documenti: () => metricsDocumenti(),
+    detrazioni: () => metricsDetrazioni()
+  };
+  el.innerHTML = map[activeTab] ? metricsToHtml(map[activeTab]()) : '';
+}
+
+function statusBadgeRecurring(p){
+  if(p.stato==='pagato') return `<span class="badge paid">Pagato</span>`;
+  const d = daysUntil(p.scadenza);
+  if(d < 0) return `<span class="badge overdue">Scaduto</span>`;
+  if(d <= 30) return `<span class="badge soon">Tra ${d} giorni</span>`;
+  return `<span class="badge pending">Da pagare</span>`;
+}
+function rowClassRecurring(p){
+  if(p.stato==='pagato') return 'row-ok';
+  const d = daysUntil(p.scadenza);
+  if(d < 0) return 'row-overdue';
+  if(d <= 30) return 'row-soon';
+  return '';
+}
+const STATI_PRATICA = {
+  da_aprire_fasi:     {label:'FASI — da aprire', cls:'pending'},
+  aperta_fasi:        {label:'FASI — aperta, in attesa di risposta', cls:'pending'},
+  chiusa_fasi:        {label:'FASI — chiusa', cls:'refunded'},
+  da_aprire_secondo:  {label:'2° Livello — da aprire', cls:'pending'},
+  aperta_secondo:     {label:'2° Livello — aperta, in attesa di risposta', cls:'pending'},
+  chiusa_secondo:     {label:'2° Livello — chiusa', cls:'refunded'},
+  chiusa_completa:    {label:'Pratica chiusa completamente', cls:'refunded'}
+};
+function statoPraticaInfo(stato){
+  return STATI_PRATICA[stato] || {label: stato || '—', cls:'pending'};
+}
+function statoSemplificatoInfo(m){
+  if(m.stato === 'chiusa_completa' && m.fasiRifiutato && m.secondoRifiutato) return {label:'Rifiutata', cls:'refused'};
+  if(m.stato === 'chiusa_completa') return {label:'Rimborsata', cls:'paid'};
+  if(m.stato === 'aperta_fasi') return {label:'In attesa di risposta', cls:'soon'};
+  return {label:'Da inviare', cls:'pending'};
+}
+function richiedenti(){
+  return [...new Set(medical.map(m => m.richiedente).filter(Boolean))].sort();
+}
+function refreshMedicalFilterOptions(){
+  const sel = document.getElementById('medical-filter');
+  const current = sel.value;
+  const names = richiedenti();
+  sel.innerHTML = `<option value="">Tutti</option>` + names.map(n => `<option value="${n}">${n}</option>`).join('');
+  if(names.includes(current)) sel.value = current;
+
+  const selStato = document.getElementById('medical-filter-stato');
+  const currentStato = selStato.value;
+  if(modalitaSemplificata){
+    selStato.innerHTML = `<option value="">Tutti</option>
+      <option value="da_aprire_fasi">Da inviare</option>
+      <option value="aperta_fasi">In attesa di risposta</option>
+      <option value="chiusa_completa">Rimborsata</option>
+      <option value="rifiutata">Rifiutata</option>`;
+  } else {
+    selStato.innerHTML = `<option value="">Tutti</option>` +
+      Object.keys(STATI_PRATICA).map(k => `<option value="${k}">${STATI_PRATICA[k].label}</option>`).join('');
+  }
+  selStato.value = currentStato;
+
+  const selAnno = document.getElementById('medical-filter-anno');
+  const currentAnno = selAnno.value;
+  const anni = [...new Set(medical.map(m => (m.dataDocumento||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  selAnno.innerHTML = `<option value="">Tutti</option>` + anni.map(a => `<option value="${a}">${a}</option>`).join('');
+  if(anni.includes(currentAnno)) selAnno.value = currentAnno;
+}
+
+function getFilteredMedical(){
+  const filterName = document.getElementById('medical-filter').value;
+  const filterStato = document.getElementById('medical-filter-stato').value;
+  const filterAnno = document.getElementById('medical-filter-anno').value;
+  const filterPrestazione = document.getElementById('medical-filter-prestazione').value.trim().toLowerCase();
+  const filterDocumento = document.getElementById('medical-filter-documento').value.trim().toLowerCase();
+  const hideClosed = document.getElementById('medical-filter-hide-closed').checked;
+  let filtered = filterName ? medical.filter(m => m.richiedente===filterName) : medical;
+  if(filterStato){
+    if(filterStato === 'rifiutata'){
+      filtered = filtered.filter(m => m.stato==='chiusa_completa' && m.fasiRifiutato && m.secondoRifiutato);
+    } else if(filterStato === 'chiusa_completa' && modalitaSemplificata){
+      filtered = filtered.filter(m => m.stato==='chiusa_completa' && !(m.fasiRifiutato && m.secondoRifiutato));
+    } else {
+      filtered = filtered.filter(m => m.stato===filterStato);
+    }
+  }
+  if(filterAnno) filtered = filtered.filter(m => (m.dataDocumento||'').slice(0,4)===filterAnno);
+  if(filterPrestazione) filtered = filtered.filter(m => (m.descrizione||'').toLowerCase().includes(filterPrestazione));
+  if(filterDocumento) filtered = filtered.filter(m => `${m.tipoDocumento||''} ${m.numeroDocumento||''}`.toLowerCase().includes(filterDocumento));
+  if(hideClosed) filtered = filtered.filter(m => m.stato !== 'chiusa_completa');
+  return filtered;
+}
+
+function medicalRowNumbers(m){
+  const totale = Number(m.totale)||0;
+  const fasiRichiesto = totale;
+  const fasiPagato = Number(m.fasi.pagato)||0;
+  const assRimborsato = Number(m.secondoLivello.rimborsato)||0;
+  const fasiConclusa = !['da_aprire_fasi','aperta_fasi'].includes(m.stato);
+  const richiestoSecondo = fasiConclusa ? Math.max(0, fasiRichiesto - fasiPagato) : 0;
+  const residuo = Math.max(0, totale - fasiPagato - assRimborsato);
+  return {totale, fasiRichiesto, fasiPagato, assRimborsato, richiestoSecondo, residuo, fasiConclusa};
+}
+
+let confirmingRecurringDeleteId = null;
+let confirmingMedicalDeleteId = null;
+let expandedMedicalIds = new Set();
+let visibleTabs = null; // null = nessuna restrizione, vede tutto
+let modalitaSemplificata = false;
+let confirmingLockMedical = false;
+let formDocumenti = [];
+let confirmingLockRecurring = false;
+let confirmingLockBilancio = false;
+let recurringSortKey = 'scadenza';
+let recurringSortDir = 'asc';
+let medicalSortKey = 'dataDocumento';
+let medicalSortDir = 'desc';
+
+function recurringSortValue(p, key){
+  switch(key){
+    case 'nome': return (p.nome||'').toLowerCase();
+    case 'scadenza': return new Date(p.scadenza).getTime() || 0;
+    case 'importo': return Number(p.importo) || 0;
+    case 'ricorrenza': return (p.ricorrenza||'').toLowerCase();
+    case 'stato': return p.stato === 'pagato' ? 1 : 0;
+    default: return 0;
+  }
+}
+function medicalSortValue(m, key){
+  const {totale, fasiRichiesto, fasiPagato, richiestoSecondo, assRimborsato, residuo} = medicalRowNumbers(m);  switch(key){
+    case 'dataDocumento': return new Date(m.dataDocumento).getTime() || 0;
+    case 'tipoDocumento': return (m.tipoDocumento||'').toLowerCase();
+    case 'numeroDocumento': return (m.numeroDocumento||'').toLowerCase();
+    case 'richiedente': return (m.richiedente||'').toLowerCase();
+    case 'descrizione': return (m.descrizione||'').toLowerCase();
+    case 'note': return (m.note||'').toLowerCase();
+    case 'modalita': return (m.modalita||'').toLowerCase();
+    case 'stato': return modalitaSemplificata ? statoSemplificatoInfo(m).label.toLowerCase() : statoPraticaInfo(m.stato).label.toLowerCase();
+    case 'totale': return totale;
+    case 'fasiRichiesto': return fasiRichiesto;
+    case 'fasiPagato': return fasiPagato;
+    case 'richiestoSecondo': return richiestoSecondo;
+    case 'assRimborsato': return assRimborsato;
+    case 'residuo': return residuo;
+    default: return 0;
+  }
+}
+function applySort(arr, valueFn, key, dir){
+  return [...arr].sort((a,b) => {
+    const va = valueFn(a, key), vb = valueFn(b, key);
+    const cmp = typeof va === 'string' ? va.localeCompare(vb) : va - vb;
+    return dir === 'asc' ? cmp : -cmp;
+  });
+}
+function updateSortIndicators(panelSelector, key, dir){
+  document.querySelectorAll(`${panelSelector} thead th[data-sort-key]`).forEach(th => {
+    const ind = th.querySelector('.sort-ind');
+    if(!ind) return;
+    ind.textContent = th.dataset.sortKey === key ? (dir === 'asc' ? '▲' : '▼') : '';
+  });
+}
+document.querySelectorAll('#panel-recurring thead th[data-sort-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sortKey;
+    if(recurringSortKey === key){ recurringSortDir = recurringSortDir === 'asc' ? 'desc' : 'asc'; }
+    else { recurringSortKey = key; recurringSortDir = 'asc'; }
+    renderRecurring();
+  });
+});
+document.querySelectorAll('#panel-medical thead th[data-sort-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sortKey;
+    if(medicalSortKey === key){ medicalSortDir = medicalSortDir === 'asc' ? 'desc' : 'asc'; }
+    else { medicalSortKey = key; medicalSortDir = 'asc'; }
+    renderMedical();
+  });
+});
+
+function renderRecurring(){
+  const body = document.getElementById('recurring-body');
+  if(recurring.length===0){
+    body.innerHTML = `<tr><td colspan="6"><div class="empty-state">Nessun pagamento registrato.</div></td></tr>`;
+    updateSortIndicators('#panel-recurring', recurringSortKey, recurringSortDir);
+    return;
+  }
+  const sorted = applySort(recurring, recurringSortValue, recurringSortKey, recurringSortDir);
+  body.innerHTML = sorted.map(p => `
+    <tr class="${rowClassRecurring(p)}" data-id="${p.id}">
+      <td data-label="Voce">${p.nome}${p.note ? `<br><span style="color:var(--ink-soft);font-size:12.5px">${p.note}</span>` : ''}</td>
+      <td data-label="Scadenza">${fmtDate(p.scadenza)}</td>
+      <td class="amount" data-label="Importo">${euro(p.importo)}</td>
+      <td data-label="Ricorrenza">${p.ricorrenza}</td>
+      <td data-label="Stato">${statusBadgeRecurring(p)}</td>
+      <td>
+        <div class="row-actions">
+          ${p.bloccato ? `
+            <span class="doc-ref" title="Pagamento bloccato: non modificabile">🔒 Bloccato</span>
+          ` : p.id === confirmingRecurringDeleteId ? `
+            <span style="color:var(--stamp);font-size:13px;margin-right:4px;">Confermi?</span>
+            <button class="btn small" data-action="confirm-delete-recurring" data-id="${p.id}">Sì, elimina</button>
+            <button class="btn small ghost" data-action="cancel-delete-recurring" data-id="${p.id}">Annulla</button>
+          ` : `
+            ${p.stato==='da_pagare' ? `<button class="btn small" data-action="mark-paid" data-id="${p.id}">Segna pagato</button>` : ''}
+            <button class="btn small ghost" data-action="edit-recurring" data-id="${p.id}">Modifica</button>
+            <button class="btn small ghost danger" data-action="delete-recurring" data-id="${p.id}">Elimina</button>
+          `}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  updateSortIndicators('#panel-recurring', recurringSortKey, recurringSortDir);
+}
+
+function renderMedical(){
+  refreshMedicalFilterOptions();
+  const filterName = document.getElementById('medical-filter').value;
+  const filterStato = document.getElementById('medical-filter-stato').value;
+  const filterAnno = document.getElementById('medical-filter-anno').value;
+  const body = document.getElementById('medical-body');
+  const filtered = getFilteredMedical();
+  if(filtered.length===0){
+    body.innerHTML = `<tr><td colspan="16"><div class="empty-state">Nessun rimborso sanitario registrato.</div></td></tr>`;
+    updateSortIndicators('#panel-medical', medicalSortKey, medicalSortDir);
+    return;
+  }
+  const sorted = applySort(filtered, medicalSortValue, medicalSortKey, medicalSortDir);
+  let totTotale=0, totFasiRichiesto=0, totFasi=0, totRichiestoSecondo=0, totAss=0, totResiduo=0;
+  const rows = sorted.map(m => {
+    const {totale, fasiRichiesto, fasiPagato, assRimborsato, richiestoSecondo, residuo} = medicalRowNumbers(m);    totTotale += totale; totFasiRichiesto += fasiRichiesto; totFasi += fasiPagato; totRichiestoSecondo += richiestoSecondo; totAss += assRimborsato; totResiduo += residuo;
+    const docs = m.documenti || [];
+    const isExpanded = expandedMedicalIds.has(m.id);
+    return `
+    <tr data-id="${m.id}">
+      <td><button type="button" class="btn small ghost" data-action="toggle-doc-row" data-id="${m.id}" style="padding:4px 8px;" aria-label="Mostra documenti collegati">${isExpanded ? '▾' : '▸'}</button></td>
+      <td data-label="Data">${fmtDate(m.dataDocumento)}</td>
+      <td class="solo-completo" data-label="Tipo documento">${m.tipoDocumento}</td>
+      <td class="solo-completo" data-label="Numero documento">${m.numeroDocumento}</td>
+      <td data-label="Richiedente">${m.richiedente}</td>
+      <td data-label="Prestazione">${m.descrizione}</td>
+      <td data-label="Note">${m.note || '—'}</td>
+      <td class="solo-completo" data-label="Modalità"><span class="modalita-badge">${m.modalita}</span></td>
+      <td data-label="Stato pratica">${(() => { if(modalitaSemplificata){ const s = statoSemplificatoInfo(m); return `<span class="badge ${s.cls}">${s.label}</span>`; } const s = statoPraticaInfo(m.stato); const tuttoRifiutato = m.stato === 'chiusa_completa' && m.fasiRifiutato && m.secondoRifiutato; return `<span class="badge ${tuttoRifiutato ? 'refused' : s.cls}">${s.label}</span>`; })()}</td>
+      <td class="amount" data-label="Totale">${euro(totale)}</td>
+      <td class="amount solo-completo" data-label="FASI richiesto">${euro(fasiRichiesto)}</td>
+      <td class="amount" data-label="${modalitaSemplificata ? 'Rimborsato' : 'FASI pagato'}">${m.fasiRifiutato ? `<span class="badge refused">Rifiutata</span>` : euro(fasiPagato)}</td>
+      <td class="amount solo-completo" data-label="2° liv. richiesto">${euro(richiestoSecondo)}</td>
+      <td class="amount solo-completo" data-label="2° liv. pagato">${m.secondoRifiutato ? `<span class="badge refused">Rifiutata</span>` : euro(assRimborsato)}</td>
+      <td class="amount" data-label="${modalitaSemplificata ? 'Da portare in detrazione' : 'Residuo'}">${euro(residuo)}</td>
+      <td>
+        <div class="row-actions">
+          ${m.bloccata ? `
+            <span class="doc-ref" title="Pratica bloccata: non modificabile">🔒 Bloccata</span>
+          ` : m.id === confirmingMedicalDeleteId ? `
+            <span style="color:var(--stamp);font-size:13px;margin-right:4px;">Confermi?</span>
+            <button class="btn small" data-action="confirm-delete-medical" data-id="${m.id}">Sì, elimina</button>
+            <button class="btn small ghost" data-action="cancel-delete-medical" data-id="${m.id}">Annulla</button>
+          ` : `
+            <button class="btn small ghost" data-action="edit-medical" data-id="${m.id}">Modifica</button>
+            <button class="btn small ghost danger" data-action="delete-medical" data-id="${m.id}">Elimina</button>
+          `}
+        </div>
+      </td>
+    </tr>${isExpanded ? `
+    <tr class="doc-row" data-parent-id="${m.id}">
+      <td colspan="15" style="background:var(--paper);padding:14px 14px 14px 40px;">
+        ${docs.length ? `
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+          ${docs.map(doc => `
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;padding:5px 8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-soft);flex-shrink:0;"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+              <a href="${doc.url}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">${doc.nome}</a>
+            </span>
+          `).join('')}
+        </div>
+        ` : `<span class="doc-ref">Nessun documento collegato — aggiungili dal form "Modifica".</span>`}
+      </td>
+    </tr>` : ''}`;
+  }).join('');
+  const subtotal = `
+    <tr class="subtotal-row">
+      <td></td><td></td><td class="solo-completo"></td><td class="solo-completo"></td><td></td><td>Totale${filterName || filterStato || filterAnno ? ' — ' + [filterName, filterStato ? (filterStato==='rifiutata' ? 'Rifiutata' : statoPraticaInfo(filterStato).label) : '', filterAnno].filter(Boolean).join(', ') : ''}</td><td></td><td class="solo-completo"></td><td></td>
+      <td class="amount">${euro(totTotale)}</td>
+      <td class="amount solo-completo">${euro(totFasiRichiesto)}</td>
+      <td class="amount">${euro(totFasi)}</td>
+      <td class="amount solo-completo">${euro(totRichiestoSecondo)}</td>
+      <td class="amount solo-completo">${euro(totAss)}</td>
+      <td class="amount">${euro(totResiduo)}</td>
+      <td></td>
+    </tr>`;
+  body.innerHTML = rows + subtotal;
+  updateSortIndicators('#panel-medical', medicalSortKey, medicalSortDir);
+}
+
+let confirmingBilancioDeleteId = null;
+let bilancioSortKey = 'anno';
+let bilancioSortDir = 'desc';
+
+function bilancioRowNumbers(b){
+  const entrate = Number(b.entrate) || 0;
+  const uscite = Number(b.uscite) || 0;
+  const risparmio = entrate - uscite;
+  return {entrate, uscite, risparmio};
+}
+function bilancioSortValue(b, key){
+  const {entrate, uscite, risparmio} = bilancioRowNumbers(b);
+  switch(key){
+    case 'anno': return Number(b.anno) || 0;
+    case 'conto': return (b.conto||'').toLowerCase();
+    case 'entrate': return entrate;
+    case 'uscite': return uscite;
+    case 'risparmio': return risparmio;
+    default: return 0;
+  }
+}
+function getFilteredBilancio(){
+  const filterAnno = document.getElementById('bilancio-filter-anno').value;
+  return filterAnno ? bilancio.filter(b => String(b.anno) === filterAnno) : bilancio;
+}
+function refreshBilancioFilterOptions(){
+  const sel = document.getElementById('bilancio-filter-anno');
+  const current = sel.value;
+  const anni = [...new Set(bilancio.map(b => String(b.anno)))].sort().reverse();
+  sel.innerHTML = `<option value="">Tutti</option>` + anni.map(a => `<option value="${a}">${a}</option>`).join('');
+  if(anni.includes(current)) sel.value = current;
+}
+document.querySelectorAll('#panel-bilancio thead th[data-sort-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sortKey;
+    if(bilancioSortKey === key){ bilancioSortDir = bilancioSortDir === 'asc' ? 'desc' : 'asc'; }
+    else { bilancioSortKey = key; bilancioSortDir = 'asc'; }
+    renderBilancio();
+  });
+});
+
+function renderBilancio(){
+  refreshBilancioFilterOptions();
+  const body = document.getElementById('bilancio-body');
+  const filtered = getFilteredBilancio();
+  if(filtered.length===0){
+    body.innerHTML = `<tr><td colspan="7"><div class="empty-state">Nessun bilancio registrato.</div></td></tr>`;
+    updateSortIndicators('#panel-bilancio', bilancioSortKey, bilancioSortDir);
+    return;
+  }
+  const sorted = applySort(filtered, bilancioSortValue, bilancioSortKey, bilancioSortDir);
+  let totEntrate=0, totUscite=0;
+  const rows = sorted.map(b => {
+    const {entrate, uscite, risparmio} = bilancioRowNumbers(b);
+    totEntrate += entrate; totUscite += uscite;
+    const haMensile = Array.isArray(b.entrateMensili) && b.entrateMensili.some(v => v);
+    return `
+    <tr data-id="${b.id}">
+      <td data-label="Anno">${b.anno}</td>
+      <td data-label="Conto">${b.conto}</td>
+      <td class="amount" data-label="Entrate">${euro(entrate)}</td>
+      <td class="amount" data-label="Uscite">${euro(uscite)}</td>
+      <td class="amount" data-label="Risparmio" style="color:${risparmio < 0 ? 'var(--stamp)' : 'var(--teal)'};font-weight:600;">${risparmio >= 0 ? '+' : ''}${euro(risparmio)}</td>
+      <td data-label="Dettaglio">${haMensile ? '<span class="badge paid">Mensile</span>' : '<span class="doc-ref">Solo annuale</span>'}</td>
+      <td>
+        <div class="row-actions">
+          ${b.bloccato ? `
+            <span class="doc-ref" title="Bilancio bloccato: non modificabile">🔒 Bloccato</span>
+          ` : b.id === confirmingBilancioDeleteId ? `
+            <span style="color:var(--stamp);font-size:13px;margin-right:4px;">Confermi?</span>
+            <button class="btn small" data-action="confirm-delete-bilancio" data-id="${b.id}">Sì, elimina</button>
+            <button class="btn small ghost" data-action="cancel-delete-bilancio" data-id="${b.id}">Annulla</button>
+          ` : `
+            <button class="btn small ghost" data-action="edit-bilancio" data-id="${b.id}">Modifica</button>
+            <button class="btn small ghost danger" data-action="delete-bilancio" data-id="${b.id}">Elimina</button>
+          `}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  const totRisparmio = totEntrate - totUscite;
+  const subtotal = `
+    <tr class="subtotal-row">
+      <td></td><td>Totale</td>
+      <td class="amount">${euro(totEntrate)}</td>
+      <td class="amount">${euro(totUscite)}</td>
+      <td class="amount" style="color:${totRisparmio < 0 ? 'var(--stamp)' : 'var(--teal)'};">${totRisparmio >= 0 ? '+' : ''}${euro(totRisparmio)}</td>
+      <td></td><td></td>
+    </tr>`;
+  body.innerHTML = rows + subtotal;
+  updateSortIndicators('#panel-bilancio', bilancioSortKey, bilancioSortDir);
+}
+
+let confirmingContrattoDeleteId = null;
+let contrattiSortKey = 'dataFine';
+let contrattiSortDir = 'asc';
+
+function statoContrattoInfo(c){
+  const d = daysUntil(c.dataFine);
+  if(d < 0) return {label:'Scaduto', cls:'overdue'};
+  if(d <= 90) return {label:'In scadenza', cls:'soon'};
+  return {label:'Attivo', cls:'paid'};
+}
+function statoDisdettaInfo(c){
+  const d = daysUntil(c.dataDisdetta);
+  if(d < 0) return {label:'Scaduta', cls:'overdue'};
+  if(d <= 90) return {label:'In scadenza', cls:'soon'};
+  return {label:'OK', cls:'paid'};
+}
+function contrattiSortValue(c, key){
+  switch(key){
+    case 'tipo': return (c.tipo||'').toLowerCase();
+    case 'controparte': return (c.controparte||'').toLowerCase();
+    case 'riferimento': return (c.riferimento||'').toLowerCase();
+    case 'dataInizio': return new Date(c.dataInizio).getTime() || 0;
+    case 'dataFine': return c.dataFine ? new Date(c.dataFine).getTime() : Infinity;
+    case 'dataDisdetta': return c.dataDisdetta ? new Date(c.dataDisdetta).getTime() : Infinity;
+    case 'canone': return Number(c.canone) || 0;
+    case 'prezzoUnitario': return Number(c.prezzoUnitario) || 0;
+    case 'note': return (c.note||'').toLowerCase();
+    default: return 0;
+  }
+}
+function getFilteredContratti(){
+  const filterTipo = document.getElementById('contratti-filter-tipo').value;
+  return filterTipo ? contratti.filter(c => c.tipo===filterTipo) : contratti;
+}
+function refreshContrattiFilterOptions(){
+  const sel = document.getElementById('contratti-filter-tipo');
+  const current = sel.value;
+  const tipi = [...new Set(contratti.map(c => c.tipo).filter(Boolean))].sort();
+  sel.innerHTML = `<option value="">Tutti</option>` + tipi.map(t => `<option value="${t}">${t}</option>`).join('');
+  if(tipi.includes(current)) sel.value = current;
+}
+document.querySelectorAll('#panel-contratti thead th[data-sort-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sortKey;
+    if(contrattiSortKey === key){ contrattiSortDir = contrattiSortDir === 'asc' ? 'desc' : 'asc'; }
+    else { contrattiSortKey = key; contrattiSortDir = 'asc'; }
+    renderContratti();
+  });
+});
+
+function renderContratti(){
+  refreshContrattiFilterOptions();
+  const body = document.getElementById('contratti-body');
+  const filtered = getFilteredContratti();
+  if(filtered.length===0){
+    body.innerHTML = `<tr><td colspan="12"><div class="empty-state">Nessun contratto registrato.</div></td></tr>`;
+    updateSortIndicators('#panel-contratti', contrattiSortKey, contrattiSortDir);
+    return;
+  }
+  const sorted = applySort(filtered, contrattiSortValue, contrattiSortKey, contrattiSortDir);
+  const rows = sorted.map(c => {
+    const statoC = c.dataFine ? statoContrattoInfo(c) : null;
+    const statoD = c.dataDisdetta ? statoDisdettaInfo(c) : null;
+    const clsList = [statoC && statoC.cls, statoD && statoD.cls].filter(Boolean);
+    const worstCls = clsList.includes('overdue') ? 'overdue' : clsList.includes('soon') ? 'soon' : 'paid';
+    const rowCls = worstCls === 'overdue' ? 'row-overdue' : worstCls === 'soon' ? 'row-soon' : 'row-ok';
+    return `
+    <tr class="${rowCls}" data-id="${c.id}">
+      <td data-label="Tipo">${c.tipo}</td>
+      <td data-label="Fornitore/Controparte">${c.controparte}</td>
+      <td data-label="Riferimento">${c.riferimento || '—'}</td>
+      <td data-label="Inizio">${fmtDate(c.dataInizio)}</td>
+      <td data-label="Fine/Scadenza">${c.dataFine ? fmtDate(c.dataFine) : '—'}</td>
+      <td data-label="Limite disdetta">${c.dataDisdetta ? fmtDate(c.dataDisdetta) : '—'}</td>
+      <td class="amount" data-label="Canone mensile">${c.canone ? euro(c.canone) : '—'}</td>
+      <td class="amount" data-label="Prezzo unitario">${c.prezzoUnitario ? `${c.prezzoUnitario.toString().replace('.',',')} €/${c.unitaMisura || '?'}` : '—'}</td>
+      <td data-label="Note">${c.note || '—'}</td>
+      <td data-label="Stato contratto">${statoC ? `<span class="badge ${statoC.cls}">${statoC.label}</span>` : '—'}</td>
+      <td data-label="Stato disdetta">${statoD ? `<span class="badge ${statoD.cls}">${statoD.label}</span>` : '—'}</td>
+      <td>
+        <div class="row-actions">
+          ${c.id === confirmingContrattoDeleteId ? `
+            <span style="color:var(--stamp);font-size:13px;margin-right:4px;">Confermi?</span>
+            <button class="btn small" data-action="confirm-delete-contratto" data-id="${c.id}">Sì, elimina</button>
+            <button class="btn small ghost" data-action="cancel-delete-contratto" data-id="${c.id}">Annulla</button>
+          ` : `
+            <button class="btn small ghost" data-action="edit-contratto" data-id="${c.id}">Modifica</button>
+            <button class="btn small ghost danger" data-action="delete-contratto" data-id="${c.id}">Elimina</button>
+          `}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  body.innerHTML = rows;
+  updateSortIndicators('#panel-contratti', contrattiSortKey, contrattiSortDir);
+}
+
+let confirmingDocumentoDeleteId = null;
+let renewingDocumentoId = null;
+let documentiSortKey = 'dataScadenza';
+let documentiSortDir = 'asc';
+
+function documentoStatoInfo(d){
+  if(!d.dataScadenza) return {label:'—', cls:'paid'};
+  const g = daysUntil(d.dataScadenza);
+  if(g < 0) return {label:'Scaduto', cls:'overdue'};
+  if(g <= 90) return {label:'In scadenza', cls:'soon'};
+  return {label:'Valido', cls:'paid'};
+}
+function documentiSortValue(d, key){
+  switch(key){
+    case 'tipo': return (d.tipo||'').toLowerCase();
+    case 'intestatario': return (d.intestatario||'').toLowerCase();
+    case 'numero': return (d.numero||'').toLowerCase();
+    case 'enteRilascio': return (d.enteRilascio||'').toLowerCase();
+    case 'dataRilascio': return d.dataRilascio ? new Date(d.dataRilascio).getTime() : 0;
+    case 'dataScadenza': return d.dataScadenza ? new Date(d.dataScadenza).getTime() : Infinity;
+    case 'note': return (d.note||'').toLowerCase();
+    default: return 0;
+  }
+}
+function getFilteredDocumenti(){
+  const filterTipo = document.getElementById('documenti-filter-tipo').value;
+  const filterIntestatario = document.getElementById('documenti-filter-intestatario').value;
+  let filtered = filterTipo ? documenti.filter(d => d.tipo===filterTipo) : documenti;
+  if(filterIntestatario) filtered = filtered.filter(d => d.intestatario===filterIntestatario);
+  return filtered;
+}
+function refreshDocumentiFilterOptions(){
+  const selTipo = document.getElementById('documenti-filter-tipo');
+  const currentTipo = selTipo.value;
+  const tipi = [...new Set(documenti.map(d => d.tipo).filter(Boolean))].sort();
+  selTipo.innerHTML = `<option value="">Tutti</option>` + tipi.map(t => `<option value="${t}">${t}</option>`).join('');
+  if(tipi.includes(currentTipo)) selTipo.value = currentTipo;
+
+  const selInt = document.getElementById('documenti-filter-intestatario');
+  const currentInt = selInt.value;
+  const intestatari = [...new Set(documenti.map(d => d.intestatario).filter(Boolean))].sort();
+  selInt.innerHTML = `<option value="">Tutti</option>` + intestatari.map(i => `<option value="${i}">${i}</option>`).join('');
+  if(intestatari.includes(currentInt)) selInt.value = currentInt;
+}
+document.querySelectorAll('#panel-documenti thead th[data-sort-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sortKey;
+    if(documentiSortKey === key){ documentiSortDir = documentiSortDir === 'asc' ? 'desc' : 'asc'; }
+    else { documentiSortKey = key; documentiSortDir = 'asc'; }
+    renderDocumenti();
+  });
+});
+
+function renderDocumenti(){
+  refreshDocumentiFilterOptions();
+  const body = document.getElementById('documenti-body');
+  const filtered = getFilteredDocumenti();
+  if(filtered.length===0){
+    body.innerHTML = `<tr><td colspan="10"><div class="empty-state">Nessun documento registrato.</div></td></tr>`;
+    updateSortIndicators('#panel-documenti', documentiSortKey, documentiSortDir);
+    return;
+  }
+  const sorted = applySort(filtered, documentiSortValue, documentiSortKey, documentiSortDir);
+  const rows = sorted.map(d => {
+    const stato = documentoStatoInfo(d);
+    const rowCls = stato.cls === 'overdue' ? 'row-overdue' : stato.cls === 'soon' ? 'row-soon' : 'row-ok';
+    return `
+    <tr class="${rowCls}" data-id="${d.id}">
+      <td data-label="Tipo">${d.tipo}</td>
+      <td data-label="Intestatario">${d.intestatario}</td>
+      <td data-label="Numero">${d.numero || '—'}</td>
+      <td data-label="Ente rilascio">${d.enteRilascio || '—'}</td>
+      <td data-label="Rilascio">${d.dataRilascio ? fmtDate(d.dataRilascio) : '—'}</td>
+      <td data-label="Scadenza">${d.dataScadenza ? fmtDate(d.dataScadenza) : '—'}</td>
+      <td data-label="Note">${d.note || '—'}</td>
+      <td data-label="Documento">${d.link ? `<a href="${d.link}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">Apri ↗</a>` : '—'}</td>
+      <td data-label="Stato"><span class="badge ${stato.cls}">${stato.label}</span></td>
+      <td>
+        <div class="row-actions">
+          ${d.id === confirmingDocumentoDeleteId ? `
+            <span style="color:var(--stamp);font-size:13px;margin-right:4px;">Confermi?</span>
+            <button class="btn small" data-action="confirm-delete-documento" data-id="${d.id}">Sì, elimina</button>
+            <button class="btn small ghost" data-action="cancel-delete-documento" data-id="${d.id}">Annulla</button>
+          ` : `
+            <button class="btn small" data-action="toggle-renew-documento" data-id="${d.id}">Rinnova</button>
+            <button class="btn small ghost" data-action="edit-documento" data-id="${d.id}">Modifica</button>
+            <button class="btn small ghost danger" data-action="delete-documento" data-id="${d.id}">Elimina</button>
+          `}
+        </div>
+      </td>
+    </tr>${d.id === renewingDocumentoId ? `
+    <tr class="doc-row" data-parent-id="${d.id}">
+      <td colspan="10" style="background:var(--paper);padding:14px 14px 14px 20px;">
+        <p style="margin:0 0 10px;font-size:13px;color:var(--ink-soft);">Rinnovo — aggiorna i dati del nuovo documento; il resto (tipo, intestatario, ente, note) resta invariato.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+          <label style="font-size:13px;">Nuovo numero</label>
+          <input type="text" id="renew-numero-${d.id}" value="${d.numero || ''}" style="width:170px;">
+          <label style="font-size:13px;margin-left:8px;">Nuovo link al documento</label>
+          <input type="url" id="renew-link-${d.id}" value="${d.link || ''}" style="flex:1;min-width:220px;">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <label style="font-size:13px;">Nuova data rilascio</label>
+          <input type="date" id="renew-rilascio-${d.id}" value="${new Date().toISOString().slice(0,10)}">
+          <label style="font-size:13px;margin-left:8px;">Nuova scadenza</label>
+          <input type="date" id="renew-scadenza-${d.id}">
+          <button type="button" class="btn small" data-action="save-renew-documento" data-id="${d.id}">Salva rinnovo</button>
+          <button type="button" class="btn small ghost" data-action="cancel-renew-documento" data-id="${d.id}">Annulla</button>
+        </div>
+      </td>
+    </tr>` : ''}`;
+  }).join('');
+  body.innerHTML = rows;
+  updateSortIndicators('#panel-documenti', documentiSortKey, documentiSortDir);
+}
+
+let confirmingDetrazioneDeleteId = null;
+let detrazioniSortKey = 'data';
+let detrazioniSortDir = 'desc';
+
+function detrazioniSortValue(d, key){
+  switch(key){
+    case 'categoria': return (d.categoria||'').toLowerCase();
+    case 'intestatario': return (d.intestatario||'').toLowerCase();
+    case 'data': return d.data ? new Date(d.data).getTime() : 0;
+    case 'importo': return Number(d.importo) || 0;
+    case 'note': return (d.note||'').toLowerCase();
+    default: return 0;
+  }
+}
+function getFilteredDetrazioni(){
+  const filterAnno = document.getElementById('detrazioni-filter-anno').value;
+  const filterCategoria = document.getElementById('detrazioni-filter-categoria').value;
+  let filtered = filterAnno ? detrazioni.filter(d => (d.data||'').slice(0,4)===filterAnno) : detrazioni;
+  if(filterCategoria) filtered = filtered.filter(d => d.categoria===filterCategoria);
+  return filtered;
+}
+function refreshDetrazioniFilterOptions(){
+  const selAnno = document.getElementById('detrazioni-filter-anno');
+  const currentAnno = selAnno.value;
+  const anni = [...new Set(detrazioni.map(d => (d.data||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  selAnno.innerHTML = `<option value="">Tutti</option>` + anni.map(a => `<option value="${a}">${a}</option>`).join('');
+  if(anni.includes(currentAnno)) selAnno.value = currentAnno;
+
+  const selCat = document.getElementById('detrazioni-filter-categoria');
+  const currentCat = selCat.value;
+  const categorie = [...new Set(detrazioni.map(d => d.categoria).filter(Boolean))].sort();
+  selCat.innerHTML = `<option value="">Tutte</option>` + categorie.map(c => `<option value="${c}">${c}</option>`).join('');
+  if(categorie.includes(currentCat)) selCat.value = currentCat;
+
+  // Popola anche il selettore anno del modulo commercialista, unendo gli anni di spese mediche e detrazioni
+  const selCommAnno = document.getElementById('commercialista-anno');
+  const currentCommAnno = selCommAnno.value;
+  const anniMedical = medical.map(m => (m.dataDocumento||'').slice(0,4)).filter(Boolean);
+  const anniTutti = [...new Set([...anni, ...anniMedical])].sort().reverse();
+  selCommAnno.innerHTML = `<option value="">Tutti gli anni</option>` + anniTutti.map(a => `<option value="${a}">${a}</option>`).join('');
+  if(anniTutti.includes(currentCommAnno)) selCommAnno.value = currentCommAnno;
+}
+document.querySelectorAll('#panel-detrazioni thead th[data-sort-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sortKey;
+    if(detrazioniSortKey === key){ detrazioniSortDir = detrazioniSortDir === 'asc' ? 'desc' : 'asc'; }
+    else { detrazioniSortKey = key; detrazioniSortDir = 'asc'; }
+    renderDetrazioni();
+  });
+});
+
+function renderDetrazioni(){
+  refreshDetrazioniFilterOptions();
+  const body = document.getElementById('detrazioni-body');
+  const filtered = getFilteredDetrazioni();
+  if(filtered.length===0){
+    body.innerHTML = `<tr><td colspan="6"><div class="empty-state">Nessuna voce detraibile registrata.</div></td></tr>`;
+    updateSortIndicators('#panel-detrazioni', detrazioniSortKey, detrazioniSortDir);
+    return;
+  }
+  const sorted = applySort(filtered, detrazioniSortValue, detrazioniSortKey, detrazioniSortDir);
+  let totImporto = 0;
+  const rows = sorted.map(d => {
+    totImporto += Number(d.importo) || 0;
+    return `
+    <tr data-id="${d.id}">
+      <td data-label="Categoria">${d.categoria}</td>
+      <td data-label="Intestatario">${d.intestatario}</td>
+      <td data-label="Data">${d.data ? fmtDate(d.data) : '—'}</td>
+      <td class="amount" data-label="Importo">${euro(d.importo)}</td>
+      <td data-label="Note">${d.note || '—'}</td>
+      <td>
+        <div class="row-actions">
+          ${d.id === confirmingDetrazioneDeleteId ? `
+            <span style="color:var(--stamp);font-size:13px;margin-right:4px;">Confermi?</span>
+            <button class="btn small" data-action="confirm-delete-detrazione" data-id="${d.id}">Sì, elimina</button>
+            <button class="btn small ghost" data-action="cancel-delete-detrazione" data-id="${d.id}">Annulla</button>
+          ` : `
+            <button class="btn small ghost" data-action="edit-detrazione" data-id="${d.id}">Modifica</button>
+            <button class="btn small ghost danger" data-action="delete-detrazione" data-id="${d.id}">Elimina</button>
+          `}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  const subtotal = `
+    <tr class="subtotal-row">
+      <td></td><td></td><td>Totale</td>
+      <td class="amount">${euro(totImporto)}</td>
+      <td></td><td></td>
+    </tr>`;
+  body.innerHTML = rows + subtotal;
+  updateSortIndicators('#panel-detrazioni', detrazioniSortKey, detrazioniSortDir);
+}
+
+const ICONA_RECURRING = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>`;
+const ICONA_MEDICAL = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`;
+const ICONA_BILANCIO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="17" y1="20" x2="17" y2="15"/></svg>`;
+const ICONA_CONTRATTI = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>`;
+const ICONA_DOCUMENTI = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.3"/><path d="M8 17c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>`;
+const ICONA_DETRAZIONI = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="9" cy="9" r="0.6" fill="currentColor"/><circle cx="15" cy="15" r="0.6" fill="currentColor"/></svg>`;
+
+function scadenzaLabel(giorni){
+  if(giorni < 0) return `scaduto da ${Math.abs(giorni)} giorn${Math.abs(giorni)===1?'o':'i'}`;
+  if(giorni === 0) return 'scade oggi';
+  return `tra ${giorni} giorn${giorni===1?'o':'i'}`;
+}
+
+function buildUrgentItems(){
+  const items = [];
+  recurring.forEach(p => {
+    if(p.stato !== 'da_pagare') return;
+    const g = daysUntil(p.scadenza);
+    if(g <= 30) items.push({icona: ICONA_RECURRING, label: p.nome, giorni: g, tab: 'recurring'});
+  });
+  contratti.forEach(c => {
+    if(c.dataFine){
+      const g = daysUntil(c.dataFine);
+      if(g <= 90) items.push({icona: ICONA_CONTRATTI, label: `${c.tipo} — contratto`, giorni: g, tab: 'contratti'});
+    }
+    if(c.dataDisdetta){
+      const g = daysUntil(c.dataDisdetta);
+      if(g <= 90) items.push({icona: ICONA_CONTRATTI, label: `${c.tipo} — disdetta`, giorni: g, tab: 'contratti'});
+    }
+  });
+  documenti.forEach(d => {
+    if(!d.dataScadenza) return;
+    const g = daysUntil(d.dataScadenza);
+    if(g <= 90) items.push({icona: ICONA_DOCUMENTI, label: `${d.tipo} di ${d.intestatario}`, giorni: g, tab: 'documenti'});
+  });
+  items.sort((a,b) => a.giorni - b.giorni);
+  const filtrati = visibleTabs ? items.filter(it => visibleTabs.includes(it.tab)) : items;
+  return filtrati.slice(0, 8);
+}
+
+function jumpToTab(tab){
+  const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+  if(btn) btn.click();
+}
+
+function dashSezioni(){
+  const d = settings.dashboard;
+  MODULI_IDS.forEach(id => { if(!d.sezioni.find(s => s.id === id)) d.sezioni.push({id, on:true, box:[]}); });
+  return d.sezioni;
+}
+function dashBoxes(sec, items){
+  const out = [];
+  sec.box.forEach(b => { const it = items.find(x => x.k === b.k); if(it) out.push({it, on:b.on}); });
+  items.forEach(it => { if(!sec.box.find(b => b.k === it.k)) out.push({it, on:!it.extra}); });
+  sec.box = out.map(o => ({k:o.it.k, on:o.on}));
+  return out;
+}
+function renderPanoramica(){
+  const root = document.getElementById('panel-panoramica');
+  root.classList.toggle('pano-edit', dashEdit);
+  const d = settings.dashboard;
+
+  document.getElementById('pano-toolbar').innerHTML = dashEdit
+    ? `<button type="button" class="btn small" data-act="edit-done">Fine</button><button type="button" class="btn small ghost" data-act="edit-reset">Ripristina predefinito</button><span class="doc-ref">Usa ↑ ↓ per spostare le sezioni, ← → per i box, 👁 per mostrare/nascondere. Compaiono anche i box extra, nascosti di default.</span>`
+    : `<button type="button" class="btn small ghost" data-act="edit-start">Personalizza</button>`;
+
+  const urgBlock = document.getElementById('pano-urgenti-block');
+  urgBlock.style.display = (d.urgentiOn || dashEdit) ? '' : 'none';
+  urgBlock.classList.toggle('off', !d.urgentiOn);
+  const urgentiEl = document.getElementById('panoramica-urgenti');
+  const items = buildUrgentItems();
+  if(items.length === 0){
+    urgentiEl.innerHTML = `<div style="padding:16px;"><span class="doc-ref">Nessuna scadenza urgente al momento.</span></div>`;
+  } else {
+    urgentiEl.innerHTML = items.map((it, idx) => `
+      <div data-jump-tab="${it.tab}" style="display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;${idx < items.length-1 ? 'border-bottom:1px solid var(--line);' : ''}">
+        <span style="color:${it.giorni < 0 ? 'var(--stamp)' : 'var(--gold)'};display:flex;flex-shrink:0;">${it.icona}</span>
+        <span style="font-size:13px;flex:1;">${escHtml(it.label)}</span>
+        <span style="font-size:12.5px;font-weight:500;color:${it.giorni < 0 ? 'var(--stamp)' : 'var(--gold)'};">${scadenzaLabel(it.giorni)}</span>
+      </div>
+    `).join('');
+  }
+
+  const icone = {recurring:ICONA_RECURRING, medical:ICONA_MEDICAL, bilancio:ICONA_BILANCIO, contratti:ICONA_CONTRATTI, documenti:ICONA_DOCUMENTI, detrazioni:ICONA_DETRAZIONI};
+  const sezioni = dashSezioni().filter(s => !visibleTabs || visibleTabs.includes(s.id));
+  const html = sezioni.map((s, si) => {
+    if(!s.on && !dashEdit) return '';
+    const boxes = dashBoxes(s, metricsSezione(s.id, true)).filter(b => dashEdit || b.on);
+    if(!boxes.length && !dashEdit) return '';
+    return `
+    <div class="pano-sec ${s.on ? '' : 'off'}" style="margin-bottom:22px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div data-jump-tab="${s.id}" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;">
+          <span style="color:var(--ink-soft);display:flex;">${icone[s.id]}</span>
+          <p style="font-size:13px;font-weight:500;margin:0;">${escHtml(settings.moduli[s.id].nome)}</p>
+        </div>
+        <span class="pano-tools"><button type="button" data-act="sec-up" data-sec="${s.id}">↑</button><button type="button" data-act="sec-down" data-sec="${s.id}">↓</button><button type="button" data-act="sec-eye" data-sec="${s.id}">👁</button></span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(150px,1fr));gap:8px;">
+        ${boxes.map(b => { const m = b.it; return `
+          <div class="pano-box ${b.on ? '' : 'off'}" data-jump-tab="${s.id}" style="background:${m.cls==='warn' ? 'var(--stamp-soft)' : 'var(--paper)'};border-radius:8px;padding:0.75rem;cursor:pointer;">
+            <span class="pano-tools"><button type="button" data-act="box-left" data-sec="${s.id}" data-k="${m.k}">←</button><button type="button" data-act="box-right" data-sec="${s.id}" data-k="${m.k}">→</button><button type="button" data-act="box-eye" data-sec="${s.id}" data-k="${m.k}">👁</button></span>
+            <p style="font-size:17px;font-weight:500;margin:0;${m.cls==='warn' ? 'color:var(--stamp);' : ''}">${m.valore}</p>
+            <p style="font-size:11.5px;color:var(--ink-soft);margin:2px 0 0;">${m.label}</p>
+          </div>`; }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('panoramica-cards').innerHTML = html || `<div class="empty-state">Nessun box da mostrare. Clicca "Personalizza" per riattivarli.</div>`;
+}
+function swap(arr, i, j){ if(j < 0 || j >= arr.length) return; const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+document.getElementById('panel-panoramica').addEventListener('click', async (e) => {
+  const actEl = e.target.closest('[data-act]');
+  if(actEl){
+    e.stopPropagation();
+    const act = actEl.dataset.act, id = actEl.dataset.sec, k = actEl.dataset.k;
+    const d = settings.dashboard;
+    const secs = dashSezioni();
+    const sec = secs.find(s => s.id === id);
+    if(act === 'edit-start') dashEdit = true;
+    else if(act === 'edit-done') dashEdit = false;
+    else if(act === 'edit-reset'){ settings.dashboard = {urgentiOn:true, sezioni:[]}; }
+    else if(act === 'urg-eye') d.urgentiOn = !d.urgentiOn;
+    else if(act === 'sec-eye' && sec) sec.on = !sec.on;
+    else if((act === 'sec-up' || act === 'sec-down') && sec){
+      // si muove tra le sezioni visibili, saltando quelle spente dai moduli
+      const vis = secs.filter(s => !visibleTabs || visibleTabs.includes(s.id));
+      const vi = vis.indexOf(sec), vj = vi + (act === 'sec-up' ? -1 : 1);
+      if(vj >= 0 && vj < vis.length){ const a = secs.indexOf(sec), b = secs.indexOf(vis[vj]); swap(secs, a, b); }
+    }
+    else if(sec && k){
+      const bi = sec.box.findIndex(b => b.k === k);
+      if(act === 'box-eye' && bi >= 0) sec.box[bi].on = !sec.box[bi].on;
+      if(act === 'box-left') swap(sec.box, bi, bi - 1);
+      if(act === 'box-right') swap(sec.box, bi, bi + 1);
+    }
+    renderPanoramica();
+    if(act !== 'edit-start' && act !== 'edit-done') await saveSettings();
+    return;
+  }
+  const jump = e.target.closest('[data-jump-tab]');
+  if(jump && !dashEdit) jumpToTab(jump.dataset.jumpTab);
+});
+
+
+// ---------- Impostazioni ----------
+function applyElenchi(){
+  Object.keys(ELENCHI_DATALIST).forEach(k => {
+    const html = settings.elenchi[k].map(v => `<option value="${escHtml(v)}">`).join('');
+    ELENCHI_DATALIST[k].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = html; });
+  });
+}
+function applyModuliLabels(){
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const id = btn.dataset.tab;
+    if(settings.moduli[id] && btn.lastChild) btn.lastChild.textContent = settings.moduli[id].nome;
+  });
+}
+function applySettings(){
+  modalitaSemplificata = settings.sanitaModalita !== 'completa';
+  const spenti = MODULI_IDS.filter(id => !settings.moduli[id].on);
+  visibleTabs = spenti.length ? MODULI_IDS.filter(id => settings.moduli[id].on) : null;
+  applyElenchi();
+  applyModuliLabels();
+  applyTabVisibility();
+  applyModalitaVisibility();
+}
+function renameInData(listKey, oldV, newV){
+  let n = 0;
+  const arrays = {recurring, medical, bilancio, contratti, documenti, detrazioni};
+  const toSave = new Set();
+  ELENCHI_CAMPI[listKey].forEach(([arrName, field]) => {
+    arrays[arrName].forEach(r => {
+      if(r[field] === oldV && !r.bloccato && !r.bloccata){ r[field] = newV; n++; toSave.add(arrName); }
+    });
+  });
+  return {n, toSave};
+}
+async function saveByName(name){
+  if(name === 'recurring') return saveRecurring();
+  if(name === 'medical') return saveMedical();
+  if(name === 'bilancio') return saveBilancio();
+  if(name === 'contratti') return saveContratti();
+  if(name === 'documenti') return saveDocumenti();
+  if(name === 'detrazioni') return saveDetrazioni();
+}
+function renderImpostazioni(){
+  const el = document.getElementById('panel-impostazioni');
+  const moduliHtml = MODULI_IDS.map(id => `
+    <div class="set-row">
+      <label class="chk"><input type="checkbox" data-set-modulo-on="${id}" ${settings.moduli[id].on ? 'checked' : ''}> Attivo</label>
+      <input type="text" data-set-modulo-nome="${id}" value="${escHtml(settings.moduli[id].nome)}" maxlength="40">
+      <span class="doc-ref">${escHtml(MODULI_DEFAULT_NOMI[id])}</span>
+    </div>`).join('');
+  const elenchiHtml = Object.keys(ELENCHI_DEF).map(k => `
+    <div class="set-card">
+      <h3>${ELENCHI_DEF[k].titolo}</h3>
+      <p class="hint">${ELENCHI_DEF[k].hint}</p>
+      <div class="chips-wrap">
+        ${settings.elenchi[k].length ? settings.elenchi[k].map((v, i) => `<span class="vchip"><span class="vname" data-list-rename="${k}" data-i="${i}" title="Clicca per rinominare">${escHtml(v)}</span><button type="button" data-list-del="${k}" data-i="${i}" title="Rimuovi dai suggerimenti">✕</button></span>`).join('') : '<span class="doc-ref">Nessun valore: aggiungine uno qui sotto.</span>'}
+      </div>
+      <div class="add-val"><input type="text" id="addval-${k}" data-list-add-input="${k}" placeholder="Nuovo valore"><button type="button" class="btn small" data-list-add="${k}">Aggiungi</button></div>
+    </div>`).join('');
+  el.innerHTML = `
+    <div class="set-card">
+      <h3>Moduli</h3>
+      <p class="hint">Attiva solo le schede che ti servono e dai loro il nome che preferisci. I dati dei moduli spenti non vengono cancellati.</p>
+      ${moduliHtml}
+    </div>
+    <div class="set-card">
+      <h3>${escHtml(settings.moduli.medical.nome)}</h3>
+      <p class="hint">Modalità semplice: stato della pratica in 4 passi, importo rimborsato e residuo da portare in detrazione. Modalità completa: doppio livello di rimborso (es. fondo sanitario + assicurazione di 2° livello) con stati e massimali dedicati.</p>
+      <div class="set-row">
+        <select id="set-sanita-modalita" style="max-width:360px;">
+          <option value="semplice" ${settings.sanitaModalita === 'semplice' ? 'selected' : ''}>Semplice (un solo rimborso)</option>
+          <option value="completa" ${settings.sanitaModalita === 'completa' ? 'selected' : ''}>Completa (primo e secondo livello)</option>
+        </select>
+      </div>
+      ${settings.sanitaModalita === 'completa' ? `
+      <div class="set-row"><span style="font-size:13px;min-width:260px;">Massimale annuo psicologia — primo livello (€)</span><input type="number" step="0.01" min="0" id="set-mass-fasi" value="${settings.massimali.fasiPsico}" style="width:120px;"></div>
+      <div class="set-row"><span style="font-size:13px;min-width:260px;">Massimale annuo psicologia — secondo livello (€)</span><input type="number" step="0.01" min="0" id="set-mass-secondo" value="${settings.massimali.secondoPsico}" style="width:120px;"></div>` : ''}
+    </div>
+    <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
+    <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
+    ${elenchiHtml}`;
+}
+document.getElementById('panel-impostazioni').addEventListener('change', async (e) => {
+  const t = e.target;
+  if(t.dataset.setModuloOn){
+    settings.moduli[t.dataset.setModuloOn].on = t.checked;
+    if(!MODULI_IDS.some(id => settings.moduli[id].on)){ settings.moduli[t.dataset.setModuloOn].on = true; t.checked = true; showNotice('Deve restare attivo almeno un modulo.'); return; }
+  } else if(t.dataset.setModuloNome){
+    const v = t.value.trim();
+    settings.moduli[t.dataset.setModuloNome].nome = v || MODULI_DEFAULT_NOMI[t.dataset.setModuloNome];
+    if(!v) t.value = settings.moduli[t.dataset.setModuloNome].nome;
+  } else if(t.id === 'set-sanita-modalita'){
+    settings.sanitaModalita = t.value;
+    settings.dashboard.sezioni = settings.dashboard.sezioni.map(s => s.id === 'medical' ? {...s, box:[]} : s);
+  } else if(t.id === 'set-mass-fasi' || t.id === 'set-mass-secondo'){
+    const v = parseFloat(t.value); if(isNaN(v) || v < 0) return;
+    if(t.id === 'set-mass-fasi') settings.massimali.fasiPsico = v; else settings.massimali.secondoPsico = v;
+  } else return;
+  applySettings();
+  renderAll();
+  renderImpostazioni();
+  await saveSettings();
+});
+async function addListValue(k){
+  const inp = document.getElementById('addval-' + k);
+  const v = inp.value.trim();
+  if(!v) return;
+  if(settings.elenchi[k].some(x => x.toLowerCase() === v.toLowerCase())){ showNotice('Questo valore c\'è già.'); return; }
+  settings.elenchi[k].push(v);
+  applyElenchi(); renderImpostazioni();
+  const again = document.getElementById('addval-' + k); if(again) again.focus();
+  await saveSettings();
+}
+document.getElementById('panel-impostazioni').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && e.target.dataset.listAddInput){ e.preventDefault(); addListValue(e.target.dataset.listAddInput); }
+});
+document.getElementById('panel-impostazioni').addEventListener('click', async (e) => {
+  const addBtn = e.target.closest('[data-list-add]');
+  if(addBtn){ addListValue(addBtn.dataset.listAdd); return; }
+  const del = e.target.closest('[data-list-del]');
+  if(del){
+    settings.elenchi[del.dataset.listDel].splice(parseInt(del.dataset.i, 10), 1);
+    applyElenchi(); renderImpostazioni(); await saveSettings(); return;
+  }
+  const ren = e.target.closest('[data-list-rename]');
+  if(ren){
+    const k = ren.dataset.listRename, i = parseInt(ren.dataset.i, 10);
+    const oldV = settings.elenchi[k][i];
+    const nuovo = (window.prompt('Rinomina il valore:', oldV) || '').trim();
+    if(!nuovo || nuovo === oldV) return;
+    if(settings.elenchi[k].some((x, j) => j !== i && x.toLowerCase() === nuovo.toLowerCase())){ showNotice('Esiste già un valore con questo nome.'); return; }
+    settings.elenchi[k][i] = nuovo;
+    const trovati = ELENCHI_CAMPI[k].reduce((s, [arr, field]) => s + ({recurring, medical, bilancio, contratti, documenti, detrazioni})[arr].filter(r => r[field] === oldV && !r.bloccato && !r.bloccata).length, 0);
+    if(trovati > 0 && window.confirm(`Ci sono ${trovati} righe già salvate con "${oldV}" (escluse quelle bloccate). Vuoi rinominarle in "${nuovo}"?`)){
+      const {toSave} = renameInData(k, oldV, nuovo);
+      for(const name of toSave) await saveByName(name);
+      renderAll();
+    }
+    applyElenchi(); renderImpostazioni(); await saveSettings();
+  }
+});
+
+function renderAll(){
+  renderSummary();
+  renderRecurring();
+  renderMedical();
+  renderBilancio();
+  renderContratti();
+  renderDocumenti();
+  renderDetrazioni();
+  renderPanoramica();
+  renderImpostazioni();
+  applyModalitaVisibility();
+}
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    renderSummary();
+  });
+});
+
+// Recurring form
+const recurringForm = document.getElementById('recurring-form');
+function resetRecurringForm(){
+  document.getElementById('rf-nome').value = '';
+  document.getElementById('rf-scadenza').value = '';
+  document.getElementById('rf-importo').value = '';
+  document.getElementById('rf-ricorrenza').value = 'Annuale';
+  document.getElementById('rf-stato').value = 'da_pagare';
+  document.getElementById('rf-note').value = '';
+  document.getElementById('rf-bloccato').checked = false;
+  confirmingLockRecurring = false;
+  document.getElementById('rf-save').textContent = 'Salva';
+}
+document.getElementById('toggle-recurring-form').addEventListener('click', () => {
+  editingRecurringId = null;
+  resetRecurringForm();
+  recurringForm.classList.add('open');
+});
+document.getElementById('rf-cancel').addEventListener('click', () => recurringForm.classList.remove('open'));
+function showFormError(msg){
+  showSaveWarning(msg);
+}
+
+document.getElementById('rf-save').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const nome = document.getElementById('rf-nome').value.trim();
+  const scadenza = document.getElementById('rf-scadenza').value;
+  const importo = parseFloat(document.getElementById('rf-importo').value);
+  if(!nome){ showFormError('Inserisci il nome della voce (es. TARI).'); return; }
+  if(!scadenza){ showFormError('Inserisci la data di scadenza.'); return; }
+  if(isNaN(importo)){ showFormError('Inserisci un importo valido.'); return; }
+  const vuoleBloccare = document.getElementById('rf-bloccato').checked;
+  const saveBtnRf = document.getElementById('rf-save');
+  if(vuoleBloccare && !confirmingLockRecurring){
+    confirmingLockRecurring = true;
+    saveBtnRf.textContent = 'Confermi il blocco? Clicca di nuovo per salvare';
+    showFormError('Una volta salvato bloccato, questo pagamento non potrà più essere modificato né eliminato.');
+    return;
+  }
+  const entry = {
+    id: editingRecurringId || uid(),
+    nome,
+    scadenza,
+    importo,
+    ricorrenza: document.getElementById('rf-ricorrenza').value,
+    stato: document.getElementById('rf-stato').value,
+    note: document.getElementById('rf-note').value.trim(),
+    bloccato: vuoleBloccare
+  };
+  if(editingRecurringId){
+    recurring = recurring.map(p => p.id===editingRecurringId ? entry : p);
+  } else {
+    recurring.push(entry);
+  }
+  await saveRecurring();
+  recurringForm.classList.remove('open');
+  resetRecurringForm();
+  editingRecurringId = null;
+  renderAll();
+});
+
+// Medical form
+const medicalForm = document.getElementById('medical-form');
+function resetMedicalForm(){
+  document.getElementById('mf-richiedente').value = '';
+  document.getElementById('mf-tipodoc').value = 'Fattura';
+  document.getElementById('mf-numerodoc').value = '';
+  document.getElementById('mf-data').value = '';
+  document.getElementById('mf-descrizione').value = '';
+  document.getElementById('mf-note').value = '';
+  document.getElementById('mf-modalita').value = 'Indiretta';
+  document.getElementById('mf-totale').value = '';
+  document.getElementById('mf-fasi-pagato').value = '0';
+  document.getElementById('mf-fasi-rifiutato').checked = false;
+  document.getElementById('mf-ass-rimborsato').value = '0';
+  document.getElementById('mf-secondo-rifiutato').checked = false;
+  document.getElementById('mf-stato').value = 'da_aprire_fasi';
+  document.getElementById('mf-stato-semplice').value = 'da_aprire_fasi';
+  document.getElementById('mf-bloccata').checked = false;
+  confirmingLockMedical = false;
+  document.getElementById('mf-save').textContent = 'Salva';
+  formDocumenti = [];
+  renderFormDocumentiList();
+  updateMedicalComputedFields();
+}
+
+function renderFormDocumentiList(){
+  const container = document.getElementById('mf-documenti-list');
+  if(formDocumenti.length === 0){
+    container.innerHTML = `<span class="doc-ref">Nessun documento aggiunto.</span>`;
+    return;
+  }
+  container.innerHTML = formDocumenti.map(doc => `
+    <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:5px 8px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-soft);flex-shrink:0;"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      <a href="${doc.url}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">${doc.nome}</a>
+      <button type="button" data-form-doc-id="${doc.id}" style="background:none;border:none;color:var(--stamp);cursor:pointer;padding:0;font-size:13px;line-height:1;" aria-label="Rimuovi documento">✕</button>
+    </span>
+  `).join('');
+}
+document.getElementById('mf-documenti-list').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-form-doc-id]');
+  if(!btn) return;
+  formDocumenti = formDocumenti.filter(d => d.id !== btn.dataset.formDocId);
+  renderFormDocumentiList();
+});
+document.getElementById('mf-doc-add').addEventListener('click', () => {
+  const nomeInput = document.getElementById('mf-doc-nome');
+  const urlInput = document.getElementById('mf-doc-url');
+  const nome = nomeInput.value.trim();
+  const url = urlInput.value.trim();
+  if(!nome || !url){ showFormError('Inserisci sia il nome che il link del documento.'); return; }
+  formDocumenti.push({id: uid(), nome, url});
+  nomeInput.value = '';
+  urlInput.value = '';
+  renderFormDocumentiList();
+});
+
+function updateMedicalComputedFields(){
+  const totale = parseFloat(document.getElementById('mf-totale').value) || 0;
+  const fasiPagato = parseFloat(document.getElementById('mf-fasi-pagato').value) || 0;
+  const secondoPagato = parseFloat(document.getElementById('mf-ass-rimborsato').value) || 0;
+  const statoSempliceVal = document.getElementById('mf-stato-semplice').value;
+  const stato = modalitaSemplificata ? (statoSempliceVal === 'rifiutata' ? 'chiusa_completa' : statoSempliceVal) : document.getElementById('mf-stato').value;
+  const {fasiRichiesto, richiestoSecondo, residuo} = medicalRowNumbers({
+    totale, fasi: {pagato: fasiPagato}, secondoLivello: {rimborsato: secondoPagato}, stato
+  });
+  document.getElementById('mf-fasi-richiesto').value = euro(fasiRichiesto);
+  document.getElementById('mf-secondo-richiesto').value = euro(richiestoSecondo);
+  document.getElementById('mf-residuo').value = euro(residuo);
+  document.getElementById('mf-residuo-semplice').value = euro(residuo);
+}
+['mf-totale','mf-fasi-pagato','mf-ass-rimborsato','mf-stato','mf-stato-semplice'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateMedicalComputedFields);
+  document.getElementById(id).addEventListener('change', updateMedicalComputedFields);
+});
+
+document.getElementById('toggle-medical-form').addEventListener('click', () => {
+  editingMedicalId = null;
+  resetMedicalForm();
+  medicalForm.classList.add('open');
+});
+document.getElementById('mf-cancel').addEventListener('click', () => medicalForm.classList.remove('open'));
+document.getElementById('medical-filter').addEventListener('change', renderMedical);
+document.getElementById('medical-filter-stato').addEventListener('change', renderMedical);
+document.getElementById('medical-filter-anno').addEventListener('change', renderMedical);
+document.getElementById('medical-filter-hide-closed').addEventListener('change', renderMedical);
+document.getElementById('medical-filter-prestazione').addEventListener('input', renderMedical);
+document.getElementById('medical-filter-documento').addEventListener('input', renderMedical);
+
+// Modulo per il commercialista: spese mediche non rimborsate + voci detraibili manuali, per anno
+function buildCommercialistaCSV(){
+  const anno = document.getElementById('commercialista-anno').value;
+
+  const speseMediche = medical
+    .filter(m => !anno || (m.dataDocumento||'').slice(0,4)===anno)
+    .map(m => {
+      const {totale, fasiPagato, assRimborsato} = medicalRowNumbers(m);
+      const coperto = fasiPagato + assRimborsato;
+      const nonRimborsato = Math.max(0, totale - coperto);
+      return {
+        data: m.dataDocumento,
+        categoria: 'Spese mediche',
+        intestatario: m.richiedente || '',
+        descrizione: m.descrizione || '',
+        importo: nonRimborsato
+      };
+    })
+    .filter(r => r.importo > 0.004);
+
+  const voci = detrazioni
+    .filter(d => !anno || (d.data||'').slice(0,4)===anno)
+    .map(d => ({
+      data: d.data,
+      categoria: d.categoria || 'Altro',
+      intestatario: d.intestatario || '',
+      descrizione: d.note || '',
+      importo: Number(d.importo) || 0
+    }));
+
+  const righe = [...speseMediche, ...voci].sort((a,b)=> new Date(a.data) - new Date(b.data));
+
+  const header = 'Data;Categoria;Intestatario;Descrizione;Importo detraibile';
+  const rows = righe.map(r => `${fmtDate(r.data)};${r.categoria.replace(/;/g,',')};${r.intestatario.replace(/;/g,',')};${r.descrizione.replace(/;/g,',')};${euro(r.importo)}`);
+
+  const perCategoria = {};
+  righe.forEach(r => { perCategoria[r.categoria] = (perCategoria[r.categoria]||0) + r.importo; });
+  const subtotaliRows = Object.keys(perCategoria).sort().map(cat => `;TOTALE ${cat};;;${euro(perCategoria[cat])}`);
+
+  const totaleComplessivo = righe.reduce((s,r)=> s + r.importo, 0);
+  const csv = [header, ...rows, '', ...subtotaliRows, `;TOTALE COMPLESSIVO;;;${euro(totaleComplessivo)}`].join('\n');
+  return {csv, count: righe.length, totale: totaleComplessivo};
+}
+
+document.getElementById('commercialista-genera').addEventListener('click', () => {
+  const {csv, count, totale} = buildCommercialistaCSV();
+  document.getElementById('commercialista-text').value = csv;
+  const feedback = document.getElementById('commercialista-feedback');
+  if(count === 0){
+    feedback.textContent = 'Nessuna voce detraibile trovata per il periodo selezionato.';
+    document.getElementById('commercialista-download').href = '#';
+    return;
+  }
+  try{
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    document.getElementById('commercialista-download').href = url;
+  }catch(e){
+    console.error('Impossibile creare il link di download', e);
+  }
+  feedback.textContent = `${count} voc${count===1?'e trovata':'i trovate'}, totale detraibile ${euro(totale)}.`;
+});
+
+document.getElementById('commercialista-copy').addEventListener('click', async () => {
+  const ta = document.getElementById('commercialista-text');
+  const feedback = document.getElementById('commercialista-feedback');
+  if(!ta.value){
+    feedback.textContent = 'Genera prima il modulo con il pulsante "Genera".';
+    return;
+  }
+  try{
+    await navigator.clipboard.writeText(ta.value);
+    feedback.textContent = 'Testo copiato negli appunti.';
+  }catch(e){
+    ta.focus();
+    ta.select();
+    feedback.textContent = 'Copia automatica non disponibile: il testo è selezionato, usa Ctrl/Cmd+C.';
+  }
+});
+
+// Importazione rapida a righe multiple
+const importPanel = document.getElementById('medical-import-panel');
+const importFeedback = document.getElementById('medical-import-feedback');
+document.getElementById('toggle-medical-import').addEventListener('click', () => {
+  importPanel.style.display = importPanel.style.display === 'none' ? 'block' : 'none';
+  importFeedback.textContent = '';
+});
+document.getElementById('medical-import-cancel').addEventListener('click', () => {
+  importPanel.style.display = 'none';
+  document.getElementById('medical-import-text').value = '';
+  importFeedback.textContent = '';
+});
+document.getElementById('medical-import-confirm').addEventListener('click', async () => {
+  const raw = document.getElementById('medical-import-text').value;
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const validStati = Object.keys(STATI_PRATICA);
+  let added = 0, errors = [];
+  lines.forEach((line, idx) => {
+    const parts = line.split(';').map(p => p.trim());
+    if(parts.length < 10){
+      errors.push(`Riga ${idx+1}: servono 10 campi separati da ";", trovati ${parts.length}.`);
+      return;
+    }
+    const [dataDocumento, tipoDocumento, numeroDocumento, richiedente, descrizione, modalita, totaleStr, fasiStr, assStr, stato] = parts;
+    const totale = parseFloat(totaleStr.replace(',', '.'));
+    const fasiPagato = parseFloat(fasiStr.replace(',', '.'));
+    const assRimborsato = parseFloat(assStr.replace(',', '.'));
+    if(!dataDocumento || !richiedente || !descrizione || isNaN(totale)){
+      errors.push(`Riga ${idx+1}: dati mancanti o totale non numerico.`);
+      return;
+    }
+    if(!validStati.includes(stato)){
+      errors.push(`Riga ${idx+1}: stato "${stato}" non riconosciuto.`);
+      return;
+    }
+    medical.push({
+      id: uid(),
+      richiedente, tipoDocumento: tipoDocumento || 'Fattura', numeroDocumento: numeroDocumento || '',
+      dataDocumento, descrizione, modalita: modalita === 'Diretta' ? 'Diretta' : 'Indiretta',
+      totale, stato,
+      fasi: {pagato: isNaN(fasiPagato) ? 0 : fasiPagato},
+      secondoLivello: {rimborsato: isNaN(assRimborsato) ? 0 : assRimborsato}
+    });
+    added++;
+  });
+  if(added > 0){
+    await saveMedical();
+    renderAll();
+  }
+  importFeedback.innerHTML = `${added} rig${added===1?'a importata':'he importate'}.` +
+    (errors.length ? `<br><span style="color:var(--stamp)">${errors.join('<br>')}</span>` : '');
+  if(added > 0 && errors.length === 0){
+    document.getElementById('medical-import-text').value = '';
+  }
+});
+document.getElementById('mf-save').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const richiedente = document.getElementById('mf-richiedente').value.trim();
+  const dataDocumento = document.getElementById('mf-data').value;
+  const descrizione = document.getElementById('mf-descrizione').value.trim();
+  const totale = parseFloat(document.getElementById('mf-totale').value);
+  if(!richiedente){ showFormError('Inserisci il richiedente.'); return; }
+  if(!dataDocumento){ showFormError('Inserisci la data del documento.'); return; }
+  if(!descrizione){ showFormError('Inserisci la prestazione.'); return; }
+  if(isNaN(totale)){ showFormError('Inserisci un totale fattura valido.'); return; }
+  const vuoleBloccare = document.getElementById('mf-bloccata').checked;
+  const saveBtn = document.getElementById('mf-save');
+  if(vuoleBloccare && !confirmingLockMedical){
+    confirmingLockMedical = true;
+    saveBtn.textContent = 'Confermi il blocco? Clicca di nuovo per salvare';
+    showFormError('Una volta salvata bloccata, questa pratica non potrà più essere modificata né eliminata.');
+    return;
+  }
+  const statoSempliceVal = document.getElementById('mf-stato-semplice').value;
+  const statoFinale = modalitaSemplificata ? (statoSempliceVal === 'rifiutata' ? 'chiusa_completa' : statoSempliceVal) : document.getElementById('mf-stato').value;
+  const rifiutataSemplice = modalitaSemplificata && statoSempliceVal === 'rifiutata';
+  const entry = {
+    id: editingMedicalId || uid(),
+    richiedente,
+    tipoDocumento: document.getElementById('mf-tipodoc').value,
+    numeroDocumento: document.getElementById('mf-numerodoc').value.trim(),
+    dataDocumento,
+    descrizione,
+    note: document.getElementById('mf-note').value.trim(),
+    modalita: document.getElementById('mf-modalita').value,
+    totale,
+    stato: statoFinale,
+    fasi: {
+      pagato: parseFloat(document.getElementById('mf-fasi-pagato').value)||0
+    },
+    fasiRifiutato: modalitaSemplificata ? rifiutataSemplice : document.getElementById('mf-fasi-rifiutato').checked,
+    secondoLivello: {
+      rimborsato: parseFloat(document.getElementById('mf-ass-rimborsato').value)||0
+    },
+    secondoRifiutato: modalitaSemplificata ? rifiutataSemplice : document.getElementById('mf-secondo-rifiutato').checked,
+    bloccata: vuoleBloccare,
+    documenti: formDocumenti
+  };
+  if(editingMedicalId){
+    medical = medical.map(m => m.id===editingMedicalId ? entry : m);
+  } else {
+    medical.push(entry);
+  }
+  await saveMedical();
+  medicalForm.classList.remove('open');
+  resetMedicalForm();
+  editingMedicalId = null;
+  renderAll();
+});
+
+// Row actions (delegation)
+function nextScadenza(dateStr, ricorrenza){
+  const d = new Date(dateStr);
+  if(isNaN(d.getTime())) return null;
+  if(ricorrenza === 'Annuale') d.setFullYear(d.getFullYear() + 1);
+  else if(ricorrenza === 'Semestrale') d.setMonth(d.getMonth() + 6);
+  else if(ricorrenza === 'Mensile') d.setMonth(d.getMonth() + 1);
+  else return null;
+  return d.toISOString().slice(0, 10);
+}
+
+document.getElementById('recurring-body').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  const item = recurring.find(p => p.id===id);
+  if(!item) return;
+  if(item.bloccato) return;
+  if(action==='mark-paid'){
+    item.stato = 'pagato';
+    const nextDate = nextScadenza(item.scadenza, item.ricorrenza);
+    if(nextDate){
+      recurring.push({
+        id: uid(),
+        nome: item.nome,
+        scadenza: nextDate,
+        importo: item.importo,
+        ricorrenza: item.ricorrenza,
+        stato: 'da_pagare',
+        note: item.note
+      });
+    }
+    await saveRecurring();
+    renderAll();
+    if(nextDate){
+      showNotice(`Creata la prossima scadenza: ${item.nome} il ${fmtDate(nextDate)}.`, 'success');
+    }
+  } else if(action==='delete-recurring'){
+    confirmingRecurringDeleteId = id;
+    renderRecurring();
+  } else if(action==='confirm-delete-recurring'){
+    confirmingRecurringDeleteId = null;
+    recurring = recurring.filter(p => p.id!==id);
+    await saveRecurring();
+    renderAll();
+  } else if(action==='cancel-delete-recurring'){
+    confirmingRecurringDeleteId = null;
+    renderRecurring();
+  } else if(action==='edit-recurring'){
+    editingRecurringId = id;
+    document.getElementById('rf-nome').value = item.nome;
+    document.getElementById('rf-scadenza').value = item.scadenza;
+    document.getElementById('rf-importo').value = item.importo;
+    document.getElementById('rf-ricorrenza').value = item.ricorrenza;
+    document.getElementById('rf-stato').value = item.stato;
+    document.getElementById('rf-note').value = item.note || '';
+    document.getElementById('rf-bloccato').checked = false;
+    confirmingLockRecurring = false;
+    document.getElementById('rf-save').textContent = 'Salva';
+    recurringForm.classList.add('open');
+    recurringForm.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+});
+
+document.getElementById('medical-body').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  const item = medical.find(m => m.id===id);
+  if(!item) return;
+  if(action==='toggle-doc-row'){
+    if(expandedMedicalIds.has(id)) expandedMedicalIds.delete(id);
+    else expandedMedicalIds.add(id);
+    renderMedical();
+    return;
+  }
+  if(item.bloccata) return;
+  if(action==='delete-medical'){
+    confirmingMedicalDeleteId = id;
+    renderMedical();
+  } else if(action==='confirm-delete-medical'){
+    confirmingMedicalDeleteId = null;
+    medical = medical.filter(m => m.id!==id);
+    await saveMedical();
+    renderAll();
+  } else if(action==='cancel-delete-medical'){
+    confirmingMedicalDeleteId = null;
+    renderMedical();
+  } else if(action==='edit-medical'){
+    if(item.bloccata) return;
+    editingMedicalId = id;
+    document.getElementById('mf-richiedente').value = item.richiedente;
+    document.getElementById('mf-tipodoc').value = item.tipoDocumento;
+    document.getElementById('mf-numerodoc').value = item.numeroDocumento;
+    document.getElementById('mf-data').value = item.dataDocumento;
+    document.getElementById('mf-descrizione').value = item.descrizione;
+    document.getElementById('mf-note').value = item.note || '';
+    document.getElementById('mf-modalita').value = item.modalita;
+    document.getElementById('mf-totale').value = item.totale;
+    document.getElementById('mf-fasi-pagato').value = item.fasi.pagato;
+    document.getElementById('mf-fasi-rifiutato').checked = !!item.fasiRifiutato;
+    document.getElementById('mf-ass-rimborsato').value = item.secondoLivello.rimborsato;
+    document.getElementById('mf-secondo-rifiutato').checked = !!item.secondoRifiutato;
+    document.getElementById('mf-stato').value = item.stato;
+    document.getElementById('mf-stato-semplice').value = (item.stato === 'chiusa_completa' && item.fasiRifiutato && item.secondoRifiutato) ? 'rifiutata' : item.stato;
+    document.getElementById('mf-bloccata').checked = false;
+    confirmingLockMedical = false;
+    document.getElementById('mf-save').textContent = 'Salva';
+    formDocumenti = JSON.parse(JSON.stringify(item.documenti || []));
+    renderFormDocumentiList();
+    updateMedicalComputedFields();
+    medicalForm.classList.add('open');
+    medicalForm.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+});
+
+// Backup dati: esportazione e importazione manuale, indipendente dallo storage di Claude
+document.getElementById('toggle-backup-panel').addEventListener('click', () => {
+  const panel = document.getElementById('backup-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+
+let confirmingBackupImport = false;
+
+const REC_CSV_COLS = ['id','nome','scadenza','importo','ricorrenza','stato','note','bloccato'];
+const MED_CSV_COLS = ['id','richiedente','tipoDocumento','numeroDocumento','dataDocumento','descrizione','note','modalita','totale','stato','fasiPagato','fasiRifiutato','secondoRimborsato','secondoRifiutato','bloccata','documenti'];
+
+function csvEscape(value){
+  const s = (value === null || value === undefined) ? '' : String(value);
+  if(/[",\n]/.test(s)){
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function parseCSVLine(line){
+  const result = [];
+  let cur = '';
+  let inQuotes = false;
+  for(let i=0; i<line.length; i++){
+    const ch = line[i];
+    if(inQuotes){
+      if(ch === '"'){
+        if(line[i+1] === '"'){ cur += '"'; i++; }
+        else { inQuotes = false; }
+      } else { cur += ch; }
+    } else {
+      if(ch === '"'){ inQuotes = true; }
+      else if(ch === ','){ result.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+const BIL_CSV_COLS = ['id','anno','conto','entrate','uscite',
+  'entrateGen','entrateFeb','entrateMar','entrateApr','entrateMag','entrateGiu','entrateLug','entrateAgo','entrateSet','entrateOtt','entrateNov','entrateDic',
+  'usciteGen','usciteFeb','usciteMar','usciteApr','usciteMag','usciteGiu','usciteLug','usciteAgo','usciteSet','usciteOtt','usciteNov','usciteDic','bloccato'];
+const BIL_MESI_ENTRATE_KEYS = BIL_CSV_COLS.slice(5,17);
+const BIL_MESI_USCITE_KEYS = BIL_CSV_COLS.slice(17,29);
+const CONTR_CSV_COLS = ['id','tipo','controparte','riferimento','dataInizio','dataFine','dataDisdetta','canone','prezzoUnitario','unitaMisura','note'];
+const DOC_CSV_COLS = ['id','tipo','intestatario','numero','link','enteRilascio','dataRilascio','dataScadenza','note'];
+const DETR_CSV_COLS = ['id','categoria','intestatario','data','importo','note'];
+
+function currentBackupCSV(){
+  const recRows = recurring.map(p => REC_CSV_COLS.map(c => csvEscape(p[c])).join(','));
+  const medRows = medical.map(m => MED_CSV_COLS.map(c => {
+    if(c === 'fasiPagato') return csvEscape(m.fasi ? m.fasi.pagato : 0);
+    if(c === 'fasiRifiutato') return csvEscape(m.fasiRifiutato ? 'true' : 'false');
+    if(c === 'secondoRimborsato') return csvEscape(m.secondoLivello ? m.secondoLivello.rimborsato : 0);
+    if(c === 'secondoRifiutato') return csvEscape(m.secondoRifiutato ? 'true' : 'false');
+    if(c === 'bloccata') return csvEscape(m.bloccata ? 'true' : 'false');
+    if(c === 'documenti') return csvEscape(JSON.stringify(m.documenti || []));
+    return csvEscape(m[c]);
+  }).join(','));
+  const bilRows = bilancio.map(b => BIL_CSV_COLS.map((c,idx) => {
+    const meseEntrateIdx = BIL_MESI_ENTRATE_KEYS.indexOf(c);
+    if(meseEntrateIdx !== -1) return csvEscape(b.entrateMensili && b.entrateMensili[meseEntrateIdx] !== null && b.entrateMensili[meseEntrateIdx] !== undefined ? b.entrateMensili[meseEntrateIdx] : '');
+    const meseUsciteIdx = BIL_MESI_USCITE_KEYS.indexOf(c);
+    if(meseUsciteIdx !== -1) return csvEscape(b.usciteMensili && b.usciteMensili[meseUsciteIdx] !== null && b.usciteMensili[meseUsciteIdx] !== undefined ? b.usciteMensili[meseUsciteIdx] : '');
+    return csvEscape(b[c]);
+  }).join(','));
+  const contrRows = contratti.map(c => CONTR_CSV_COLS.map(col => csvEscape(c[col])).join(','));
+  const docRows = documenti.map(d => DOC_CSV_COLS.map(col => csvEscape(d[col])).join(','));
+  const detrRows = detrazioni.map(d => DETR_CSV_COLS.map(col => csvEscape(d[col])).join(','));
+  return `### PAGAMENTI RICORRENTI\n${REC_CSV_COLS.join(',')}\n${recRows.join('\n')}\n\n### SPESE MEDICHE\n${MED_CSV_COLS.join(',')}\n${medRows.join('\n')}\n\n### BILANCIO ANNUALE\n${BIL_CSV_COLS.join(',')}\n${bilRows.join('\n')}\n\n### CONTRATTI A SCADENZA\n${CONTR_CSV_COLS.join(',')}\n${contrRows.join('\n')}\n\n### DOCUMENTI PERSONALI\n${DOC_CSV_COLS.join(',')}\n${docRows.join('\n')}\n\n### DETRAZIONI FISCALI\n${DETR_CSV_COLS.join(',')}\n${detrRows.join('\n')}\n\n### IMPOSTAZIONI\n${JSON.stringify(settings)}\n`;
+}
+
+function parseBackupCSV(text){
+  const mSet = /###\s*IMPOSTAZIONI/i;
+  let settingsOut = null;
+  if(mSet.test(text)){
+    const parts = text.split(mSet);
+    text = parts[0];
+    try{ settingsOut = JSON.parse((parts[1] || '').trim()); }catch(e){ settingsOut = null; }
+  }
+  const out = parseBackupCSVCore(text);
+  out.settings = settingsOut;
+  return out;
+}
+function parseBackupCSVCore(text){
+  const markerMed = /###\s*SPESE MEDICHE/i;
+  const markerBil = /###\s*BILANCIO ANNUALE/i;
+  const markerContr = /###\s*CONTRATTI A SCADENZA/i;
+  const markerDoc = /###\s*DOCUMENTI PERSONALI/i;
+  const markerDetr = /###\s*DETRAZIONI FISCALI/i;
+  if(!markerMed.test(text)){
+    throw new Error('Formato non riconosciuto: manca la sezione "### SPESE MEDICHE".');
+  }
+  const [recPart, afterMed] = text.split(markerMed);
+  let medPart = afterMed, bilPart = '', contrPart = '', docPart = '', detrPart = '';
+  if(markerBil.test(afterMed)){
+    const parts = afterMed.split(markerBil);
+    medPart = parts[0];
+    let afterBil = parts[1] || '';
+    if(markerContr.test(afterBil)){
+      const parts2 = afterBil.split(markerContr);
+      bilPart = parts2[0];
+      let afterContr = parts2[1] || '';
+      if(markerDoc.test(afterContr)){
+        const parts3 = afterContr.split(markerDoc);
+        contrPart = parts3[0];
+        let afterDoc = parts3[1] || '';
+        if(markerDetr.test(afterDoc)){
+          const parts4 = afterDoc.split(markerDetr);
+          docPart = parts4[0];
+          detrPart = parts4[1] || '';
+        } else {
+          docPart = afterDoc;
+        }
+      } else {
+        contrPart = afterContr;
+      }
+    } else {
+      bilPart = afterBil;
+    }
+  }
+  const recBlock = recPart.replace(/###\s*PAGAMENTI RICORRENTI/i, '').trim();
+  const medBlock = medPart.trim();
+
+  const recLines = recBlock.split('\n').map(l => l.trim()).filter(l => l.length);
+  const recurringOut = recLines.length > 1 ? recLines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const obj = {};
+    REC_CSV_COLS.forEach((h,i) => obj[h] = vals[i] !== undefined ? vals[i] : '');
+    obj.importo = parseFloat(obj.importo) || 0;
+    obj.bloccato = obj.bloccato === 'true';
+    return obj;
+  }) : [];
+
+  const medLines = medBlock.split('\n').map(l => l.trim()).filter(l => l.length);
+  const medicalOut = medLines.length > 1 ? medLines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const raw = {};
+    MED_CSV_COLS.forEach((h,i) => raw[h] = vals[i] !== undefined ? vals[i] : '');
+    return {
+      id: raw.id,
+      richiedente: raw.richiedente,
+      tipoDocumento: raw.tipoDocumento,
+      numeroDocumento: raw.numeroDocumento,
+      dataDocumento: raw.dataDocumento,
+      descrizione: raw.descrizione,
+      note: raw.note,
+      modalita: raw.modalita,
+      totale: parseFloat(raw.totale) || 0,
+      stato: raw.stato,
+      fasi: {pagato: parseFloat(raw.fasiPagato) || 0},
+      fasiRifiutato: raw.fasiRifiutato === 'true',
+      secondoLivello: {rimborsato: parseFloat(raw.secondoRimborsato) || 0},
+      secondoRifiutato: raw.secondoRifiutato === 'true',
+      bloccata: raw.bloccata === 'true',
+      documenti: (() => { try{ return JSON.parse(raw.documenti || '[]'); }catch(e){ return []; } })()
+    };
+  }) : [];
+
+  const bilLines = bilPart.trim().split('\n').map(l => l.trim()).filter(l => l.length);
+  const bilancioOut = bilLines.length > 1 ? bilLines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const raw = {};
+    BIL_CSV_COLS.forEach((h,i) => raw[h] = vals[i] !== undefined ? vals[i] : '');
+    const entrateMensili = BIL_MESI_ENTRATE_KEYS.map(k => raw[k] === '' || raw[k] === undefined ? null : parseFloat(raw[k]));
+    const usciteMensili = BIL_MESI_USCITE_KEYS.map(k => raw[k] === '' || raw[k] === undefined ? null : parseFloat(raw[k]));
+    const haMensile = entrateMensili.some(v => v !== null) || usciteMensili.some(v => v !== null);
+    return {
+      id: raw.id,
+      anno: parseInt(raw.anno, 10) || 0,
+      conto: raw.conto,
+      entrate: parseFloat(raw.entrate) || 0,
+      uscite: parseFloat(raw.uscite) || 0,
+      entrateMensili: haMensile ? entrateMensili : null,
+      usciteMensili: haMensile ? usciteMensili : null,
+      bloccato: raw.bloccato === 'true'
+    };
+  }) : [];
+
+  const contrLines = contrPart.trim().split('\n').map(l => l.trim()).filter(l => l.length);
+  const contrattiOut = contrLines.length > 1 ? contrLines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const raw = {};
+    CONTR_CSV_COLS.forEach((h,i) => raw[h] = vals[i] !== undefined ? vals[i] : '');
+    return {
+      id: raw.id,
+      tipo: raw.tipo,
+      controparte: raw.controparte,
+      riferimento: raw.riferimento,
+      dataInizio: raw.dataInizio,
+      dataFine: raw.dataFine || null,
+      dataDisdetta: raw.dataDisdetta || null,
+      canone: parseFloat(raw.canone) || 0,
+      prezzoUnitario: parseFloat(raw.prezzoUnitario) || 0,
+      unitaMisura: raw.unitaMisura || '',
+      note: raw.note
+    };
+  }) : [];
+
+  const docLines = docPart.trim().split('\n').map(l => l.trim()).filter(l => l.length);
+  const documentiOut = docLines.length > 1 ? docLines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const raw = {};
+    DOC_CSV_COLS.forEach((h,i) => raw[h] = vals[i] !== undefined ? vals[i] : '');
+    return {
+      id: raw.id,
+      tipo: raw.tipo,
+      intestatario: raw.intestatario,
+      numero: raw.numero,
+      link: raw.link,
+      enteRilascio: raw.enteRilascio,
+      dataRilascio: raw.dataRilascio || null,
+      dataScadenza: raw.dataScadenza || null,
+      note: raw.note
+    };
+  }) : [];
+
+  const detrLines = detrPart.trim().split('\n').map(l => l.trim()).filter(l => l.length);
+  const detrazioniOut = detrLines.length > 1 ? detrLines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const raw = {};
+    DETR_CSV_COLS.forEach((h,i) => raw[h] = vals[i] !== undefined ? vals[i] : '');
+    return {
+      id: raw.id,
+      categoria: raw.categoria,
+      intestatario: raw.intestatario,
+      data: raw.data || null,
+      importo: parseFloat(raw.importo) || 0,
+      note: raw.note
+    };
+  }) : [];
+
+  return {recurring: recurringOut, medical: medicalOut, bilancio: bilancioOut, contratti: contrattiOut, documenti: documentiOut, detrazioni: detrazioniOut};
+}
+
+document.getElementById('backup-export-btn').addEventListener('click', () => {
+  const csv = currentBackupCSV();
+  document.getElementById('backup-export-text').value = csv;
+  try{
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    document.getElementById('backup-download-link').href = url;
+  }catch(e){
+    console.error('Impossibile creare il link di download', e);
+  }
+  document.getElementById('backup-feedback').textContent = `Backup generato: ${recurring.length} pagamenti, ${medical.length} voci di sanità integrativa, ${bilancio.length} bilanci, ${contratti.length} contratti, ${documenti.length} documenti, ${detrazioni.length} detrazioni. Copialo o scaricalo prima di pubblicare.`;
+});
+
+document.getElementById('backup-copy-btn').addEventListener('click', async () => {
+  const ta = document.getElementById('backup-export-text');
+  if(!ta.value){
+    showNotice('Genera prima il backup con il pulsante "Genera backup".', 'error');
+    return;
+  }
+  try{
+    await navigator.clipboard.writeText(ta.value);
+    document.getElementById('backup-feedback').textContent = 'Backup copiato negli appunti.';
+  }catch(e){
+    ta.focus();
+    ta.select();
+    document.getElementById('backup-feedback').textContent = 'Copia automatica non disponibile: il testo è selezionato, usa Ctrl/Cmd+C.';
+  }
+});
+
+document.getElementById('backup-import-btn').addEventListener('click', async () => {
+  const feedback = document.getElementById('backup-feedback');
+  const raw = document.getElementById('backup-import-text').value.trim();
+  if(!raw){
+    feedback.textContent = 'Incolla prima il testo del backup nel campo qui sopra.';
+    return;
+  }
+  let parsed;
+  try{
+    parsed = parseBackupCSV(raw);
+  }catch(e){
+    feedback.textContent = 'Il testo incollato non è nel formato atteso: ' + e.message;
+    return;
+  }
+  const haCurrentData = recurring.length > 0 || medical.length > 0 || bilancio.length > 0 || contratti.length > 0 || documenti.length > 0 || detrazioni.length > 0;
+  if(haCurrentData && !confirmingBackupImport){
+    confirmingBackupImport = true;
+    const btn = document.getElementById('backup-import-btn');
+    btn.textContent = 'Confermi? Clicca di nuovo per sovrascrivere';
+    feedback.textContent = 'Attenzione: questo sovrascriverà tutti i dati attualmente presenti nell\'app.';
+    setTimeout(() => {
+      if(confirmingBackupImport){
+        confirmingBackupImport = false;
+        btn.textContent = 'Importa backup';
+      }
+    }, 6000);
+    return;
+  }
+  confirmingBackupImport = false;
+  document.getElementById('backup-import-btn').textContent = 'Importa backup';
+  recurring = parsed.recurring;
+  medical = parsed.medical;
+  bilancio = parsed.bilancio || [];
+  contratti = parsed.contratti || [];
+  documenti = parsed.documenti || [];
+  detrazioni = parsed.detrazioni || [];
+  if(parsed.settings){ settings = normalizeSettings(parsed.settings); await saveSettings(); applySettings(); }
+  await saveRecurring();
+  await saveMedical();
+  await saveBilancio();
+  await saveContratti();
+  await saveDocumenti();
+  await saveDetrazioni();
+  renderAll();
+  showNotice(`Backup importato: ${recurring.length} pagamenti, ${medical.length} voci di sanità integrativa, ${bilancio.length} bilanci, ${contratti.length} contratti, ${documenti.length} documenti, ${detrazioni.length} detrazioni.`, 'success');
+  feedback.textContent = 'Importazione completata.';
+});
+
+// Bilancio annuale
+document.getElementById('bilancio-filter-anno').addEventListener('change', renderBilancio);
+
+const bilancioForm = document.getElementById('bilancio-form');
+const MESI_LABELS = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+function getMensileValues(){
+  const entrateMensili = [], usciteMensili = [];
+  for(let i=0;i<12;i++){
+    const eVal = document.getElementById(`bf-mese-${i}-entrate`).value;
+    const uVal = document.getElementById(`bf-mese-${i}-uscite`).value;
+    entrateMensili.push(eVal === '' ? null : parseFloat(eVal)||0);
+    usciteMensili.push(uVal === '' ? null : parseFloat(uVal)||0);
+  }
+  return {entrateMensili, usciteMensili};
+}
+function haQualcheMese(entrateMensili, usciteMensili){
+  return entrateMensili.some(v => v !== null) || usciteMensili.some(v => v !== null);
+}
+function updateBilancioComputedFields(){
+  const {entrateMensili, usciteMensili} = getMensileValues();
+  const usaMensile = document.getElementById('bf-usa-mensile').checked;
+  const entrateInput = document.getElementById('bf-entrate');
+  const usciteInput = document.getElementById('bf-uscite');
+  if(usaMensile && haQualcheMese(entrateMensili, usciteMensili)){
+    const sommaEntrate = entrateMensili.reduce((s,v)=> s + (v||0), 0);
+    const sommaUscite = usciteMensili.reduce((s,v)=> s + (v||0), 0);
+    entrateInput.value = sommaEntrate.toFixed(2);
+    usciteInput.value = sommaUscite.toFixed(2);
+    entrateInput.disabled = true;
+    usciteInput.disabled = true;
+  } else {
+    entrateInput.disabled = false;
+    usciteInput.disabled = false;
+  }
+  const entrate = parseFloat(entrateInput.value) || 0;
+  const uscite = parseFloat(usciteInput.value) || 0;
+  document.getElementById('bf-risparmio').value = euro(entrate - uscite);
+}
+document.getElementById('bf-usa-mensile').addEventListener('change', () => {
+  const checked = document.getElementById('bf-usa-mensile').checked;
+  document.getElementById('bf-mensile-wrap').style.display = checked ? 'block' : 'none';
+  updateBilancioComputedFields();
+});
+for(let i=0;i<12;i++){
+  ['entrate','uscite'].forEach(tipo => {
+    document.getElementById(`bf-mese-${i}-${tipo}`).addEventListener('input', updateBilancioComputedFields);
+  });
+}
+['bf-entrate','bf-uscite'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateBilancioComputedFields);
+});
+
+function resetBilancioForm(){
+  document.getElementById('bf-anno').value = new Date().getFullYear();
+  document.getElementById('bf-conto').value = '';
+  document.getElementById('bf-usa-mensile').checked = false;
+  document.getElementById('bf-mensile-wrap').style.display = 'none';
+  for(let i=0;i<12;i++){
+    document.getElementById(`bf-mese-${i}-entrate`).value = '';
+    document.getElementById(`bf-mese-${i}-uscite`).value = '';
+  }
+  document.getElementById('bf-entrate').value = '0';
+  document.getElementById('bf-entrate').disabled = false;
+  document.getElementById('bf-uscite').value = '0';
+  document.getElementById('bf-uscite').disabled = false;
+  document.getElementById('bf-bloccato').checked = false;
+  confirmingLockBilancio = false;
+  document.getElementById('bf-save').textContent = 'Salva';
+  updateBilancioComputedFields();
+}
+document.getElementById('toggle-bilancio-form').addEventListener('click', () => {
+  editingBilancioId = null;
+  resetBilancioForm();
+  bilancioForm.classList.add('open');
+});
+document.getElementById('bf-cancel').addEventListener('click', () => bilancioForm.classList.remove('open'));
+
+document.getElementById('bf-save').addEventListener('click', async () => {
+  const anno = parseInt(document.getElementById('bf-anno').value, 10);
+  const conto = document.getElementById('bf-conto').value.trim();
+  if(!anno || isNaN(anno)){ showFormError('Inserisci un anno valido.'); return; }
+  if(!conto){ showFormError('Inserisci il nome del conto.'); return; }
+  const vuoleBloccare = document.getElementById('bf-bloccato').checked;
+  const saveBtnBf = document.getElementById('bf-save');
+  if(vuoleBloccare && !confirmingLockBilancio){
+    confirmingLockBilancio = true;
+    saveBtnBf.textContent = 'Confermi il blocco? Clicca di nuovo per salvare';
+    showFormError('Una volta salvato bloccato, questo bilancio non potrà più essere modificato né eliminato.');
+    return;
+  }
+  const {entrateMensili, usciteMensili} = getMensileValues();
+  const usaMensile = document.getElementById('bf-usa-mensile').checked && haQualcheMese(entrateMensili, usciteMensili);
+  const entrate = parseFloat(document.getElementById('bf-entrate').value) || 0;
+  const uscite = parseFloat(document.getElementById('bf-uscite').value) || 0;
+  const entry = {
+    id: editingBilancioId || uid(),
+    anno, conto, entrate, uscite,
+    entrateMensili: usaMensile ? entrateMensili : null,
+    usciteMensili: usaMensile ? usciteMensili : null,
+    bloccato: vuoleBloccare
+  };
+  if(editingBilancioId){
+    bilancio = bilancio.map(b => b.id===editingBilancioId ? entry : b);
+  } else {
+    bilancio.push(entry);
+  }
+  await saveBilancio();
+  bilancioForm.classList.remove('open');
+  resetBilancioForm();
+  editingBilancioId = null;
+  renderAll();
+});
+
+document.getElementById('bilancio-body').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  const item = bilancio.find(b => b.id===id);
+  if(!item) return;
+  if(item.bloccato) return;
+  if(action==='delete-bilancio'){
+    confirmingBilancioDeleteId = id;
+    renderBilancio();
+  } else if(action==='confirm-delete-bilancio'){
+    confirmingBilancioDeleteId = null;
+    bilancio = bilancio.filter(b => b.id!==id);
+    await saveBilancio();
+    renderAll();
+  } else if(action==='cancel-delete-bilancio'){
+    confirmingBilancioDeleteId = null;
+    renderBilancio();
+  } else if(action==='edit-bilancio'){
+    editingBilancioId = id;
+    document.getElementById('bf-anno').value = item.anno;
+    document.getElementById('bf-conto').value = item.conto;
+    const haMensile = Array.isArray(item.entrateMensili) && item.entrateMensili.some(v => v !== null && v !== undefined);
+    document.getElementById('bf-usa-mensile').checked = haMensile;
+    document.getElementById('bf-mensile-wrap').style.display = haMensile ? 'block' : 'none';
+    for(let i=0;i<12;i++){
+      document.getElementById(`bf-mese-${i}-entrate`).value = (item.entrateMensili && item.entrateMensili[i] !== null && item.entrateMensili[i] !== undefined) ? item.entrateMensili[i] : '';
+      document.getElementById(`bf-mese-${i}-uscite`).value = (item.usciteMensili && item.usciteMensili[i] !== null && item.usciteMensili[i] !== undefined) ? item.usciteMensili[i] : '';
+    }
+    document.getElementById('bf-entrate').value = item.entrate;
+    document.getElementById('bf-uscite').value = item.uscite;
+    document.getElementById('bf-bloccato').checked = false;
+    confirmingLockBilancio = false;
+    document.getElementById('bf-save').textContent = 'Salva';
+    updateBilancioComputedFields();
+    bilancioForm.classList.add('open');
+    bilancioForm.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+});
+
+// Contratti a scadenza
+document.getElementById('contratti-filter-tipo').addEventListener('change', renderContratti);
+
+const contrattiForm = document.getElementById('contratti-form');
+function resetContrattiForm(){
+  document.getElementById('cf-tipo').value = '';
+  document.getElementById('cf-controparte').value = '';
+  document.getElementById('cf-riferimento').value = '';
+  document.getElementById('cf-data-inizio').value = '';
+  document.getElementById('cf-data-fine').value = '';
+  document.getElementById('cf-data-disdetta').value = '';
+  document.getElementById('cf-canone').value = '';
+  document.getElementById('cf-prezzo-unitario').value = '';
+  document.getElementById('cf-unita-misura').value = '';
+  document.getElementById('cf-note').value = '';
+}
+document.getElementById('toggle-contratti-form').addEventListener('click', () => {
+  editingContrattoId = null;
+  resetContrattiForm();
+  contrattiForm.classList.add('open');
+});
+document.getElementById('cf-cancel').addEventListener('click', () => contrattiForm.classList.remove('open'));
+
+document.getElementById('cf-save').addEventListener('click', async () => {
+  const tipo = document.getElementById('cf-tipo').value.trim();
+  const controparte = document.getElementById('cf-controparte').value.trim();
+  const dataInizio = document.getElementById('cf-data-inizio').value;
+  if(!tipo){ showFormError('Inserisci il tipo di contratto.'); return; }
+  if(!controparte){ showFormError('Inserisci il fornitore/controparte.'); return; }
+  if(!dataInizio){ showFormError('Inserisci la data di inizio.'); return; }
+  const entry = {
+    id: editingContrattoId || uid(),
+    tipo, controparte,
+    riferimento: document.getElementById('cf-riferimento').value.trim(),
+    dataInizio,
+    dataFine: document.getElementById('cf-data-fine').value || null,
+    dataDisdetta: document.getElementById('cf-data-disdetta').value || null,
+    canone: parseFloat(document.getElementById('cf-canone').value) || 0,
+    prezzoUnitario: parseFloat(document.getElementById('cf-prezzo-unitario').value) || 0,
+    unitaMisura: document.getElementById('cf-unita-misura').value,
+    note: document.getElementById('cf-note').value.trim()
+  };
+  if(editingContrattoId){
+    contratti = contratti.map(c => c.id===editingContrattoId ? entry : c);
+  } else {
+    contratti.push(entry);
+  }
+  await saveContratti();
+  contrattiForm.classList.remove('open');
+  resetContrattiForm();
+  editingContrattoId = null;
+  renderAll();
+});
+
+document.getElementById('contratti-body').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  const item = contratti.find(c => c.id===id);
+  if(!item) return;
+  if(action==='delete-contratto'){
+    confirmingContrattoDeleteId = id;
+    renderContratti();
+  } else if(action==='confirm-delete-contratto'){
+    confirmingContrattoDeleteId = null;
+    contratti = contratti.filter(c => c.id!==id);
+    await saveContratti();
+    renderAll();
+  } else if(action==='cancel-delete-contratto'){
+    confirmingContrattoDeleteId = null;
+    renderContratti();
+  } else if(action==='edit-contratto'){
+    editingContrattoId = id;
+    document.getElementById('cf-tipo').value = item.tipo;
+    document.getElementById('cf-controparte').value = item.controparte;
+    document.getElementById('cf-riferimento').value = item.riferimento || '';
+    document.getElementById('cf-data-inizio').value = item.dataInizio;
+    document.getElementById('cf-data-fine').value = item.dataFine || '';
+    document.getElementById('cf-data-disdetta').value = item.dataDisdetta || '';
+    document.getElementById('cf-canone').value = item.canone || '';
+    document.getElementById('cf-prezzo-unitario').value = item.prezzoUnitario || '';
+    document.getElementById('cf-unita-misura').value = item.unitaMisura || '';
+    document.getElementById('cf-note').value = item.note || '';
+    contrattiForm.classList.add('open');
+    contrattiForm.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+});
+
+// Documenti personali
+document.getElementById('documenti-filter-tipo').addEventListener('change', renderDocumenti);
+document.getElementById('documenti-filter-intestatario').addEventListener('change', renderDocumenti);
+
+const documentiForm = document.getElementById('documenti-form');
+function resetDocumentiForm(){
+  document.getElementById('df-tipo').value = '';
+  document.getElementById('df-intestatario').value = '';
+  document.getElementById('df-numero').value = '';
+  document.getElementById('df-link').value = '';
+  document.getElementById('df-ente').value = '';
+  document.getElementById('df-data-rilascio').value = '';
+  document.getElementById('df-data-scadenza').value = '';
+  document.getElementById('df-note').value = '';
+}
+document.getElementById('toggle-documenti-form').addEventListener('click', () => {
+  editingDocumentoId = null;
+  resetDocumentiForm();
+  documentiForm.classList.add('open');
+});
+document.getElementById('df-cancel').addEventListener('click', () => documentiForm.classList.remove('open'));
+
+document.getElementById('df-save').addEventListener('click', async () => {
+  const tipo = document.getElementById('df-tipo').value.trim();
+  const intestatario = document.getElementById('df-intestatario').value.trim();
+  if(!tipo){ showFormError('Inserisci il tipo di documento.'); return; }
+  if(!intestatario){ showFormError('Inserisci l\'intestatario.'); return; }
+  const entry = {
+    id: editingDocumentoId || uid(),
+    tipo, intestatario,
+    numero: document.getElementById('df-numero').value.trim(),
+    link: document.getElementById('df-link').value.trim(),
+    enteRilascio: document.getElementById('df-ente').value.trim(),
+    dataRilascio: document.getElementById('df-data-rilascio').value || null,
+    dataScadenza: document.getElementById('df-data-scadenza').value || null,
+    note: document.getElementById('df-note').value.trim()
+  };
+  if(editingDocumentoId){
+    documenti = documenti.map(d => d.id===editingDocumentoId ? entry : d);
+  } else {
+    documenti.push(entry);
+  }
+  await saveDocumenti();
+  documentiForm.classList.remove('open');
+  resetDocumentiForm();
+  editingDocumentoId = null;
+  renderAll();
+});
+
+document.getElementById('documenti-body').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  const item = documenti.find(d => d.id===id);
+  if(!item) return;
+  if(action==='delete-documento'){
+    confirmingDocumentoDeleteId = id;
+    renderDocumenti();
+  } else if(action==='confirm-delete-documento'){
+    confirmingDocumentoDeleteId = null;
+    documenti = documenti.filter(d => d.id!==id);
+    await saveDocumenti();
+    renderAll();
+  } else if(action==='cancel-delete-documento'){
+    confirmingDocumentoDeleteId = null;
+    renderDocumenti();
+  } else if(action==='edit-documento'){
+    editingDocumentoId = id;
+    document.getElementById('df-tipo').value = item.tipo;
+    document.getElementById('df-intestatario').value = item.intestatario;
+    document.getElementById('df-numero').value = item.numero || '';
+    document.getElementById('df-link').value = item.link || '';
+    document.getElementById('df-ente').value = item.enteRilascio || '';
+    document.getElementById('df-data-rilascio').value = item.dataRilascio || '';
+    document.getElementById('df-data-scadenza').value = item.dataScadenza || '';
+    document.getElementById('df-note').value = item.note || '';
+    documentiForm.classList.add('open');
+    documentiForm.scrollIntoView({behavior:'smooth', block:'center'});
+  } else if(action==='toggle-renew-documento'){
+    renewingDocumentoId = renewingDocumentoId === id ? null : id;
+    renderDocumenti();
+  } else if(action==='cancel-renew-documento'){
+    renewingDocumentoId = null;
+    renderDocumenti();
+  } else if(action==='save-renew-documento'){
+    const nuovaRilascio = document.getElementById(`renew-rilascio-${id}`).value;
+    const nuovaScadenza = document.getElementById(`renew-scadenza-${id}`).value;
+    const nuovoNumero = document.getElementById(`renew-numero-${id}`).value.trim();
+    const nuovoLink = document.getElementById(`renew-link-${id}`).value.trim();
+    if(!nuovaScadenza){ showFormError('Inserisci la nuova data di scadenza.'); return; }
+    item.dataRilascio = nuovaRilascio || null;
+    item.dataScadenza = nuovaScadenza;
+    item.numero = nuovoNumero;
+    item.link = nuovoLink;
+    await saveDocumenti();
+    renewingDocumentoId = null;
+    renderAll();
+    showNotice('Documento rinnovato.', 'success');
+  }
+});
+
+// Detrazioni fiscali
+document.getElementById('detrazioni-filter-anno').addEventListener('change', renderDetrazioni);
+document.getElementById('detrazioni-filter-categoria').addEventListener('change', renderDetrazioni);
+
+const detrazioniForm = document.getElementById('detrazioni-form');
+function resetDetrazioniForm(){
+  document.getElementById('ef-categoria').value = '';
+  document.getElementById('ef-intestatario').value = '';
+  document.getElementById('ef-data').value = '';
+  document.getElementById('ef-importo').value = '';
+  document.getElementById('ef-note').value = '';
+}
+document.getElementById('toggle-detrazioni-form').addEventListener('click', () => {
+  editingDetrazioneId = null;
+  resetDetrazioniForm();
+  detrazioniForm.classList.add('open');
+});
+document.getElementById('ef-cancel').addEventListener('click', () => detrazioniForm.classList.remove('open'));
+
+document.getElementById('ef-save').addEventListener('click', async () => {
+  const categoria = document.getElementById('ef-categoria').value.trim();
+  const intestatario = document.getElementById('ef-intestatario').value.trim();
+  const importo = parseFloat(document.getElementById('ef-importo').value);
+  if(!categoria){ showFormError('Inserisci la categoria.'); return; }
+  if(!intestatario){ showFormError('Inserisci l\'intestatario.'); return; }
+  if(isNaN(importo)){ showFormError('Inserisci un importo valido.'); return; }
+  const entry = {
+    id: editingDetrazioneId || uid(),
+    categoria, intestatario, importo,
+    data: document.getElementById('ef-data').value || null,
+    note: document.getElementById('ef-note').value.trim()
+  };
+  if(editingDetrazioneId){
+    detrazioni = detrazioni.map(d => d.id===editingDetrazioneId ? entry : d);
+  } else {
+    detrazioni.push(entry);
+  }
+  await saveDetrazioni();
+  detrazioniForm.classList.remove('open');
+  resetDetrazioniForm();
+  editingDetrazioneId = null;
+  renderAll();
+});
+
+document.getElementById('detrazioni-body').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  const item = detrazioni.find(d => d.id===id);
+  if(!item) return;
+  if(action==='delete-detrazione'){
+    confirmingDetrazioneDeleteId = id;
+    renderDetrazioni();
+  } else if(action==='confirm-delete-detrazione'){
+    confirmingDetrazioneDeleteId = null;
+    detrazioni = detrazioni.filter(d => d.id!==id);
+    await saveDetrazioni();
+    renderAll();
+  } else if(action==='cancel-delete-detrazione'){
+    confirmingDetrazioneDeleteId = null;
+    renderDetrazioni();
+  } else if(action==='edit-detrazione'){
+    editingDetrazioneId = id;
+    document.getElementById('ef-categoria').value = item.categoria;
+    document.getElementById('ef-intestatario').value = item.intestatario;
+    document.getElementById('ef-data').value = item.data || '';
+    document.getElementById('ef-importo').value = item.importo;
+    document.getElementById('ef-note').value = item.note || '';
+    detrazioniForm.classList.add('open');
+    detrazioniForm.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+});
+
+// Autenticazione: mostra l'app solo dopo il login, carica i dati dell'utente
+function showAuthError(err){
+  const mapping = {
+    'auth/invalid-email': 'Indirizzo email non valido.',
+    'auth/user-not-found': 'Nessun account con questa email.',
+    'auth/wrong-password': 'Password errata.',
+    'auth/invalid-credential': 'Email o password non corrette.',
+    'auth/email-already-in-use': 'Esiste già un account con questa email.',
+    'auth/weak-password': 'La password deve avere almeno 6 caratteri.',
+    'auth/popup-closed-by-user': 'Accesso con Google annullato.',
+    'auth/missing-password': 'Inserisci la password.'
+  };
+  const el = document.getElementById('auth-error');
+  el.textContent = mapping[err.code] || 'Si è verificato un errore. Riprova.';
+  el.style.display = 'block';
+}
+document.getElementById('auth-login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  document.getElementById('auth-error').style.display = 'none';
+  try{ await signInWithEmailAndPassword(auth, email, password); }
+  catch(e){ showAuthError(e); }
+});
+document.getElementById('auth-register-btn').addEventListener('click', async () => {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  document.getElementById('auth-error').style.display = 'none';
+  try{ await createUserWithEmailAndPassword(auth, email, password); }
+  catch(e){ showAuthError(e); }
+});
+document.getElementById('auth-google-btn').addEventListener('click', async () => {
+  document.getElementById('auth-error').style.display = 'none';
+  try{ await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch(e){ showAuthError(e); }
+});
+document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+function applyTabVisibility(){
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  tabButtons.forEach(btn => {
+    const tab = btn.dataset.tab;
+    const consentita = tab === 'panoramica' || tab === 'impostazioni' || !visibleTabs || visibleTabs.includes(tab);
+    btn.style.display = consentita ? '' : 'none';
+  });
+  const attivo = document.querySelector('.tab-btn.active');
+  if(attivo && attivo.style.display === 'none'){
+    const primaConsentita = document.querySelector('.tab-btn[data-tab="panoramica"]') || Array.from(tabButtons).find(b => b.style.display !== 'none');
+    if(primaConsentita) primaConsentita.click();
+  }
+}
+function applyModalitaVisibility(){
+  document.querySelectorAll('.solo-completo').forEach(el => { el.style.display = modalitaSemplificata ? 'none' : ''; });
+  document.querySelectorAll('.solo-semplice').forEach(el => { el.style.display = modalitaSemplificata ? '' : 'none'; });
+  const labelRimborsato = document.getElementById('mf-fasi-pagato-label');
+  if(labelRimborsato) labelRimborsato.textContent = modalitaSemplificata ? 'Rimborsato (€)' : 'Pagato da FASI (€)';
+  const thRimborsato = document.getElementById('th-fasi-pagato');
+  if(thRimborsato) thRimborsato.childNodes[0].textContent = modalitaSemplificata ? 'Rimborsato ' : 'FASI pagato ';
+  const thResiduo = document.getElementById('th-residuo');
+  if(thResiduo) thResiduo.childNodes[0].textContent = modalitaSemplificata ? 'Da portare in detrazione ' : 'Residuo ';}
+
+onAuthStateChanged(auth, async (user) => {
+  if(user){
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app-content').style.display = 'block';
+    document.getElementById('logout-bar').style.display = 'flex';
+    document.getElementById('logout-email').textContent = user.email || '';
+    document.getElementById('auth-email').value = '';
+    document.getElementById('auth-password').value = '';
+    await loadData();
+    applySettings();
+    renderAll();
+  } else {
+    document.getElementById('auth-gate').style.display = 'flex';
+    document.getElementById('app-content').style.display = 'none';
+    document.getElementById('logout-bar').style.display = 'none';
+  }
+});
+
+// Registrazione service worker per l'installazione come app (PWA)
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((e) => console.error('Registrazione service worker non riuscita', e));
+  });
+}
+</script>
+</div>
+</body>
+</html>
