@@ -542,6 +542,89 @@
 
   .rb-tip{position:fixed;z-index:60;display:none;max-width:320px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:9px;box-shadow:0 6px 20px rgba(16,37,58,.25);pointer-events:none;}
   .rb-dot:hover{transform:translateX(-50%) scale(1.15);}
+
+  /* ===== Scheda Report ===== */
+  #panel-report .rp-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  #panel-report .rp-bar .sp{flex:1;}
+  #panel-report .rp-note{font-size:12.5px;color:var(--ink-soft);}
+  #panel-report select,#panel-report input[type=text]{font:600 13px Manrope,sans-serif;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper-raised);color:var(--ink);width:auto;}
+  .rp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+  .rp-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+  .rp-kpi small{display:block;color:var(--ink-soft);font-size:12.5px;}
+  .rp-kpi b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:2px;}
+  .rp-kpi em{font-style:normal;font-size:12px;font-weight:700;color:var(--ink-soft);}
+  .rp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}
+  .rp-card.wide{grid-column:1/-1;}
+  .rp-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;}
+  .rp-head h3{margin:0;font-size:15px;font-weight:800;}
+  .rp-head p{margin:0;font-size:12.5px;color:var(--ink-soft);}
+  .rp-acts{margin-left:auto;display:flex;gap:4px;opacity:0;transition:opacity .15s;}
+  .rp-card:hover .rp-acts,.rp-card:focus-within .rp-acts{opacity:1;}
+  .rp-ico{width:28px;height:28px;border:1px solid var(--line);background:var(--paper-raised);border-radius:8px;cursor:pointer;color:var(--ink-soft);font-size:13px;display:grid;place-items:center;padding:0;}
+  .rp-ico:hover{color:var(--accent);border-color:var(--accent);}
+  svg.rp-chart{width:100%;height:auto;display:block;}
+  svg.rp-chart text{font:500 11px Manrope,sans-serif;fill:var(--ink-soft);}
+  .rp-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12.5px;color:var(--ink-soft);}
+  .rp-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;}
+  .rp-hit{cursor:pointer;} .rp-hit:hover{opacity:.82;}
+  .rp-empty{padding:40px 0;text-align:center;color:var(--ink-soft);}
+  .rp-add{border:2px dashed var(--line);background:transparent;display:grid;place-items:center;min-height:240px;cursor:pointer;color:var(--ink-soft);font-weight:700;border-radius:14px;}
+  .rp-add:hover{border-color:var(--accent);color:var(--accent);}
+  .rp-tip{position:fixed;z-index:80;display:none;background:var(--ink);color:#fff;padding:7px 11px;border-radius:9px;font-size:12.5px;font-weight:600;pointer-events:none;box-shadow:0 6px 20px rgba(16,37,58,.25);}
+  .rp-tip small{display:block;font-weight:500;opacity:.75;}
+  .rp-ov{position:fixed;inset:0;background:rgba(16,37,58,.45);display:none;align-items:center;justify-content:center;z-index:60;padding:16px;}
+  .rp-ov.on{display:flex;}
+  .rp-modal{background:var(--paper-raised);border-radius:16px;width:min(920px,100%);max-height:94vh;overflow:auto;display:grid;grid-template-columns:320px 1fr;}
+  .rp-modal .rp-f{padding:22px;border-right:1px solid var(--line);}
+  .rp-modal .rp-pv{padding:22px;background:var(--bg);min-width:0;}
+  .rp-modal h2{margin:0 0 14px;font-size:18px;font-weight:800;}
+  .rp-fld{display:grid;gap:5px;margin-bottom:12px;}
+  .rp-fld label{font-size:12.5px;font-weight:700;}
+  .rp-fld select,.rp-fld input{width:100% !important;}
+  .rp-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .rp-seg button{border:1px solid var(--line);background:var(--paper-raised);border-radius:10px;padding:8px;font:700 12.5px Manrope,sans-serif;cursor:pointer;color:var(--ink);}
+  .rp-seg button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);}
+  .rp-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+  .rp-drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--paper-raised);box-shadow:-10px 0 30px rgba(16,37,58,.2);transform:translateX(110%);transition:transform .25s;z-index:70;padding:22px;overflow:auto;}
+  .rp-drawer.on{transform:none;}
+  .rp-drawer h2{margin:0 0 2px;font-size:17px;font-weight:800;}
+  .rp-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+  .rp-row .d{flex:1;min-width:0;} .rp-row .d b{display:block;font-weight:600;} .rp-row .d span{font-size:12.5px;color:var(--ink-soft);}
+  @media (max-width:1000px){ .rp-kpis{grid-template-columns:1fr 1fr;} .rp-grid{grid-template-columns:1fr;} .rp-modal{grid-template-columns:1fr;} .rp-modal .rp-f{border-right:0;border-bottom:1px solid var(--line);} }
+  @media (max-width:760px){ .rp-acts{opacity:1;} }
+  #panel-report{background:transparent;border:0;padding:0;}
+  #panel-report > .ph{margin-bottom:12px;}
+  #panel-report .ph-title{font-size:20px;}
+/* ---- date dei rimborsi ---- */
+.dt-sub{font-size:12px;color:var(--ink-soft);margin-top:3px;white-space:nowrap}
+.late{display:inline-block;margin-left:6px;font-size:11.5px;font-weight:800;color:var(--stamp);background:color-mix(in srgb,var(--stamp) 13%,transparent);border-radius:6px;padding:1px 6px;vertical-align:middle}
+.dt-tl{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:12px 0 6px;padding-top:12px;border-top:1px dashed var(--line);flex-basis:100%;width:100%}
+.dt-tl h4{margin:0 0 8px;font-size:13px}
+.dt-st{display:flex;gap:10px;align-items:flex-start;padding:4px 0;position:relative}
+.dt-st i{width:10px;height:10px;border-radius:50%;background:var(--line);flex:0 0 auto;margin-top:4px}
+.dt-st.done i,.dt-st.ok i{background:var(--teal,#1C8A5A)}.dt-st.wait i{background:#B96A00}.dt-st.slate i,.dt-st.bad i{background:var(--stamp)}
+.dt-st b{display:block;font-size:13px}.dt-st span{display:block;font-size:12.5px;color:var(--ink-soft)}
+.dt-st.slate span{color:var(--stamp);font-weight:700}.dt-st.idle b,.dt-st.todo b{color:var(--ink-soft);font-weight:600}
+.dt-auto{margin:6px 0 0;font-size:12.5px;color:var(--teal,#1C8A5A);font-weight:600;min-height:1em}
+.dt-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+table.dt-imp{width:100%;border-collapse:collapse;font-size:13px}table.dt-imp th,table.dt-imp td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.dt-ok{color:var(--teal,#1C8A5A);font-weight:600}.dt-no{color:var(--stamp);font-weight:600}
+.med-det>div{min-width:0}.med-det .badge{white-space:normal}
+/* ---- schede di inserimento/modifica come finestra popup ---- */
+.entry-form.open{display:grid;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(820px,94vw);max-height:90vh;overflow:auto;z-index:300;margin:0 !important;padding:0 26px 0;background:var(--paper-raised,#fff);border:1px solid var(--line);box-shadow:0 28px 70px rgba(16,37,58,.38);border-radius:16px !important}
+.ef-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:290;display:none}.ef-bd.on{display:block}
+.ef-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:2;background:var(--paper-raised,#fff);margin:0 -26px 6px;padding:18px 26px 12px;border-bottom:1px solid var(--line)}
+.ef-head h3{margin:0;font-size:17px;font-weight:800}
+.ef-x{border:1px solid var(--line);background:var(--paper);border-radius:10px;width:32px;height:32px;font-size:15px;cursor:pointer;color:var(--ink-soft)}
+.ef-x:hover{color:var(--ink);border-color:var(--ink)}
+.entry-form .form-actions{position:sticky;bottom:0;background:var(--paper-raised,#fff);padding:12px 0 18px;margin-top:6px}
+/* link ai documenti nella riga espansa */
+tr.doc-row span:has(> a){background:var(--accent-soft,#EAF0FF) !important;border-color:transparent !important;padding:7px 12px !important;border-radius:10px !important}
+tr.doc-row a{font-weight:700 !important}
+tr.doc-row a::after{content:' ↗'}
+.med-det a{display:inline-block;padding:5px 12px;border-radius:10px;background:var(--accent-soft,#EAF0FF);font-weight:700;text-decoration:none}
+.med-det .badge{display:inline-block !important;white-space:normal !important;max-width:100%;line-height:1.35}
+table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}table.xt .med-det > div > b > .badge{display:inline-flex !important;white-space:normal !important;max-width:100% !important;align-items:flex-start;gap:6px;line-height:1.35;overflow:visible !important}
 </style>
 </head>
 <body>
@@ -641,6 +724,7 @@
     <button class="tab-btn" data-tab="contratti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Contratti a scadenza</button>
     <button class="tab-btn" data-tab="documenti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.3"/><path d="M8 17c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>Documenti personali</button>
     <button class="tab-btn" data-tab="detrazioni"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="9" cy="9" r="0.6" fill="currentColor"/><circle cx="15" cy="15" r="0.6" fill="currentColor"/></svg>Detrazioni fiscali</button>
+    <button class="tab-btn" data-tab="report"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>Report</button>
     <button class="tab-btn" data-tab="impostazioni"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Impostazioni</button>
   </nav>
 
@@ -655,6 +739,33 @@
       <div id="panoramica-urgenti" style="background:var(--paper-raised);border:1px solid var(--line);border-radius:8px;overflow:hidden;"></div>
     </div>
     <div id="panoramica-cards"></div>
+  </section>
+
+  <section class="panel" id="panel-report">
+    <div class="ph"><h2 class="ph-title">Report</h2><div class="ph-actions"><button type="button" class="btn" id="rp-new">+ Nuovo grafico</button></div></div>
+    <div class="rp-bar">
+      <select id="rp-per" aria-label="Periodo"></select>
+      <select id="rp-who" aria-label="Persona"></select>
+      <button type="button" class="btn ghost small" id="rp-reset" hidden>Azzera filtri</button>
+      <span class="sp"></span>
+      <span class="rp-note" id="rp-note">I filtri valgono per le spese mediche. Clicca una barra per vedere le voci che la compongono.</span>
+    </div>
+    <div class="rp-kpis" id="rp-kpis"></div>
+    <div class="rp-grid" id="rp-grid"></div>
+    <div class="rp-ov" id="rp-ov"><div class="rp-modal" role="dialog" aria-modal="true" aria-labelledby="rp-mt">
+      <div class="rp-f">
+        <h2 id="rp-mt">Nuovo grafico</h2>
+        <div class="rp-fld"><label for="rp-m-title">Titolo</label><input type="text" id="rp-m-title" placeholder="es. Spese per persona" maxlength="60"></div>
+        <div class="rp-fld"><label for="rp-m-src">Dati</label><select id="rp-m-src"></select></div>
+        <div class="rp-fld"><label for="rp-m-meas">Misura</label><select id="rp-m-meas"></select></div>
+        <div class="rp-fld"><label for="rp-m-grp">Raggruppa per</label><select id="rp-m-grp"></select></div>
+        <div class="rp-fld" id="rp-m-stk-w"><label for="rp-m-stk">Suddividi per</label><select id="rp-m-stk"><option value="">Nessuno</option><option value="persona">Persona</option></select></div>
+        <div class="rp-fld"><label>Tipo di grafico</label><div class="rp-seg" id="rp-m-type"><button type="button" data-t="bar">Barre</button><button type="button" data-t="hbar">Barre orizzontali</button><button type="button" data-t="line">Linee</button><button type="button" data-t="pie">Torta</button></div></div>
+        <div class="rp-foot"><button type="button" class="btn ghost" id="rp-m-cancel">Annulla</button><button type="button" class="btn" id="rp-m-save">Salva grafico</button></div>
+      </div>
+      <div class="rp-pv"><div class="rp-head"><div><h3 id="rp-pv-t">Anteprima</h3><p>Si aggiorna mentre scegli</p></div></div><div id="rp-pv"></div></div>
+    </div></div>
+    <div class="rp-drawer" id="rp-drawer"><button type="button" class="btn ghost small" id="rp-d-close" style="float:right">Chiudi</button><h2 id="rp-d-t"></h2><p class="doc-ref" id="rp-d-s" style="margin:0 0 10px"></p><div id="rp-d-l"></div><button type="button" class="btn ghost small" id="rp-d-go" style="margin-top:14px"></button></div>
   </section>
 
   <section class="panel" id="panel-impostazioni"></section>
@@ -1300,7 +1411,7 @@ function defaultPagatori(){ return [{id:'p1', nome:'Assicurazione'}]; }
 function defaultSettings(){
   const moduli = {}; MODULI_IDS.forEach(id => { moduli[id] = {on:true, nome:MODULI_DEFAULT_NOMI[id]}; });
   const elenchi = {}; Object.keys(ELENCHI_DEF).forEach(k => { elenchi[k] = ELENCHI_DEF[k].default.slice(); });
-  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', foto:'', colore:'#2F5BEA'}};
+  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}};
 }
 function normalizeSettings(raw){
   const d = defaultSettings();
@@ -1351,6 +1462,10 @@ function normalizeSettings(raw){
       if(typeof m.nome === 'string' && m.nome.trim()) d.moduli[id].nome = m.nome.trim();
     }
   });
+  if(raw.report && Array.isArray(raw.report.charts)){
+    d.report.charts = raw.report.charts.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && ['med', 'bil'].includes(x.src) && ['bar', 'hbar', 'line', 'pie'].includes(x.type) && ['tot', 'rimb', 'resid', 'n', 'multi', 'giorni', 'e', 'u', 'r'].includes(x.meas) && ['mese', 'anno', 'persona', 'prestazione', 'pagatore', 'conto'].includes(x.grp))
+      .slice(0, 40).map(x => ({id:x.id.slice(0, 30), t:String(x.t || '').slice(0, 60), src:x.src, meas:x.meas, grp:x.grp, stk:x.stk === 'persona' ? 'persona' : '', type:x.type, wide:x.wide === true}));
+  }
   Object.keys(ELENCHI_DEF).forEach(k => {
     const v = raw.elenchi && raw.elenchi[k];
     if(Array.isArray(v)) d.elenchi[k] = v.map(x => String(x).trim()).filter(Boolean);
@@ -1676,7 +1791,7 @@ const STATI_RIMBORSO = {
 };
 function rimborsoDi(m, pid){
   const r = m && m.rimborsi && m.rimborsi[pid];
-  return {stato: r && STATI_RIMBORSO[r.stato] ? r.stato : 'da_inviare', pagato: Number(r && r.pagato) || 0};
+  return {stato: r && STATI_RIMBORSO[r.stato] ? r.stato : 'da_inviare', pagato: Number(r && r.pagato) || 0, inviata: (r && r.inviata) || '', chiusa: (r && r.chiusa) || ''};
 }
 // Conversione dal vecchio formato (FASI / 2° livello fissi) ai rimborsi per pagatore
 function legacyToRimborsi(m, pagatori){
@@ -2892,6 +3007,7 @@ function renderAll(){
   renderDocumenti();
   renderDetrazioni();
   renderPanoramica();
+  try{ renderReport(); }catch(e){ console.error(e); }
   renderImpostazioni();
   applyModalitaVisibility();
 }
@@ -2993,10 +3109,13 @@ function buildRimborsiForm(values){
     const st = STATI_RIMBORSO[v.stato] ? v.stato : 'da_inviare';
     return `<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0;">
       <p class="form-section-title" style="margin:0 0 8px;">${escHtml(p.nome)}</p>
-      <div class="form-row form-row-3">
+      <div class="form-row" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
         <div class="field"><label>Stato</label><select id="mf-rb-stato-${p.id}">${Object.keys(STATI_RIMBORSO).map(k => `<option value="${k}" ${k === st ? 'selected' : ''}>${STATI_RIMBORSO[k].label}</option>`).join('')}</select></div>
         <div class="field"><label>Importo pagato (€)</label><input type="number" step="0.01" min="0" id="mf-rb-pagato-${p.id}" value="${Number(v.pagato) || 0}"></div>
+        <div class="field"><label>Data invio</label><input type="date" id="mf-rb-inv-${p.id}" value="${escHtml(v.inviata || '')}"></div>
+        <div class="field"><label>Data risposta / chiusura</label><input type="date" id="mf-rb-chi-${p.id}" value="${escHtml(v.chiusa || '')}"></div>
       </div>
+      <p class="dt-auto" id="mf-rb-auto-${p.id}"></p>
     </div>`;
   }).join('');
 }
@@ -3004,7 +3123,11 @@ function readRimborsiForm(){
   const out = {};
   settings.pagatori.forEach(p => {
     const s = document.getElementById('mf-rb-stato-' + p.id), a = document.getElementById('mf-rb-pagato-' + p.id);
-    out[p.id] = {stato: s ? s.value : 'da_inviare', pagato: a ? (parseFloat(a.value) || 0) : 0};
+    const o = {stato: s ? s.value : 'da_inviare', pagato: a ? (parseFloat(a.value) || 0) : 0};
+    const di = document.getElementById('mf-rb-inv-' + p.id), dc = document.getElementById('mf-rb-chi-' + p.id);
+    if(di && di.value) o.inviata = di.value;
+    if(dc && dc.value) o.chiusa = dc.value;
+    out[p.id] = o;
   });
   return out;
 }
@@ -3211,6 +3334,7 @@ document.getElementById('mf-save').addEventListener('click', async (e) => {
   if(!dataDocumento){ showFormError('Inserisci la data del documento.'); return; }
   if(!descrizione){ showFormError('Inserisci la prestazione.'); return; }
   if(isNaN(totale)){ showFormError('Inserisci un totale fattura valido.'); return; }
+  { const _e = dtValidateForm(); if(_e){ showFormError(_e); return; } }
   const vuoleBloccare = document.getElementById('mf-bloccata').checked;
   const saveBtn = document.getElementById('mf-save');
   if(vuoleBloccare && !confirmingLockMedical){
@@ -4137,7 +4261,7 @@ function applyTabVisibility(){
   const tabButtons = document.querySelectorAll('.tab-btn');
   tabButtons.forEach(btn => {
     const tab = btn.dataset.tab;
-    const consentita = tab === 'panoramica' || tab === 'impostazioni' || !visibleTabs || visibleTabs.includes(tab);
+    const consentita = tab === 'panoramica' || tab === 'impostazioni' || !visibleTabs || visibleTabs.includes(tab) || (tab === 'report' && (visibleTabs.includes('medical') || visibleTabs.includes('bilancio')));
     btn.style.display = consentita ? '' : 'none';
   });
   const attivo = document.querySelector('.tab-btn.active');
@@ -4187,7 +4311,7 @@ function xEnhance(bodyId){
     const detHtml = det.length ? '<div class="med-det">' + det.map(x => '<div><span>' + x.k + '</span><b style="font-weight:600">' + x.v + '</b></div>').join('') + '</div>' : '';
     let host = r.nextElementSibling && r.nextElementSibling.classList.contains('doc-row') && r.nextElementSibling.dataset.parentId === id && bodyId === 'medical-body' ? r.nextElementSibling.firstElementChild : null;
     if(host){
-      host.insertAdjacentHTML('afterbegin', detHtml);
+      host.insertAdjacentHTML('afterbegin', detHtml + (bodyId === 'medical-body' ? dtTimelineFor(id) : ''));
       if(actions){ const w = document.createElement('div'); w.className = 'x-actions'; w.appendChild(actions); host.appendChild(w); }
       r.classList.add('x-open');
       return;
@@ -4239,7 +4363,7 @@ function fmtShort(d){
   const y = +p[0]; return (+p[2]) + ' ' + mesi[+p[1] - 1] + (y !== new Date().getFullYear() ? ' ' + y : '');
 }
 function pillHtml(cls, txt){ return `<span class="pill ${cls}">${txt}</span>`; }
-function payerPill(m, p){
+function payerPill0(m, p){
   const r = rimborsoDi(m, p.id);
   if(r.stato === 'rifiutata') return pillHtml('no', 'Rifiutato');
   if(r.stato === 'chiusa') return r.pagato > 0 ? pillHtml('ok', 'Rimborsato ' + euro(r.pagato)) : pillHtml('ok', 'Chiusa');
@@ -4297,6 +4421,376 @@ function uxTitles(){
   });
 }
 Object.keys(UX_NUOVO).forEach(uxPanelSetup);
+
+
+// ---- Scheda Report: grafici sui dati (spese mediche, bilancio) ----
+function rpPayers(){ return settings.pagatori.map(p => ({id:p.id, nome:p.nome})); }
+function rpMedRows(){ return medical.map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:m.dataDocumento || '', who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo}; }); }
+function rpBilRows(){ return bilancio.map(b => ({id:b.id, anno:String(b.anno), conto:(b.conto || '').trim() || '—', e:Number(b.entrate) || 0, u:Number(b.uscite) || 0})); }
+const RP_MES = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+const RP_COL = ['#2F5BEA','#1C8A5A','#B96A00','#7A4FD6','#0F8B8D','#C2410C','#6B7B8C'];
+const RP_MEAS = {med:[['tot','Totale speso'],['rimb','Rimborsato'],['resid','Residuo da portare in detrazione'],['n','Numero di pratiche'],['multi','Speso / rimborsato / residuo'],['giorni','Tempi di rimborso (giorni medi)']],
+                 bil:[['multi','Entrate / uscite / risparmio'],['e','Entrate'],['u','Uscite'],['r','Risparmio']]};
+const RP_GRP = {med:[['mese','Mese'],['anno','Anno'],['persona','Persona'],['prestazione','Prestazione'],['pagatore','Pagatore']], bil:[['anno','Anno'],['conto','Conto']]};
+const RP_MLAB = {giorni:'Giorni medi', tot:'Totale speso', rimb:'Rimborsato', resid:'Residuo', n:'Pratiche', e:'Entrate', u:'Uscite', r:'Risparmio'};
+const rpF = {per:'all', who:''};
+let rpDraft = null;
+const rpEl = (id) => document.getElementById(id);
+const rpEur = (v) => Math.round(v).toLocaleString('it-IT') + ' €';
+function rpAccent(){ return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#2F5BEA'; }
+function rpPersonColor(n){ let h = 0; for(const ch of String(n).toLowerCase()) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AV_COL[h % AV_COL.length]; }
+function rpAllowed(src){ const t = src === 'med' ? 'medical' : 'bilancio'; return !visibleTabs || visibleTabs.includes(t); }
+function rpSrcName(src){ return src === 'med' ? ((settings.moduli && settings.moduli.medical && settings.moduli.medical.nome) || 'Spese mediche') : ((settings.moduli && settings.moduli.bilancio && settings.moduli.bilancio.nome) || 'Bilancio'); }
+function rpDefaultCharts(){
+  const l = [
+    {id:'d1', t:'Spese per mese', src:'med', meas:'tot', grp:'mese', stk:'persona', type:'bar', wide:true},
+    {id:'d2', t:'Speso, rimborsato e residuo', src:'med', meas:'multi', grp:'anno', stk:'', type:'bar'},
+    {id:'d3', t:'Chi ha rimborsato', src:'med', meas:'rimb', grp:'pagatore', stk:'', type:'pie'},
+    {id:'d4', t:'Dove spendi di più', src:'med', meas:'tot', grp:'prestazione', stk:'', type:'hbar'},
+    {id:'d5', t:'Spese per persona', src:'med', meas:'tot', grp:'persona', stk:'', type:'pie'},
+    {id:'d7', t:'Tempi di rimborso', src:'med', meas:'giorni', grp:'pagatore', stk:'', type:'hbar'},
+    {id:'d6', t:'Entrate, uscite e risparmio', src:'bil', meas:'multi', grp:'anno', stk:'', type:'bar'}
+  ];
+  return l.filter(c => rpAllowed(c.src));
+}
+function rpCharts(){ return settings.report && Array.isArray(settings.report.charts) ? settings.report.charts : rpDefaultCharts(); }
+function rpSave(list){ settings.report = {charts:list}; saveSettings(); }
+function rpRows(){
+  const t = new Date(); t.setDate(1); t.setMonth(t.getMonth() - 11);
+  const from12 = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-01';
+  return rpMedRows().filter(r => r.date && (!rpF.who || r.who === rpF.who) && (rpF.per === 'all' || (rpF.per === '12m' ? r.date >= from12 : r.date.startsWith(rpF.per))));
+}
+function rpBuild(c){
+  const sum = (rows, f) => rows.reduce((s, r) => s + f(r), 0);
+  const acc = rpAccent();
+  if(c.src === 'bil'){
+    const rows = rpBilRows();
+    const keys = [...new Set(rows.map(r => c.grp === 'conto' ? r.conto : r.anno))].sort();
+    const cats = keys.map(k => ({label:k, rows:rows.filter(r => (c.grp === 'conto' ? r.conto : r.anno) === k)}));
+    const defs = c.meas === 'multi' ? [['Entrate', r => r.e, acc], ['Uscite', r => r.u, '#B96A00'], ['Risparmio', r => r.e - r.u, '#1C8A5A']]
+      : [[RP_MLAB[c.meas], c.meas === 'e' ? (r => r.e) : c.meas === 'u' ? (r => r.u) : (r => r.e - r.u), acc]];
+    return {cats, series:defs.map(d => ({name:d[0], color:d[2], vals:cats.map(k => sum(k.rows, d[1]))})), fm:rpEur, stack:false, tab:'bilancio', bil:true};
+  }
+  const gg = c.meas === 'giorni';
+  const rows = gg ? rpGiorniRows() : rpRows(), payers = rpPayers();
+  const M = (rs, m) => m === 'tot' ? sum(rs, r => r.tot) : m === 'rimb' ? sum(rs, r => r.rb) : m === 'resid' ? sum(rs, r => r.res) : m === 'n' ? rs.length : m === 'giorni' ? (rs.length ? sum(rs, r => r.g) / rs.length : 0) : 0;
+  const fm = c.meas === 'n' ? (v => String(Math.round(v))) : gg ? (v => Math.round(v) + ' g') : rpEur;
+  if(gg && c.grp === 'pagatore'){ const cats = payers.map(p => ({label:p.nome, rows:rows.filter(r => r.pn === p.nome)})).filter(k => k.rows.length); rpGiSub(cats); return {cats, series:[{name:'Giorni medi', color:acc, vals:cats.map(k => M(k.rows, 'giorni'))}], fm, stack:false, tab:'medical'}; }
+  if(c.grp === 'pagatore'){
+    const cats = payers.map(p => ({label:p.nome, rows:rows.filter(r => (r.pay[p.id] || 0) > 0)})).concat([{label:'Non rimborsato', rows:rows.filter(r => r.res > 0)}]);
+    const vals = payers.map(p => sum(rows, r => r.pay[p.id] || 0)).concat([sum(rows, r => r.res)]);
+    return {cats, series:[{name:'Rimborsato', color:acc, vals}], fm:rpEur, stack:false, tab:'medical', pieColors:payers.map((p, i) => i === 0 ? acc : RP_COL[i % RP_COL.length]).concat(['#C9D1DA'])};
+  }
+  let keyOf, keys, lab = (k) => k;
+  if(c.grp === 'mese'){
+    const ds = rows.map(r => r.date.slice(0, 7)).sort(); keys = [];
+    if(ds.length){ let [y, m] = ds[0].split('-').map(Number); const [ey, em] = ds[ds.length - 1].split('-').map(Number); while(y < ey || (y === ey && m <= em)){ keys.push(y + '-' + String(m).padStart(2, '0')); m++; if(m > 12){ m = 1; y++; } } }
+    keyOf = r => r.date.slice(0, 7); lab = k => RP_MES[+k.slice(5) - 1] + ' ' + k.slice(2, 4);
+  } else if(c.grp === 'anno'){ keyOf = r => r.date.slice(0, 4); keys = [...new Set(rows.map(keyOf))].sort(); }
+  else if(c.grp === 'persona'){ keyOf = r => r.who; keys = [...new Set(rows.map(keyOf))].sort(); }
+  else { keyOf = r => r.prest; const t = {}; rows.forEach(r => { t[r.prest] = (t[r.prest] || 0) + r.tot; }); keys = Object.keys(t).sort((a, b) => t[b] - t[a]).slice(0, 8); }
+  const cats = keys.map(k => ({label:lab(k), rows:rows.filter(r => keyOf(r) === k)}));
+  const pieColors = c.grp === 'persona' ? keys.map(rpPersonColor) : undefined;
+  if(gg) rpGiSub(cats);
+  if(c.meas === 'multi'){
+    return {cats, series:[['Speso', acc, 'tot'], ['Rimborsato', '#1C8A5A', 'rimb'], ['Residuo', '#B96A00', 'resid']].map(d => ({name:d[0], color:d[1], vals:cats.map(k => M(k.rows, d[2]))})), fm:rpEur, stack:false, tab:'medical'};
+  }
+  if(c.stk === 'persona' && c.grp !== 'persona'){
+    const persone = [...new Set(rows.map(r => r.who))].sort();
+    return {cats, series:persone.map(w => ({name:w, color:rpPersonColor(w), who:w, vals:cats.map(k => M(k.rows.filter(r => r.who === w), c.meas))})), fm, stack:true, tab:'medical'};
+  }
+  return {cats, series:[{name:RP_MLAB[c.meas], color:acc, vals:cats.map(k => M(k.rows, c.meas))}], fm, stack:false, tab:'medical', pieColors};
+}
+function rpGiSub(cats){ cats.forEach(k => { const g = k.rows.map(r => r.g); k.sub = g.length ? 'da ' + Math.min(...g) + ' a ' + Math.max(...g) + ' giorni · ' + g.length + (g.length === 1 ? ' rimborso' : ' rimborsi') : ''; }); }
+function rpStep(max){ const p = Math.pow(10, Math.floor(Math.log10(max || 1))); let s = p; for(const f of [1, 2, 2.5, 5, 10]){ s = f * p; if(max / s <= 5) break; } return s; }
+function rpRender(c, box, small){
+  const d = rpBuild(c), W = (c.wide && !small) ? 1240 : 620, H = small ? 250 : (c.wide ? 300 : 270);
+  if(!d.cats.length || d.series.every(s => s.vals.every(v => !v))){ box.innerHTML = '<div class="rp-empty">' + (c.meas === 'giorni' ? 'Servono le date di invio e chiusura dei rimborsi: compilale in «Modifica» nelle singole pratiche.' : 'Nessun dato nel periodo scelto') + '</div>'; return; }
+  const multi = d.series.length > 1;
+  const leg = multi ? '<div class="rp-legend">' + d.series.map(s => `<span><i style="background:${s.color}"></i>${escHtml(s.name)}</span>`).join('') + '</div>' : '';
+  const ta = (ci, si, txt, sub) => `data-ci="${ci}" data-si="${si}" data-tip="${escHtml(txt)}" data-sub="${escHtml(sub)}"`;
+  let h = '';
+  if(c.type === 'pie'){
+    const vals = d.series[0].vals.map(v => Math.max(0, v)), tot = vals.reduce((a, b) => a + b, 0) || 1;
+    const cx = 150, cy = 125, R = 100, r = 62; let a0 = -Math.PI / 2;
+    h = `<svg class="rp-chart" viewBox="0 0 ${W} ${H}">`;
+    vals.forEach((v, i) => {
+      if(!v) return;
+      const a1 = a0 + v / tot * Math.PI * 2 - .0001, lg = a1 - a0 > Math.PI ? 1 : 0, col = d.pieColors ? d.pieColors[i % d.pieColors.length] : RP_COL[i % RP_COL.length];
+      const P = (R_, a) => [cx + R_ * Math.cos(a), cy + R_ * Math.sin(a)];
+      const [x0, y0] = P(R, a0), [x1, y1] = P(R, a1), [x2, y2] = P(r, a1), [x3, y3] = P(r, a0);
+      h += `<path class="rp-hit" d="M${x0},${y0} A${R},${R} 0 ${lg} 1 ${x1},${y1} L${x2},${y2} A${r},${r} 0 ${lg} 0 ${x3},${y3}Z" fill="${col}" ${ta(i, 0, d.cats[i].label + ' · ' + d.fm(v), Math.round(v / tot * 100) + '% del totale')}/>`;
+      a0 = a1 + .0001;
+    });
+    h += `<text x="${cx}" y="${cy - 2}" text-anchor="middle" style="font:800 18px Manrope;fill:var(--ink)">${d.fm(tot)}</text><text x="${cx}" y="${cy + 16}" text-anchor="middle">totale</text>`;
+    vals.forEach((v, i) => {
+      const col = d.pieColors ? d.pieColors[i % d.pieColors.length] : RP_COL[i % RP_COL.length], y = 40 + i * 34;
+      if(y > H - 30) return;
+      h += `<rect x="330" y="${y}" width="12" height="12" rx="3" fill="${col}"/><text x="350" y="${y + 10}" style="font:700 12.5px Manrope;fill:var(--ink)">${escHtml(d.cats[i].label)}</text><text x="350" y="${y + 25}">${d.fm(v)} · ${Math.round(v / tot * 100)}%</text>`;
+    });
+    box.innerHTML = h + '</svg>'; rpBind(box, c, d); return;
+  }
+  const horiz = c.type === 'hbar';
+  const stackSum = (i) => d.series.reduce((s, x) => s + Math.max(0, x.vals[i]), 0);
+  let max = Math.max(...d.cats.map((_, i) => d.stack ? stackSum(i) : Math.max(...d.series.map(s => s.vals[i]))), 1);
+  const step = rpStep(max); max = Math.ceil(max / step) * step;
+  const fa = (v) => d.fm === rpEur ? (v >= 1000 ? (v / 1000).toLocaleString('it-IT', {maximumFractionDigits:1}) + 'k' : String(v)) : String(Math.round(v));
+  h = `<svg class="rp-chart" viewBox="0 0 ${W} ${H}">`;
+  if(horiz){
+    const L = 130, T = 8, B = 24, iw = W - L - 70, ih = H - T - B, bh = ih / d.cats.length;
+    for(let v = 0; v <= max + .001; v += step){ const x = L + v / max * iw; h += `<line x1="${x}" x2="${x}" y1="${T}" y2="${T + ih}" stroke="var(--line)"/><text x="${x}" y="${H - 8}" text-anchor="middle">${fa(v)}</text>`; }
+    d.cats.forEach((k, i) => {
+      const y = T + i * bh; h += `<text x="${L - 8}" y="${y + bh / 2 + 4}" text-anchor="end" style="fill:var(--ink)">${escHtml(k.label.length > 22 ? k.label.slice(0, 21) + '…' : k.label)}</text>`;
+      d.series.forEach((s, si) => {
+        const bw = Math.max(0, s.vals[i]) / max * iw, bhh = Math.min(22, bh * .6 / d.series.length);
+        h += `<rect class="rp-hit" x="${L}" y="${y + bh / 2 - bhh * d.series.length / 2 + si * bhh}" width="${bw}" height="${bhh - 2}" rx="4" fill="${s.color}" ${ta(i, si, k.label + ' · ' + d.fm(s.vals[i]), k.sub || (s.name + ' · ' + k.rows.length + ' voci'))}/>`;
+        h += `<text x="${L + bw + 6}" y="${y + bh / 2 + 4}" style="fill:var(--ink);font-weight:700">${d.fm(s.vals[i])}</text>`;
+      });
+    });
+  } else {
+    const L = 44, T = 10, B = 26, iw = W - L - 10, ih = H - T - B;
+    for(let v = 0; v <= max + .001; v += step){ const y = T + ih - v / max * ih; h += `<line x1="${L}" x2="${W - 10}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L - 6}" y="${y + 4}" text-anchor="end">${fa(v)}</text>`; }
+    const cw = iw / d.cats.length, every = Math.ceil(d.cats.length / (W < 700 ? 8 : 16));
+    if(c.type === 'line'){
+      d.series.forEach((s, si) => {
+        const pts = s.vals.map((v, i) => [L + cw * i + cw / 2, T + ih - Math.max(0, v) / max * ih]);
+        h += `<polyline fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" points="${pts.map(p => p.join(',')).join(' ')}"/>`;
+        pts.forEach((p, i) => { h += `<circle class="rp-hit" cx="${p[0]}" cy="${p[1]}" r="${d.cats.length > 14 ? 3.5 : 5}" fill="var(--paper-raised)" stroke="${s.color}" stroke-width="2.5" ${ta(i, si, d.cats[i].label + ' · ' + d.fm(s.vals[i]), s.name)}/>`; });
+      });
+    } else {
+      d.cats.forEach((k, i) => {
+        if(d.stack){
+          let accv = 0; const bw = Math.min(46, cw * .64);
+          d.series.forEach((s, si) => { const v = Math.max(0, s.vals[i]); if(!v) return; const hh = v / max * ih, y = T + ih - (accv + v) / max * ih; accv += v;
+            h += `<rect class="rp-hit" x="${L + cw * i + (cw - bw) / 2}" y="${y}" width="${bw}" height="${hh}" fill="${s.color}" ${ta(i, si, k.label + ' · ' + s.name + ' · ' + d.fm(v), 'Totale ' + d.fm(stackSum(i)))}/>`; });
+        } else {
+          const n = d.series.length, bw = Math.min(40, cw * .7 / n);
+          d.series.forEach((s, si) => { const v = s.vals[i], hh = Math.abs(v) / max * ih;
+            h += `<rect class="rp-hit" x="${L + cw * i + (cw - bw * n) / 2 + si * bw}" y="${T + ih - hh}" width="${bw - 2}" height="${hh}" rx="3" fill="${v < 0 ? '#CF3A3A' : s.color}" ${ta(i, si, k.label + ' · ' + s.name + ' · ' + d.fm(v), k.sub || (k.rows.length + ' voci'))}/>`; });
+        }
+      });
+    }
+    d.cats.forEach((k, i) => { if(i % every === 0) h += `<text x="${L + cw * i + cw / 2}" y="${H - 8}" text-anchor="middle">${escHtml(k.label)}</text>`; });
+  }
+  box.innerHTML = h + '</svg>' + leg; rpBind(box, c, d);
+}
+let rpTip = null;
+function rpBind(box, c, d){
+  box.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mousemove', (e) => {
+      if(!rpTip){ rpTip = document.createElement('div'); rpTip.className = 'rp-tip'; document.body.appendChild(rpTip); }
+      rpTip.innerHTML = escHtml(el.dataset.tip) + '<small>' + escHtml(el.dataset.sub) + '</small>'; rpTip.style.display = 'block';
+      const w = rpTip.offsetWidth; rpTip.style.left = Math.max(8, Math.min(innerWidth - w - 8, e.clientX - w / 2)) + 'px'; rpTip.style.top = (e.clientY - rpTip.offsetHeight - 14) + 'px';
+    });
+    el.addEventListener('mouseleave', () => { if(rpTip) rpTip.style.display = 'none'; });
+    el.addEventListener('click', () => { if(rpTip) rpTip.style.display = 'none'; rpDrawer(d, +el.dataset.ci, +el.dataset.si); });
+  });
+}
+function rpDrawer(d, ci, si){
+  const cat = d.cats[ci], s = d.series[si]; let rows = cat.rows; if(s && s.who) rows = rows.filter(r => r.who === s.who);
+  rpEl('rp-d-t').textContent = cat.label + (s && s.who ? ' · ' + s.who : '');
+  rpEl('rp-d-s').textContent = rows.length + (rows.length === 1 ? ' voce' : ' voci');
+  rpEl('rp-d-l').innerHTML = rows.length ? rows.map(r => d.bil
+    ? `<div class="rp-row"><div class="d"><b>${escHtml(r.conto)} ${escHtml(r.anno)}</b><span>Entrate ${rpEur(r.e)} · Uscite ${rpEur(r.u)}</span></div><b style="color:${r.e - r.u < 0 ? 'var(--stamp)' : 'var(--teal)'}">${rpEur(r.e - r.u)}</b></div>`
+    : `<div class="rp-row">${avatarHtml(r.who).replace(/<div class="who">(.*?)<\/div>/, (m, x) => x.split('</span>')[0] + '</span>')}<div class="d"><b>${escHtml(r.prest)}</b><span>${fmtShort(r.date)} · ${escHtml(r.who)} · rimborsato ${rpEur(r.rb)}${r.g != null ? ' · ' + r.g + ' g (' + escHtml(r.pn) + ')' : ''}</span></div><b>${rpEur(r.tot)}</b></div>`).join('') : '<p class="doc-ref">Nessuna voce.</p>';
+  const go = rpEl('rp-d-go'); go.textContent = 'Apri ' + rpSrcName(d.bil ? 'bil' : 'med'); go.dataset.tab = d.tab;
+  rpEl('rp-drawer').classList.add('on');
+}
+function rpSub(c){ const g = Object.fromEntries(RP_GRP[c.src]), m = Object.fromEntries(RP_MEAS[c.src]); return rpSrcName(c.src) + ' · ' + (m[c.meas] || '').toLowerCase() + ' per ' + (g[c.grp] || '').toLowerCase() + (c.stk ? ' e ' + c.stk : ''); }
+function renderReport(){
+  if(!rpEl('rp-grid')) return;
+  const medOk = rpAllowed('med');
+  const all = medOk ? rpMedRows().filter(r => r.date) : [];
+  const years = [...new Set(all.map(r => r.date.slice(0, 4)))].sort().reverse(), people = [...new Set(all.map(r => r.who))].sort();
+  const per = rpEl('rp-per'), who = rpEl('rp-who');
+  per.innerHTML = '<option value="all">Tutto il periodo</option><option value="12m">Ultimi 12 mesi</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+  who.innerHTML = '<option value="">Tutta la famiglia</option>' + people.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join('');
+  if(![...per.options].some(o => o.value === rpF.per)) rpF.per = 'all';
+  if(![...who.options].some(o => o.value === rpF.who)) rpF.who = '';
+  per.value = rpF.per; who.value = rpF.who;
+  rpEl('rp-reset').hidden = !(rpF.per !== 'all' || rpF.who);
+  rpEl('rp-per').parentElement.style.display = medOk ? '' : 'none';
+  const r = medOk ? rpRows() : [], tot = r.reduce((s, x) => s + x.tot, 0), rb = r.reduce((s, x) => s + x.rb, 0), rs = r.reduce((s, x) => s + x.res, 0);
+  rpEl('rp-kpis').innerHTML = medOk ? [['Speso', rpEur(tot), r.length + ' pratiche', ''], ['Rimborsato', rpEur(rb), tot ? Math.round(rb / tot * 100) + '% del totale' : '—', 'var(--teal)'], ['Da portare in detrazione', rpEur(rs), 'dopo tutti i rimborsi', 'var(--accent)'], ['Media per pratica', rpEur(r.length ? tot / r.length : 0), 'spesa media', '']]
+    .map(k => `<div class="rp-card rp-kpi"><small>${k[0]}</small><b style="${k[3] ? 'color:' + k[3] : ''}">${k[1]}</b><em>${k[2]}</em></div>`).join('') : '';
+  const list = rpCharts().filter(c => rpAllowed(c.src)), g = rpEl('rp-grid');
+  g.innerHTML = list.map(c => `<div class="rp-card${c.wide ? ' wide' : ''}" data-id="${escHtml(c.id)}"><div class="rp-head"><div><h3>${escHtml(c.t)}</h3><p>${escHtml(rpSub(c))}</p></div><div class="rp-acts"><button type="button" class="rp-ico" data-a="up" title="Sposta su" aria-label="Sposta su">↑</button><button type="button" class="rp-ico" data-a="edit" title="Modifica" aria-label="Modifica">✎</button><button type="button" class="rp-ico" data-a="dup" title="Duplica" aria-label="Duplica">⧉</button><button type="button" class="rp-ico" data-a="del" title="Elimina" aria-label="Elimina">✕</button></div></div><div class="rp-cb"></div></div>`).join('') + '<div class="rp-add" id="rp-add2" tabindex="0" role="button">+ Nuovo grafico</div>';
+  const cards = [...g.querySelectorAll('.rp-card[data-id]')];
+  list.forEach((c, i) => rpRender(c, cards[i].querySelector('.rp-cb')));
+}
+rpEl('rp-grid').addEventListener('click', (e) => {
+  if(e.target.closest('#rp-add2')){ rpOpen(); return; }
+  const b = e.target.closest('[data-a]'); if(!b) return;
+  const id = b.closest('[data-id]').dataset.id, list = rpCharts().map(c => ({...c})), i = list.findIndex(c => c.id === id); if(i < 0) return;
+  if(b.dataset.a === 'edit'){ rpOpen(list[i]); return; }
+  if(b.dataset.a === 'dup') list.splice(i + 1, 0, {...list[i], id:'c' + Date.now(), t:(list[i].t + ' (copia)').slice(0, 60), wide:false});
+  if(b.dataset.a === 'del') list.splice(i, 1);
+  if(b.dataset.a === 'up' && i > 0) [list[i - 1], list[i]] = [list[i], list[i - 1]];
+  rpSave(list); renderReport();
+});
+rpEl('rp-grid').addEventListener('keydown', (e) => { if((e.key === 'Enter' || e.key === ' ') && e.target.id === 'rp-add2'){ e.preventDefault(); rpOpen(); } });
+rpEl('rp-per').onchange = (e) => { rpF.per = e.target.value; renderReport(); };
+rpEl('rp-who').onchange = (e) => { rpF.who = e.target.value; renderReport(); };
+rpEl('rp-reset').onclick = () => { rpF.per = 'all'; rpF.who = ''; renderReport(); };
+rpEl('rp-d-close').onclick = () => rpEl('rp-drawer').classList.remove('on');
+rpEl('rp-d-go').onclick = (e) => { rpEl('rp-drawer').classList.remove('on'); jumpToTab(e.currentTarget.dataset.tab); };
+// finestra nuovo / modifica
+function rpFill(sel, list, val){ sel.innerHTML = list.map(o => `<option value="${o[0]}">${o[1]}</option>`).join(''); sel.value = list.some(o => o[0] === val) ? val : list[0][0]; }
+function rpSync(){
+  const srcs = [['med', rpSrcName('med')], ['bil', rpSrcName('bil')]].filter(s => rpAllowed(s[0]));
+  rpFill(rpEl('rp-m-src'), srcs, rpDraft.src); rpDraft.src = rpEl('rp-m-src').value;
+  rpFill(rpEl('rp-m-meas'), RP_MEAS[rpDraft.src], rpDraft.meas); rpDraft.meas = rpEl('rp-m-meas').value;
+  let gl = RP_GRP[rpDraft.src]; if(rpDraft.src === 'med' && !['rimb', 'giorni'].includes(rpDraft.meas)) gl = gl.filter(x => x[0] !== 'pagatore');
+  rpFill(rpEl('rp-m-grp'), gl, rpDraft.grp); rpDraft.grp = rpEl('rp-m-grp').value;
+  const canStk = rpDraft.src === 'med' && ['tot', 'rimb', 'resid', 'n'].includes(rpDraft.meas) && ['mese', 'anno', 'prestazione'].includes(rpDraft.grp);
+  rpEl('rp-m-stk-w').style.display = canStk ? '' : 'none'; if(!canStk) rpDraft.stk = ''; rpEl('rp-m-stk').value = rpDraft.stk;
+  document.querySelectorAll('#rp-m-type button').forEach(b => b.classList.toggle('on', b.dataset.t === rpDraft.type));
+  rpEl('rp-pv-t').textContent = rpDraft.t || 'Anteprima';
+  rpRender(rpDraft, rpEl('rp-pv'), true);
+}
+function rpOpen(c){
+  const first = rpAllowed('med') ? 'med' : 'bil';
+  rpDraft = c ? {...c} : {id:'c' + Date.now(), t:'', src:first, meas:RP_MEAS[first][0][0], grp:RP_GRP[first][0][0], stk:'', type:'bar'};
+  rpEl('rp-mt').textContent = c ? 'Modifica grafico' : 'Nuovo grafico'; rpEl('rp-m-title').value = rpDraft.t;
+  rpSync(); rpEl('rp-ov').classList.add('on'); rpEl('rp-m-title').focus();
+}
+rpEl('rp-new').onclick = () => rpOpen();
+rpEl('rp-m-cancel').onclick = () => rpEl('rp-ov').classList.remove('on');
+rpEl('rp-ov').addEventListener('click', (e) => { if(e.target.id === 'rp-ov') rpEl('rp-ov').classList.remove('on'); });
+rpEl('rp-m-title').oninput = (e) => { rpDraft.t = e.target.value; rpEl('rp-pv-t').textContent = rpDraft.t || 'Anteprima'; };
+rpEl('rp-m-src').onchange = (e) => { rpDraft.src = e.target.value; rpDraft.meas = RP_MEAS[rpDraft.src][0][0]; rpDraft.grp = RP_GRP[rpDraft.src][0][0]; rpDraft.stk = ''; rpSync(); };
+rpEl('rp-m-meas').onchange = (e) => { rpDraft.meas = e.target.value; rpSync(); };
+rpEl('rp-m-grp').onchange = (e) => { rpDraft.grp = e.target.value; rpSync(); };
+rpEl('rp-m-stk').onchange = (e) => { rpDraft.stk = e.target.value; rpSync(); };
+rpEl('rp-m-type').onclick = (e) => { const b = e.target.closest('button'); if(b){ rpDraft.type = b.dataset.t; rpSync(); } };
+rpEl('rp-m-save').onclick = () => {
+  if(!rpDraft.t.trim()) rpDraft.t = ({giorni:'Tempi di rimborso', tot:'Spese', rimb:'Rimborsi', resid:'Residuo', n:'Pratiche', multi:'Confronto', e:'Entrate', u:'Uscite', r:'Risparmio'})[rpDraft.meas] || 'Nuovo grafico';
+  const list = rpCharts().map(c => ({...c})), i = list.findIndex(c => c.id === rpDraft.id);
+  if(i >= 0) list[i] = rpDraft; else list.push(rpDraft);
+  rpSave(list); rpEl('rp-ov').classList.remove('on'); renderReport();
+};
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ rpEl('rp-ov').classList.remove('on'); rpEl('rp-drawer').classList.remove('on'); } });
+
+// ---- Date dei rimborsi: tempi di invio e chiusura ----
+const DT_LATE = 45;
+const dtPad = (n) => String(n).padStart(2, '0');
+function dtToday(){ const d = new Date(); return d.getFullYear() + '-' + dtPad(d.getMonth() + 1) + '-' + dtPad(d.getDate()); }
+function dtDays(a, b){
+  if(!a || !b) return null;
+  const x = Date.parse(a + 'T00:00:00Z'), y = Date.parse(b + 'T00:00:00Z');
+  return isNaN(x) || isNaN(y) ? null : Math.round((y - x) / 86400000);
+}
+function dtClassOf(pill){ const m = /class="pill (\w+)"/.exec(pill || ''); return m ? m[1] : ''; }
+const dtEl = (id) => document.getElementById(id);
+function dtLevels(m){
+  return settings.pagatori.map(p => { const r = rimborsoDi(m, p.id); return {id:p.id, nome:p.nome, a:r.inviata, c:r.chiusa, pill:payerPill0(m, p)}; });
+}
+function payerPill(m, p){ const r = rimborsoDi(m, p.id); return dtWrap({a:r.inviata, c:r.chiusa}, payerPill0(m, p)); }
+function dtValidateForm(){
+  for(const p of settings.pagatori){
+    const a = dtEl('mf-rb-inv-' + p.id), c = dtEl('mf-rb-chi-' + p.id);
+    if(a && c && a.value && c.value && c.value < a.value) return p.nome + ': la data di chiusura non può essere precedente alla data di invio.';
+  }
+  return '';
+}
+dtEl('mf-rimborsi').addEventListener('change', (e) => {
+  const t = e.target; if(!t.id || t.id.indexOf('mf-rb-stato-') !== 0) return;
+  const pid = t.id.slice('mf-rb-stato-'.length), inv = dtEl('mf-rb-inv-' + pid), chi = dtEl('mf-rb-chi-' + pid), au = dtEl('mf-rb-auto-' + pid);
+  if(!inv || !chi) return;
+  const oggi = dtToday(), msg = [];
+  if(t.value === 'attesa' && !inv.value){ inv.value = oggi; msg.push('Data di invio impostata a oggi'); }
+  if((t.value === 'chiusa' || t.value === 'rifiutata') && !chi.value){
+    chi.value = oggi; msg.push('Data di ' + (t.value === 'chiusa' ? 'chiusura' : 'risposta') + ' impostata a oggi');
+    if(!inv.value) msg.push('manca la data di invio');
+  }
+  if(au) au.textContent = msg.length ? '✓ ' + msg.join(' · ') + ' (modificabile)' : '';
+});
+
+// pillola + etichetta "oltre 45 giorni" + data sotto la pillola
+function dtWrap(lv, pill){
+  if(!lv) return pill;
+  const cl = dtClassOf(pill); let h = pill;
+  if(cl === 'wait' && lv.a){
+    const g = dtDays(lv.a, dtToday());
+    if(g != null && g > DT_LATE) h += `<span class="late" title="In attesa da ${g} giorni">${g} g</span>`;
+    h += `<div class="dt-sub">inviata ${fmtShort(lv.a)}</div>`;
+  } else if((cl === 'ok' || cl === 'no') && lv.c){
+    const g = dtDays(lv.a, lv.c);
+    h += `<div class="dt-sub">${fmtShort(lv.c)}${g != null && g >= 0 ? ' · ' + g + ' g' : ''}</div>`;
+  }
+  return h;
+}
+// passi (inviata → in attesa → chiusa) nella riga espansa
+function dtTimeline(m){
+  const L = dtLevels(m).filter(lv => lv.pill);
+  if(!L.some(lv => lv.a || lv.c)) return '';
+  const step = (k, t, s) => `<div class="dt-st ${k}"><i></i><div><b>${t}</b><span>${s}</span></div></div>`;
+  const today = dtToday();
+  const blocks = L.map(lv => {
+    const cl = dtClassOf(lv.pill); let st = '';
+    if(cl === 'idle') st = step('idle', 'In coda', 'non ancora inviata');
+    else if(cl === 'todo') st = step('todo', 'Da inviare', '—');
+    else {
+      st += step(lv.a ? 'done' : 'todo', 'Inviata', lv.a ? fmtShort(lv.a) : 'data non registrata');
+      if(cl === 'wait'){
+        const g = dtDays(lv.a, today), late = g != null && g > DT_LATE;
+        st += step(late ? 'slate' : 'wait', 'In attesa di risposta', g != null ? 'da ' + g + ' giorni' + (late ? ' · oltre ' + DT_LATE : '') : '—');
+      } else {
+        const g = dtDays(lv.a, lv.c);
+        st += step(cl === 'ok' ? 'ok' : 'bad', cl === 'ok' ? 'Chiusa' : 'Rifiutata', (lv.c ? fmtShort(lv.c) : 'data non registrata') + (g != null && g >= 0 ? ' · ' + g + ' giorni dall\'invio' : ''));
+      }
+    }
+    return `<div><h4>${escHtml(lv.nome)}</h4>${st}</div>`;
+  });
+  return `<div class="dt-tl">${blocks.join('')}</div>`;
+}
+// campioni per il Report: giorni tra invio e chiusura
+function dtSamples(){
+  const out = [];
+  medical.forEach(m => dtLevels(m).forEach(lv => {
+    if(!lv.pill) return;
+    const cl = dtClassOf(lv.pill), g = dtDays(lv.a, lv.c);
+    if((cl === 'ok' || cl === 'no') && g != null && g >= 0) out.push({id:m.id, pn:lv.nome, g});
+  }));
+  return out;
+}
+function rpGiorniRows(){
+  const by = {}; rpRows().forEach(r => { by[r.id] = r; });
+  return dtSamples().filter(s => by[s.id]).map(s => ({...by[s.id], pn:s.pn, g:s.g}));
+}
+
+function dtTimelineFor(id){ const m = medical.find(x => x.id === id); return m ? dtTimeline(m) : ''; }
+
+// ---- Finestra popup per i form di inserimento/modifica ----
+(function(){
+  const bd = document.createElement('div'); bd.className = 'ef-bd'; document.body.appendChild(bd);
+  let mode = 'Nuova voce';
+  document.addEventListener('click', (e) => {
+    if(e.target.closest('[data-action^="edit-"], [data-action="renew-document"], [data-action="rinnova"]')) mode = 'Modifica';
+    else if(e.target.closest('.ph-actions .btn, .add-toggle')) mode = 'Nuova voce';
+  }, true);
+  const forms = [...document.querySelectorAll('.entry-form')];
+  const isOpen = () => forms.some(f => f.classList.contains('open'));
+  function closeForm(f){ const c = f.querySelector('[id$="-cancel"]'); if(c) c.click(); else f.classList.remove('open'); }
+  forms.forEach(f => {
+    const head = document.createElement('div'); head.className = 'ef-head';
+    head.innerHTML = '<h3></h3><button type="button" class="ef-x" aria-label="Chiudi">✕</button>';
+    f.prepend(head);
+    head.querySelector('.ef-x').addEventListener('click', () => closeForm(f));
+    new MutationObserver(() => {
+      const open = f.classList.contains('open');
+      if(open){
+        const pt = f.closest('section.panel'), t = pt && pt.querySelector('.ph-title');
+        head.querySelector('h3').textContent = mode + (t ? ' · ' + t.textContent : '');
+        f.scrollTop = 0;
+      }
+      bd.classList.toggle('on', isOpen());
+      document.body.style.overflow = isOpen() ? 'hidden' : '';
+    }).observe(f, {attributes:true, attributeFilter:['class']});
+  });
+  bd.addEventListener('click', () => forms.filter(f => f.classList.contains('open')).forEach(closeForm));
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') forms.filter(f => f.classList.contains('open')).forEach(closeForm); });
+})();
 
 onAuthStateChanged(auth, async (user) => {
   if(user){
