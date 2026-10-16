@@ -582,9 +582,11 @@
   <h2>Benvenuto! Configuriamo la tua dashboard</h2>
   <p class="sub">Bastano pochi secondi. Potrai cambiare tutto più tardi dalla scheda Impostazioni.</p>
   <div class="blk"><h4>Quali schede vuoi usare?</h4><div id="welcome-moduli"></div></div>
-  <div class="blk" id="welcome-sanita-blk"><h4>Chi rimborsa le tue spese mediche? (un nome per riga, nell'ordine in cui di solito si chiede)</h4>
+  <div class="blk" id="welcome-sanita-blk"><h4>Chi ti rimborsa le spese mediche?</h4>
+    <p style="margin:0 0 8px;font-size:12.5px;color:var(--ink-soft);">Scrivi un nome per riga: fondo sanitario, assicurazione, datore di lavoro… In Sanità integrativa avrai una colonna per ciascuno, dove segui lo stato di ogni richiesta e quanto ti hanno rimborsato. Mettili nell'ordine in cui di solito invii le richieste. Se non ricevi rimborsi, lascia un solo nome, ad esempio «Assicurazione».</p>
     <textarea id="welcome-pagatori" rows="2" placeholder="es.&#10;Fondo sanitario&#10;Assicurazione">Assicurazione</textarea></div>
-  <div class="blk"><h4>Chi fa parte della famiglia? (un nome per riga, facoltativo)</h4>
+  <div class="blk"><h4>Chi fa parte della famiglia? (facoltativo)</h4>
+    <p style="margin:0 0 8px;font-size:12.5px;color:var(--ink-soft);">Un nome per riga. Li ritroverai come scelte rapide quando inserisci spese, documenti e detrazioni.</p>
     <textarea id="welcome-persone" rows="3" placeholder="es.&#10;Mario&#10;Anna"></textarea></div>
   <div class="acts"><button type="button" class="btn ghost" id="welcome-skip">Salta, userò le impostazioni di base</button><button type="button" class="btn" id="welcome-ok">Inizia</button></div>
 </div></div>
@@ -2719,7 +2721,7 @@ function renderImpostazioni(){
     <div class="set-card">
       <h3>${escHtml(V.moduli.medical.nome)}</h3>
       <h3 style="margin:10px 0 4px;font-size:13.5px;">Pagatori dei rimborsi</h3>
-      <p class="hint">Chi rimborsa le tue spese, nell'ordine in cui di solito si chiede (es. fondo sanitario, poi assicurazione). Ne basta uno; puoi aggiungerne altri e dare a ciascuno il nome che vuoi. Il residuo da portare in detrazione si calcola dopo tutti i rimborsi.</p>
+      <p class="hint">Chi ti rimborsa le spese mediche: fondo sanitario, assicurazione, datore di lavoro… Ognuno diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta e l'importo rimborsato. Mettili nell'ordine in cui di solito invii le richieste. Ne basta uno; puoi aggiungerne altri e dare a ciascuno il nome che vuoi. Il residuo da portare in detrazione si calcola dopo tutti i rimborsi.</p>
       ${V.pagatori.map((p, i) => `
       <div class="set-row"><span style="width:18px;color:var(--ink-soft);">${i + 1}.</span>
         <input type="text" data-pag-i="${i}" value="${escHtml(p.nome)}" maxlength="40">
