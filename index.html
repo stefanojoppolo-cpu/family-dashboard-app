@@ -2427,6 +2427,7 @@ function dashBoxes(sec, items){
   const out = [];
   sec.box.forEach(b => { const it = items.find(x => x.k === b.k); if(it) out.push({it, on:b.on}); });
   items.forEach(it => { if(!sec.box.find(b => b.k === it.k)) out.push({it, on:!it.extra}); });
+  out.sort((a, b) => (a.it.bar ? 1 : 0) - (b.it.bar ? 1 : 0));
   sec.box = out.map(o => ({k:o.it.k, on:o.on}));
   return out;
 }
