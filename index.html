@@ -643,6 +643,27 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 #backup-last{margin:0 0 12px;font-size:13px}
 @media (max-width:640px){.acc-b{padding:12px 14px 16px}}
 .fcount[hidden]{display:none;}
+.md{display:flex;flex-direction:column;gap:6px;width:100%;text-align:left}
+.md-top{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 18px;padding:2px 0 4px}
+.md-top>div{min-width:0}.md-top span{display:block;font-size:12px;color:var(--ink-soft)}.md-top b{display:block;font-size:14px;font-weight:700;overflow-wrap:anywhere}
+.md-h{margin:12px 0 2px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);display:flex;gap:6px;align-items:baseline}
+.md-h .doc-ref{text-transform:none;letter-spacing:0;font-weight:500}
+.md-pay{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.md-card{background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.md-ch{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}.md-ch b{font-size:14px}
+.md-steps{margin-bottom:6px}.md-amt{font-size:13px;font-weight:700;margin:4px 0 8px}
+.md-dates{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.md-dates label{font-size:11.5px;color:var(--ink-soft)}
+.md-dates input{display:block;width:100%;min-width:0;box-sizing:border-box;margin-top:3px;padding:5px 7px;font-size:13px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+.md-docs{display:flex;flex-wrap:wrap;gap:8px}.md-docs a{padding:7px 12px;border-radius:10px;background:var(--accent-soft,#EAF0FF);font-weight:700;text-decoration:none;font-size:13px}
+.md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
+.md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
+.md-modal.on{display:flex}
+.md-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 24px 12px;border-bottom:1px solid var(--line)}
+.md-head h3{margin:0;font-size:18px;font-weight:800}.md-who{font-weight:600;color:var(--ink-soft);font-size:14px;margin-left:6px}
+.md-sub{margin-top:5px;font-size:13px;color:var(--ink-soft)}
+.md-body{padding:12px 24px 8px;overflow:auto;flex:1}
+.md-foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 24px 16px;border-top:1px solid var(--line);background:var(--paper-raised,#fff)}
+@media (max-width:640px){.md-head,.md-body,.md-foot{padding-left:16px;padding-right:16px}}
 </style>
 </head>
 <body>
@@ -3525,12 +3546,7 @@ document.getElementById('medical-body').addEventListener('click', async (e) => {
   const action = btn.dataset.action;
   const item = medical.find(m => m.id===id);
   if(!item) return;
-  if(action==='toggle-doc-row'){
-    if(expandedMedicalIds.has(id)) expandedMedicalIds.delete(id);
-    else expandedMedicalIds.add(id);
-    renderMedical();
-    return;
-  }
+  if(action==='toggle-doc-row'){ openMedDetail(id); return; }
   if(item.bloccata) return;
   if(action==='delete-medical'){
     confirmingMedicalDeleteId = id;
@@ -5177,6 +5193,76 @@ document.addEventListener('input', (e) => {
   const t = e.target; if(t.dataset.pagQuota === undefined && t.dataset.pagPer === undefined) return;
   const D = impDraft; if(!D) return; const ex = document.getElementById('terzo-esempio'), T = D.pagatori.find(p => p.quota > 0);
   if(!ex || !T) return; const v = {...T}; if(t.dataset.pagQuota !== undefined) v.quota = Math.min(100, Math.max(1, parseFloat(t.value) || 1)); if(t.dataset.pagPer !== undefined) v.per = t.value; ex.textContent = terzoEsempio(v);
+});
+
+// ---- Dettaglio della pratica (riga espansa) riorganizzato ----
+function mdSteps(lv){
+  const step = (k, t, s) => `<div class="dt-st ${k}"><i></i><div><b>${t}</b><span>${s}</span></div></div>`;
+  const cl = dtClassOf(lv.pill), today = dtToday();
+  if(cl === 'idle') return step('idle', 'In coda', 'tocca dopo i precedenti');
+  if(cl === 'todo') return step('todo', 'Da inviare', 'non ancora inviata');
+  let st = step(lv.a ? 'done' : 'todo', 'Inviata', lv.a ? fmtShort(lv.a) : 'data non registrata');
+  if(cl === 'wait'){
+    const g = dtDays(lv.a, today), late = g != null && g > DT_LATE;
+    st += step(late ? 'slate' : 'wait', 'In attesa di risposta', g != null ? 'da ' + g + ' giorni' + (late ? ' · oltre ' + DT_LATE : '') : 'serve la data di invio');
+  } else {
+    const g = dtDays(lv.a, lv.c);
+    st += step(cl === 'ok' ? 'ok' : 'bad', cl === 'ok' ? 'Chiusa' : 'Rifiutata', (lv.c ? fmtShort(lv.c) : 'data non registrata') + (g != null && g >= 0 ? ' · ' + g + ' giorni dall\'invio' : ''));
+  }
+  return st;
+}
+function medDrill(m){
+  const n = medicalRowNumbers(m), docs = m.documenti || [], lv = dtLevels(m);
+  const kv = (k, v) => v ? `<div><span>${k}</span><b>${v}</b></div>` : '';
+  const top = `<div class="md-top">${kv('Totale', euro(m.totale))}${kv('Rimborsato', euro(n.totPagato))}${kv('Da portare in detrazione', euro(n.residuo))}<div><span>Stato</span><b><span class="badge ${n.statoInfo.cls}">${escHtml(n.statoInfo.label)}</span></b></div></div>`;
+  const cards = lv.map(x => {
+    const p = settings.pagatori.find(q => q.id === x.id) || {}, r = rimborsoDi(m, x.id);
+    const att = p.nome && p.nome !== x.nome ? ` <span class="doc-ref">(allora: ${escHtml(x.nome)})</span>` : '';
+    const imp = isQuota(p) ? (r.stato === 'chiusa' || r.pagato > 0 ? 'Pagato ' + euro(r.pagato) : (n.prossimo && n.prossimo.p.id === x.id ? 'Quota ' + p.quota + '%: ' + euro(quotaDi(m, p)) : '')) : (r.pagato > 0 || r.stato === 'chiusa' ? 'Rimborsato ' + euro(r.pagato) : '');
+    return `<div class="md-card"><div class="md-ch"><b>${escHtml(p.nome || x.nome)}</b>${att}${x.pill}</div>
+      <div class="md-steps">${mdSteps(x)}</div>
+      ${imp ? `<div class="md-amt">${imp}</div>` : ''}
+      <div class="md-dates"><label>Inviata il<input type="date" data-md-id="${m.id}" data-md-pid="${x.id}" data-md-f="inviata" value="${escHtml(r.inviata)}"></label><label>Chiusa il<input type="date" data-md-id="${m.id}" data-md-pid="${x.id}" data-md-f="chiusa" value="${escHtml(r.chiusa)}"></label></div></div>`;
+  }).join('');
+  const doc = `<div class="md-top">${kv('Tipo documento', escHtml(m.tipoDocumento || ''))}${kv('Numero', escHtml(m.numeroDocumento || ''))}${kv('Modalità', escHtml(m.modalita || ''))}${kv('Note', escHtml(m.note || ''))}</div>`;
+  const all = docs.length ? `<div class="md-docs">${docs.map(d => `<a href="${escHtml(d.url)}" target="_blank" rel="noopener">${escHtml(d.nome)} ↗</a>`).join('')}</div>` : `<span class="doc-ref">Nessun documento collegato — aggiungili da «Modifica».</span>`;
+  return `<div class="md">${top}<h4 class="md-h">Percorso dei rimborsi <span class="doc-ref">· puoi scrivere le date qui sotto</span></h4><div class="md-pay">${cards}</div><h4 class="md-h">Documento</h4>${doc}<h4 class="md-h">Allegati</h4>${all}</div>`;
+}
+document.addEventListener('change', async (e) => {
+  const t = e.target; if(!t.dataset || t.dataset.mdId === undefined) return;
+  const m = medical.find(x => x.id === t.dataset.mdId); if(!m) return;
+  const pid = t.dataset.mdPid, f = t.dataset.mdF, cur = {...((m.rimborsi && m.rimborsi[pid]) || {})};
+  if(t.value) cur[f] = t.value; else delete cur[f];
+  if(cur.inviata && cur.chiusa && cur.chiusa < cur.inviata){ showNotice('La data di chiusura non può essere precedente alla data di invio.'); renderMedical(); return; }
+  medical = medical.map(x => x.id === m.id ? {...x, rimborsi:{...(x.rimborsi || {}), [pid]: {stato:'da_inviare', pagato:0, ...cur}}} : x);
+  await saveMedical(); renderAll(); if(mdOpenId) mdRender();
+});
+
+// ---- Popup di dettaglio della pratica ----
+let mdOpenId = null, mdConfirmDel = false;
+const mdBd = document.createElement('div'); mdBd.className = 'md-bd'; document.body.appendChild(mdBd);
+const mdBox = document.createElement('div'); mdBox.className = 'md-modal'; mdBox.setAttribute('role', 'dialog'); document.body.appendChild(mdBox);
+function mdRender(){
+  const m = medical.find(x => x.id === mdOpenId); if(!m){ mdClose(); return; }
+  const n = medicalRowNumbers(m);
+  const sub = [fmtDate(m.dataDocumento), [m.tipoDocumento, m.numeroDocumento].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
+  const btns = m.bloccata ? '<span class="doc-ref">🔒 Pratica bloccata: non modificabile</span>' : (mdConfirmDel
+    ? '<span style="color:var(--stamp);font-weight:700;">Eliminare questa pratica?</span><button type="button" class="btn small danger" data-md-act="del-yes">Sì, elimina</button><button type="button" class="btn small ghost" data-md-act="del-no">Annulla</button>'
+    : '<button type="button" class="btn small" data-md-act="edit">Modifica</button><button type="button" class="btn small ghost danger" data-md-act="del">Elimina</button>');
+  mdBox.innerHTML = `<div class="md-head"><div><h3>${escHtml(m.descrizione || 'Pratica')} <span class="md-who">${escHtml(m.richiedente || '')}</span></h3><div class="md-sub">${escHtml(sub)} · <span class="badge ${n.statoInfo.cls}">${escHtml(n.statoInfo.label)}</span></div></div><button type="button" class="ef-x" data-md-act="close" aria-label="Chiudi">✕</button></div><div class="md-body">${medDrill(m)}</div><div class="md-foot">${btns}<span style="flex:1"></span><button type="button" class="btn small ghost" data-md-act="close">Chiudi</button></div>`;
+}
+function openMedDetail(id){ mdOpenId = id; mdConfirmDel = false; mdRender(); mdBox.classList.add('on'); mdBd.classList.add('on'); }
+function mdClose(){ mdOpenId = null; mdConfirmDel = false; mdBox.classList.remove('on'); mdBd.classList.remove('on'); }
+mdBd.addEventListener('click', mdClose);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && mdOpenId) mdClose(); });
+mdBox.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-md-act]'); if(!b) return;
+  const a = b.dataset.mdAct, id = mdOpenId;
+  if(a === 'close') mdClose();
+  else if(a === 'edit'){ mdClose(); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); }
+  else if(a === 'del'){ mdConfirmDel = true; mdRender(); }
+  else if(a === 'del-no'){ mdConfirmDel = false; mdRender(); }
+  else if(a === 'del-yes'){ mdClose(); confirmingMedicalDeleteId = id; renderMedical(); const cb = document.querySelector('#medical-body [data-action="confirm-delete-medical"][data-id="' + id + '"]'); if(cb) cb.click(); }
 });
 
 onAuthStateChanged(auth, async (user) => {
