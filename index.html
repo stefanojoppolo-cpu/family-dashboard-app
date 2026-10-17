@@ -642,6 +642,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .bk-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--stamp);margin-left:auto;flex:none}
 #backup-last{margin:0 0 12px;font-size:13px}
 @media (max-width:640px){.acc-b{padding:12px 14px 16px}}
+.fcount[hidden]{display:none;}
 </style>
 </head>
 <body>
@@ -1672,15 +1673,20 @@ function metricsMedical(conMassimali){
   const piu = pags.length > 1;
   const anno = new Date().getFullYear();
   const righe = medical.map(m => ({m, n: medicalRowNumbers(m)}));
-  const aperte = righe.filter(x => !x.n.conclusa);
+  const aperte = righe.filter(x => !x.n.conclusa && !x.n.soloQuota);
   const ancora = aperte.reduce((s, x) => s + x.n.residuo, 0);
-  const detr = righe.filter(x => x.n.conclusa && (x.m.dataDocumento || '').slice(0,4) === String(anno)).reduce((s, x) => s + x.n.residuo, 0);
+  const detr = righe.filter(x => (x.n.conclusa || x.n.soloQuota) && (x.m.dataDocumento || '').slice(0,4) === String(anno)).reduce((s, x) => s + x.n.residuo, 0);
   const items = [{k:'aperte', valore: aperte.length, label:'Pratiche aperte', cls: aperte.length ? 'pend' : ''}];
   pags.forEach(p => {
     const n = medical.filter(m => payerApplies(m, p) && rimborsoDi(m, p.id).stato === 'attesa').length;
     items.push({k:'att_' + p.id, valore: n, label: piu ? 'In attesa di ' + escHtml(p.nome) : 'In attesa di risposta', cls: n ? 'pend' : ''});
   });
   pags.forEach(p => {
+    if(p.quota > 0){
+      const e = medical.reduce((s, m) => { const n = medicalRowNumbers(m); return n.prossimo && n.prossimo.p.id === p.id && n.prossimo.stato === 'da_inviare' ? s + n.daRichiedere : s; }, 0);
+      items.push({k:'dainvE_' + p.id, valore: euro(e), label: 'Da richiedere a ' + escHtml(p.nome), cls: e > 0.004 ? 'pend' : ''});
+      return;
+    }
     const n = medical.filter(m => { const r = medicalRowNumbers(m).prossimo; return r && r.p.id === p.id && r.stato === 'da_inviare'; }).length;
     items.push({k:'dainv_' + p.id, valore: n, label: piu ? 'Pratiche da inviare a ' + escHtml(p.nome) : 'Pratiche da inviare', cls: n ? 'pend' : ''});
   });
@@ -1912,7 +1918,7 @@ function medicalRowNumbers(m){
     kind = 'da_inviare';
     statoInfo = {label: piu ? 'Da inviare a: ' + pnome(m, prossimo.p) : 'Da inviare', cls:'pending'};
   }
-  return {totale, pagati, totPagato, residuo: Math.max(0, totale - totPagato), prossimo, daRichiedere: prossimo ? (prossimo.p.quota > 0 ? quotaDi(m, prossimo.p) : Math.max(0, totale - prima)) : 0, kind, statoInfo, conclusa: tuttiConclusi};
+  return {totale, pagati, totPagato, residuo: Math.max(0, totale - totPagato), prossimo, daRichiedere: prossimo ? (prossimo.p.quota > 0 ? quotaDi(m, prossimo.p) : Math.max(0, totale - prima)) : 0, kind, statoInfo, conclusa: tuttiConclusi, soloQuota: !tuttiConclusi && !!prossimo && prossimo.p.quota > 0};
 }
 
 let confirmingRecurringDeleteId = null;
@@ -3057,6 +3063,7 @@ document.getElementById('panel-impostazioni').addEventListener('click', async (e
 });
 
 function renderAll(){
+  try{ document.querySelectorAll('.fpanel').forEach(f => f._upd && f._upd()); }catch(e){}
   renderSummary();
   renderRecurring();
   renderMedical();
@@ -4470,7 +4477,7 @@ function uxPanelSetup(tid){
     acts.appendChild(fb);
     const reset = document.createElement('button'); reset.type = 'button'; reset.className = 'btn ghost small'; reset.textContent = 'Azzera filtri'; reset.hidden = true; reset.style.marginLeft = 'auto';
     fp.appendChild(reset);
-    const upd = () => { const n = uxFilterCount(fp); const c = fb.querySelector('.fcount'); c.hidden = !n; c.textContent = n; reset.hidden = !n; };
+    const upd = fp._upd = () => { const n = uxFilterCount(fp); const c = fb.querySelector('.fcount'); c.hidden = !n; c.textContent = n; reset.hidden = !n; };
     fb.addEventListener('click', () => fp.classList.toggle('open'));
     fp.addEventListener('change', upd); fp.addEventListener('input', upd);
     reset.addEventListener('click', () => {
@@ -4478,7 +4485,7 @@ function uxPanelSetup(tid){
       fp.querySelectorAll('input').forEach(i => { if(i.type === 'checkbox') i.checked = false; else i.value = ''; i.dispatchEvent(new Event(i.type === 'checkbox' ? 'change' : 'input', {bubbles: true})); });
       upd();
     });
-    head.after(fp); anchor = fp;
+    head.after(fp); anchor = fp; upd();
   }
   const xb = document.createElement('button'); xb.type = 'button'; xb.className = 'btn ghost small'; xb.dataset.xl = tid; xb.title = 'Scarica in Excel le righe mostrate'; xb.textContent = 'Excel'; acts.appendChild(xb);
   if(tid === 'medical'){ const eb = document.createElement('button'); eb.type = 'button'; eb.className = 'btn ghost small'; eb.id = 'pay-email-btn'; eb.hidden = true; eb.textContent = '✉ Email'; acts.appendChild(eb); }
@@ -5079,11 +5086,13 @@ let payEmailIds = [], payEmailPid = '';
 function payEmailBuild(){
   const pid = document.getElementById('pay-email-who').value, p = settings.pagatori.find(x => x.id === pid);
   const fb = document.getElementById('pay-email-feedback'); fb.textContent = '';
-  const righe = getFilteredMedical().map(m => ({m, n: medicalRowNumbers(m)})).filter(x => !x.m.bloccata && x.n.prossimo && x.n.prossimo.p.id === pid && x.n.prossimo.stato === 'da_inviare' && x.n.daRichiedere > 0.004)
+  const tocca = (m) => { const n = medicalRowNumbers(m); return n.prossimo && n.prossimo.p.id === pid && n.prossimo.stato === 'da_inviare' && n.daRichiedere > 0.004; };
+  const righe = getFilteredMedical().filter(tocca).map(m => ({m, n: medicalRowNumbers(m)}))
     .sort((a, b) => new Date(a.m.dataDocumento) - new Date(b.m.dataDocumento));
+  const nascoste = medical.filter(tocca).length - righe.length;
   payEmailIds = righe.map(x => x.m.id); payEmailPid = pid;
   const subj = document.getElementById('pay-email-subject'), body = document.getElementById('pay-email-body'), open = document.getElementById('pay-email-open');
-  if(!p || !righe.length){ subj.value = ''; body.value = ''; open.href = '#'; fb.textContent = 'Nessuna pratica da inviare a ' + (p ? p.nome : 'questo pagatore') + ' con i filtri attuali.'; return; }
+  if(!p || !righe.length){ subj.value = ''; body.value = ''; open.href = '#'; fb.textContent = nascoste > 0 ? 'Con i filtri attuali non compare nessuna pratica, ma ce ne sono ' + nascoste + ' da inviare a ' + p.nome + ': azzera i filtri.' : 'Nessuna pratica da inviare a ' + (p ? p.nome : 'questo pagatore') + '.'; return; }
   const anno = document.getElementById('medical-filter-anno').value;
   const tot = righe.reduce((s, x) => s + x.n.daRichiedere, 0);
   subj.value = 'Richiesta rimborso spese' + (anno ? ' - ' + anno : '');
@@ -5091,7 +5100,7 @@ function payEmailBuild(){
     righe.map(x => `- ${fmtDate(x.m.dataDocumento)} | ${x.m.richiedente || ''} | ${x.m.descrizione || ''} | totale ${euro(x.m.totale)} | ` + (isQuota(p) ? `non rimborsato ${euro(nonRimborsato(x.m))} | quota ${p.quota}% ${euro(x.n.daRichiedere)}` : `da richiedere ${euro(x.n.daRichiedere)}`)).join('\n') +
     `\n\nTotale da richiedere: ${euro(tot)}\n\nGrazie`;
   open.href = 'mailto:' + encodeURIComponent(p.email).replace('%40', '@') + '?subject=' + encodeURIComponent(subj.value) + '&body=' + encodeURIComponent(body.value);
-  fb.textContent = righe.length + (righe.length === 1 ? ' pratica' : ' pratiche') + ' · destinatario: ' + p.email;
+  fb.textContent = righe.length + (righe.length === 1 ? ' pratica' : ' pratiche') + ' · destinatario: ' + p.email + (nascoste > 0 ? ' · altre ' + nascoste + ' nascoste dai filtri' : '');
 }
 document.addEventListener('click', async (e) => {
   const t = e.target;
