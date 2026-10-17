@@ -1947,6 +1947,11 @@ function getFilteredMedical(){
   return filtered;
 }
 
+function spesaCoperta(m){
+  const t = Number(m.totale) || 0; if(t <= 0) return false;
+  let s = 0; settings.pagatori.forEach(p => { if(payerApplies(m, p) && !isQuota(p)) s += rimborsoDi(m, p.id).pagato; });
+  return t - s <= 0.004;
+}
 function medicalRowNumbers(m){
   const totale = Number(m.totale) || 0;
   const pags = settings.pagatori;
@@ -1958,7 +1963,7 @@ function medicalRowNumbers(m){
     const r = rimborsoDi(m, p.id);
     pagati[p.id] = r.pagato;
     totPagato += r.pagato;
-    const aperto = (r.stato === 'da_inviare' || r.stato === 'attesa') && !(isQuota(p) && r.stato === 'da_inviare' && quotaDi(m, p) <= 0.004);
+    const aperto = (r.stato === 'da_inviare' || r.stato === 'attesa') && !(isQuota(p) && r.stato === 'da_inviare' && quotaDi(m, p) <= 0.004) && !(!isQuota(p) && r.stato === 'da_inviare' && spesaCoperta(m));
     if(aperto) tuttiConclusi = false;
     if(aperto && !prossimo) prossimo = {p, stato:r.stato};
     else if(!prossimo) prima += r.pagato;
@@ -4529,6 +4534,7 @@ function fmtShort(d){
 function pillHtml(cls, txt){ return `<span class="pill ${cls}">${txt}</span>`; }
 function payerPill0(m, p){
   const r = rimborsoDi(m, p.id);
+  if(r.stato === 'da_inviare' && !isQuota(p) && spesaCoperta(m)) return pillHtml('idle', 'Non necessario');
   if(r.stato === 'rifiutata') return pillHtml('no', 'Rifiutato');
   if(r.stato === 'chiusa') return r.pagato > 0 ? pillHtml('ok', 'Rimborsato ' + euro(r.pagato)) : pillHtml('ok', 'Chiusa');
   return STATI_RIMBORSO[r.stato].label === 'In attesa di risposta' ? pillHtml('wait', 'In attesa') : pillHtml('todo', 'Da inviare');
@@ -5253,7 +5259,7 @@ document.addEventListener('input', (e) => {
 function mdSteps(lv){
   const step = (k, t, s) => `<div class="dt-st ${k}"><i></i><div><b>${t}</b><span>${s}</span></div></div>`;
   const cl = dtClassOf(lv.pill), today = dtToday();
-  if(cl === 'idle') return step('idle', 'In coda', 'tocca dopo i precedenti');
+  if(cl === 'idle') return /Non necessario/.test(lv.pill) ? step('idle', 'Non necessario', 'spesa già interamente rimborsata') : step('idle', 'In coda', 'tocca dopo i precedenti');
   if(cl === 'todo') return step('todo', 'Da inviare', 'non ancora inviata');
   let st = step(lv.a ? 'done' : 'todo', 'Inviata', lv.a ? fmtShort(lv.a) : 'data non registrata');
   if(cl === 'wait'){
