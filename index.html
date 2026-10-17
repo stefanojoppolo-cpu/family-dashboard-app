@@ -881,6 +881,10 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
       <select id="medical-filter">
         <option value="">Tutti</option>
       </select>
+      <label style="margin-left:18px;margin-right:8px;">Pagatore</label>
+      <select id="medical-filter-pag">
+        <option value="">Tutti</option>
+      </select>
       <label style="margin-left:18px;margin-right:8px;">Stato pratica</label>
       <select id="medical-filter-stato">
         <option value="">Tutti</option>
@@ -1895,9 +1899,14 @@ function refreshMedicalFilterOptions(){
   sel.innerHTML = `<option value="">Tutti</option>` + names.map(n => `<option value="${escHtml(n)}">${escHtml(n)}</option>`).join('');
   if(names.includes(current)) sel.value = current;
 
+  const selPag = document.getElementById('medical-filter-pag'), curPag = selPag.value;
+  selPag.innerHTML = `<option value="">Tutti</option>` + settings.pagatori.map(p => `<option value="${escHtml(p.id)}">${escHtml(p.nome)}</option>`).join('');
+  if(settings.pagatori.some(p => p.id === curPag)) selPag.value = curPag;
+
   const selStato = document.getElementById('medical-filter-stato');
   const currentStato = selStato.value;
   selStato.innerHTML = `<option value="">Tutti</option>` + Object.keys(STATI_RIMBORSO).map(k => `<option value="${k}">${STATI_RIMBORSO[k].label}</option>`).join('');
+  if(selPag.value) selStato.insertAdjacentHTML('beforeend', '<option value="coda">In coda (dopo i precedenti)</option>');
   selStato.value = currentStato;
 
   const selAnno = document.getElementById('medical-filter-anno');
@@ -1907,6 +1916,13 @@ function refreshMedicalFilterOptions(){
   if(anni.includes(currentAnno)) selAnno.value = currentAnno;
 }
 
+function efStatoPag(m, p){
+  const r = rimborsoDi(m, p.id).stato;
+  if(r !== 'da_inviare') return r;
+  const n = medicalRowNumbers(m);
+  if(n.prossimo && n.prossimo.p.id === p.id) return 'da_inviare';
+  return n.conclusa ? 'nessuno' : 'coda';
+}
 function getFilteredMedical(){
   const filterName = document.getElementById('medical-filter').value;
   const filterStato = document.getElementById('medical-filter-stato').value;
@@ -1915,7 +1931,9 @@ function getFilteredMedical(){
   const filterDocumento = document.getElementById('medical-filter-documento').value.trim().toLowerCase();
   const hideClosed = document.getElementById('medical-filter-hide-closed').checked;
   let filtered = filterName ? medical.filter(m => m.richiedente===filterName) : medical;
-  if(filterStato) filtered = filtered.filter(m => medicalRowNumbers(m).kind === filterStato);
+  const pagSel = document.getElementById('medical-filter-pag').value, pagObj = settings.pagatori.find(p => p.id === pagSel);
+  if(pagObj) filtered = filtered.filter(m => payerApplies(m, pagObj));
+  if(filterStato) filtered = filtered.filter(m => pagObj ? efStatoPag(m, pagObj) === filterStato : medicalRowNumbers(m).kind === filterStato);
   if(filterAnno) filtered = filtered.filter(m => (m.dataDocumento||'').slice(0,4)===filterAnno);
   if(filterPrestazione) filtered = filtered.filter(m => (m.descrizione||'').toLowerCase().includes(filterPrestazione));
   if(filterDocumento) filtered = filtered.filter(m => `${m.tipoDocumento||''} ${m.numeroDocumento||''}`.toLowerCase().includes(filterDocumento));
@@ -2150,7 +2168,7 @@ function renderMedical(){
       </td>
     </tr>` : ''}`;
   }).join('');
-  const titolo = filterName || filterStato || filterAnno ? ' — ' + [filterName, filterStato ? STATI_RIMBORSO[filterStato].label : '', filterAnno].filter(Boolean).join(', ') : '';
+  const titolo = filterName || filterStato || filterAnno ? ' — ' + [filterName, filterStato ? (STATI_RIMBORSO[filterStato] ? STATI_RIMBORSO[filterStato].label : 'In coda') : '', filterAnno].filter(Boolean).join(', ') : '';
   const subtotal = `
     <tr class="subtotal-row">
       <td></td><td></td><td>Totale${escHtml(titolo)}</td><td></td>
@@ -3306,6 +3324,7 @@ document.getElementById('toggle-medical-form').addEventListener('click', () => {
 document.getElementById('mf-cancel').addEventListener('click', () => medicalForm.classList.remove('open'));
 document.getElementById('medical-filter').addEventListener('change', renderMedical);
 document.getElementById('medical-filter-stato').addEventListener('change', renderMedical);
+document.getElementById('medical-filter-pag').addEventListener('change', renderMedical);
 document.getElementById('medical-filter-anno').addEventListener('change', renderMedical);
 document.getElementById('medical-filter-hide-closed').addEventListener('change', renderMedical);
 document.getElementById('medical-filter-prestazione').addEventListener('input', renderMedical);
