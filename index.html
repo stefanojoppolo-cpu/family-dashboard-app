@@ -4543,7 +4543,7 @@ function fmtShort(d){
 function pillHtml(cls, txt){ return `<span class="pill ${cls}">${txt}</span>`; }
 function payerPill0(m, p){
   const r = rimborsoDi(m, p.id);
-  if(r.stato === 'da_inviare' && !isQuota(p) && spesaCoperta(m)) return pillHtml('idle', 'Non necessario');
+  if(r.stato === 'da_inviare' && (isQuota(p) ? quotaDi(m, p) <= 0.004 : spesaCoperta(m))) return pillHtml('idle', 'Non necessario');
   if(r.stato === 'rifiutata') return pillHtml('no', 'Rifiutato');
   if(r.stato === 'chiusa') return r.pagato > 0 ? pillHtml('ok', 'Rimborsato ' + euro(r.pagato)) : pillHtml('ok', 'Chiusa');
   return STATI_RIMBORSO[r.stato].label === 'In attesa di risposta' ? pillHtml('wait', 'In attesa') : pillHtml('todo', 'Da inviare');
