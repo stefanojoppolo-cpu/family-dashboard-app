@@ -625,6 +625,23 @@ tr.doc-row a::after{content:' ↗'}
 .med-det a{display:inline-block;padding:5px 12px;border-radius:10px;background:var(--accent-soft,#EAF0FF);font-weight:700;text-decoration:none}
 .med-det .badge{display:inline-block !important;white-space:normal !important;max-width:100%;line-height:1.35}
 table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}table.xt .med-det > div > b > .badge{display:inline-flex !important;white-space:normal !important;max-width:100% !important;align-items:flex-start;gap:6px;line-height:1.35;overflow:visible !important}
+/* ---- impostazioni a schede espandibili ---- */
+.set-grp{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:24px 0 10px}
+.set-grp:first-child{margin-top:4px}
+.acc{background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.acc.open{border-color:#C9D6FB;box-shadow:0 4px 18px rgba(47,91,234,.08)}
+.acc-h{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;padding:15px 20px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.acc-h:hover{background:rgba(47,91,234,.04)}
+.acc-ic{width:34px;height:34px;border-radius:10px;background:var(--accent-soft,#E7EDFF);color:var(--accent);display:grid;place-items:center;font-size:16px;flex:none}
+.acc-t{flex:1;min-width:0}.acc-t b{display:block;font-size:15px;font-weight:700}.acc-t span{display:block;color:var(--ink-soft);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-ch{color:var(--ink-soft);transition:.2s;font-size:13px}.acc.open .acc-ch{transform:rotate(90deg)}
+.acc-b{display:none;padding:14px 20px 20px 68px;border-top:1px solid var(--line)}.acc.open .acc-b{display:block}
+.acc-b > .set-card{border:0;padding:0;margin:0 0 18px;background:none}
+.acc-b #backup-panel{display:block !important;margin:0 !important;padding:0 !important;border:0 !important;background:none !important}
+.bk-warn{background:color-mix(in srgb,var(--stamp) 12%,transparent);color:var(--stamp);border-radius:12px;padding:12px 16px;font-weight:700;margin:0 0 6px}
+.bk-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--stamp);margin-left:auto;flex:none}
+#backup-last{margin:0 0 12px;font-size:13px}
+@media (max-width:640px){.acc-b{padding:12px 14px 16px}}
 </style>
 </head>
 <body>
@@ -690,7 +707,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
           <p style="margin:4px 0 0;">Scadenze, rimborsi, contratti e documenti di famiglia in un unico posto.</p>
         </div>
       </div>
-      <button class="btn ghost" id="toggle-backup-panel" style="white-space:nowrap;">⤓ Backup dati</button>
+      <button class="btn ghost" id="toggle-backup-panel" style="white-space:nowrap;display:none;" hidden>⤓ Backup dati</button>
     </div>
   </header>
 
@@ -702,6 +719,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
       <button type="button" class="btn" id="backup-export-btn">Genera backup</button>
       <button type="button" class="btn ghost" id="backup-copy-btn">Copia backup</button>
       <a id="backup-download-link" class="btn ghost" href="#" download="registro-pagamenti-backup.csv" style="text-decoration:none;">Scarica file .csv</a>
+      <button type="button" class="btn ghost" id="xl-all" title="Un foglio per ogni scheda. Solo da leggere: per ripristinare usa il file .csv">Scarica Excel completo</button>
     </div>
     <textarea id="backup-export-text" readonly rows="4" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;padding:10px;border:1px solid var(--line);border-radius:4px;margin-bottom:16px;" placeholder="Clicca 'Genera backup' per creare il testo da copiare o scaricare."></textarea>
     <hr style="border:none;border-top:1px solid var(--line);margin:0 0 16px;">
@@ -1411,11 +1429,13 @@ function defaultPagatori(){ return [{id:'p1', nome:'Assicurazione'}]; }
 function defaultSettings(){
   const moduli = {}; MODULI_IDS.forEach(id => { moduli[id] = {on:true, nome:MODULI_DEFAULT_NOMI[id]}; });
   const elenchi = {}; Object.keys(ELENCHI_DEF).forEach(k => { elenchi[k] = ELENCHI_DEF[k].default.slice(); });
-  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}};
+  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}, ultimoBackup:'', backupDa:''};
 }
 function normalizeSettings(raw){
   const d = defaultSettings();
   if(!raw || typeof raw !== 'object') return d;
+  d.ultimoBackup = /^\d{4}-\d{2}-\d{2}$/.test(raw.ultimoBackup || '') ? raw.ultimoBackup : '';
+  d.backupDa = /^\d{4}-\d{2}-\d{2}$/.test(raw.backupDa || '') ? raw.backupDa : '';
   if(raw.profilo && typeof raw.profilo === 'object'){
     d.profilo.nome = String(raw.profilo.nome || '').trim().slice(0, 40);
     d.profilo.foto = typeof raw.profilo.foto === 'string' && raw.profilo.foto.startsWith('data:image/') && raw.profilo.foto.length < 150000 ? raw.profilo.foto : '';
@@ -1449,7 +1469,8 @@ function normalizeSettings(raw){
       nome: String(x.nome || '').trim(),
       parole: String(x.parole || '').trim(),
       ambito: x.ambito === 'persona' ? 'persona' : 'nucleo',
-      importi: importiDa(x)
+      importi: importiDa(x),
+      tipo: x.tipo === 'quantita' ? 'quantita' : 'importo'
     })).filter(x => x.nome);
   } else if(raw.massimali && typeof raw.massimali === 'object' && (raw.massimali.fasiPsico !== undefined || raw.massimali.secondoPsico !== undefined)){
     // vecchio formato: un solo massimale "psicologia" per tutto il nucleo
@@ -1629,9 +1650,10 @@ function massimaliMetrics(){
       pags.forEach(p => {
         const importo = mx.importi && mx.importi[p.id];
         if(!(importo > 0)) return;
-        const usato = g.righe.reduce((s, m) => s + rimborsoDi(m, p.id).pagato, 0);
+        const q = mx.tipo === 'quantita';
+        const usato = q ? g.righe.length : g.righe.reduce((s, m) => s + rimborsoDi(m, p.id).pagato, 0);
         const residuo = Math.max(0, importo - usato);
-        out.push({k:`mx_${mx.id}_${p.id}_${g.n}`, bar:{usato, importo, residuo, titolo:`${mx.nome}${pags.length > 1 ? ' — ' + p.nome : ''}${g.suff}`}, valore: euro(residuo), label: `Massimale ${escHtml(mx.nome)}${pags.length > 1 ? ' — ' + escHtml(p.nome) : ''}${escHtml(g.suff)} residuo (${anno}) · ${g.righe.length} prest.`, cls: residuo <= 0.004 ? 'warn' : ''});
+        out.push({k:`mx_${mx.id}_${p.id}_${g.n}`, bar:{usato, importo, residuo, q, titolo:`${mx.nome}${pags.length > 1 ? ' — ' + p.nome : ''}${g.suff}`}, valore: q ? qtaTxt(residuo) : euro(residuo), label: `Massimale ${escHtml(mx.nome)}${pags.length > 1 ? ' — ' + escHtml(p.nome) : ''}${escHtml(g.suff)} residuo (${anno}) · ${g.righe.length} prest.`, cls: residuo <= 0.004 ? 'warn' : ''});
       });
     });
   });
@@ -2598,7 +2620,7 @@ function panoBarHtml(b, secId){
   const cl = pct >= 100 ? 'full' : (pct >= 70 ? 'hot' : '');
   return `<div class="pano-box pano-bar ${b.on ? '' : 'off'}" data-jump-tab="${secId}">
     <span class="pano-tools"><button type="button" data-act="box-left" data-sec="${secId}" data-k="${m.k}">←</button><button type="button" data-act="box-right" data-sec="${secId}" data-k="${m.k}">→</button><button type="button" data-act="box-eye" data-sec="${secId}" data-k="${m.k}">👁</button></span>
-    <div class="pb-head"><strong>Massimale ${escHtml(x.titolo)}</strong><span>residuo <strong>${euro(x.residuo)}</strong> su ${euro(x.importo)}</span></div>
+    <div class="pb-head"><strong>Massimale ${escHtml(x.titolo)}</strong><span>${x.q ? `<strong>${x.usato} su ${x.importo}</strong> ${x.importo === 1 ? 'usata' : 'usate'} · residuo ${qtaTxt(x.residuo)}` : `residuo <strong>${euro(x.residuo)}</strong> su ${euro(x.importo)}`}</span></div>
     <div class="pb-track"><i class="${cl}" style="width:${pct}%"></i></div>
   </div>`;
 }
@@ -2753,6 +2775,7 @@ function applyProfilo(){
   try{ uxTitles(); }catch(e){}
 }
 function applySettings(){
+  try{ backupUiUpdate(); }catch(e){}
   applyProfilo();
   const spenti = MODULI_IDS.filter(id => !settings.moduli[id].on);
   visibleTabs = spenti.length ? MODULI_IDS.filter(id => settings.moduli[id].on) : null;
@@ -2814,6 +2837,7 @@ function profiloCardHtml(){
 }
 function renderImpostazioni(){
   const el = document.getElementById('panel-impostazioni');
+  accStash();
   const V = impView();
   const moduliHtml = MODULI_IDS.map(id => `
     <div class="set-row">
@@ -2851,20 +2875,23 @@ function renderImpostazioni(){
       </div>`).join('')}
       <div style="margin-top:8px;"><button type="button" class="btn ghost small" id="pag-add">+ Aggiungi pagatore</button></div>
       <h3 style="margin:18px 0 4px;font-size:13.5px;">Massimali annui</h3>
-      <p class="hint">Aggiungi i tetti di rimborso che vuoi tenere d'occhio, con un importo per ogni pagatore. Le <b>parole chiave</b> (separate da virgola) vengono cercate nel campo Prestazione delle spese dell'anno corrente. In Panoramica compare il residuo. Conta i rimborsi già pagati.</p>
+      <p class="hint">Aggiungi i tetti di rimborso che vuoi tenere d'occhio, con un importo per ogni pagatore. Le <b>parole chiave</b> (separate da virgola) vengono cercate nel campo Prestazione delle spese dell'anno corrente. In Panoramica compare il residuo. Per i massimali in euro conta i rimborsi già pagati; per quelli a quantità (es. 1 pulizia dei denti all\'anno) conta le spese registrate nell\'anno, anche se non ancora rimborsate.</p>
       ${V.massimali.length ? V.massimali.map((mx, i) => `
       <div class="set-row" style="border-top:1px solid var(--line);padding-top:10px;align-items:flex-end;">
         <div style="min-width:150px;"><label style="font-size:11.5px;color:var(--ink-soft);">Nome</label><input type="text" data-mass-i="${i}" data-mass-f="nome" value="${escHtml(mx.nome)}" maxlength="40" placeholder="es. Psicologia" style="min-width:0;width:100%;"></div>
         <div style="flex:1;min-width:190px;"><label style="font-size:11.5px;color:var(--ink-soft);">Parole chiave</label><input type="text" data-mass-i="${i}" data-mass-f="parole" value="${escHtml(mx.parole)}" placeholder="es. psicolog, psicoterap" style="min-width:0;width:100%;"></div>
         <div><label style="font-size:11.5px;color:var(--ink-soft);">Vale per</label><select data-mass-i="${i}" data-mass-f="ambito"><option value="nucleo" ${mx.ambito === 'nucleo' ? 'selected' : ''}>Tutto il nucleo</option><option value="persona" ${mx.ambito === 'persona' ? 'selected' : ''}>Ogni persona</option></select></div>
-        ${V.pagatori.map(p => `<div><label style="font-size:11.5px;color:var(--ink-soft);">${escHtml(p.nome)} (€/anno)</label><input type="number" step="0.01" min="0" data-mass-i="${i}" data-mass-imp="${p.id}" value="${(mx.importi && mx.importi[p.id]) || ''}" style="width:120px;"></div>`).join('')}
+        <div><label style="font-size:11.5px;color:var(--ink-soft);">Limite</label><select data-mass-i="${i}" data-mass-f="tipo"><option value="importo" ${mx.tipo !== 'quantita' ? 'selected' : ''}>Importo (€)</option><option value="quantita" ${mx.tipo === 'quantita' ? 'selected' : ''}>Quantità (volte)</option></select></div>
+        ${V.pagatori.map(p => `<div><label style="font-size:11.5px;color:var(--ink-soft);">${escHtml(p.nome)} ${mx.tipo === 'quantita' ? '(volte/anno)' : '(€/anno)'}</label><input type="number" step="${mx.tipo === 'quantita' ? 1 : 0.01}" min="0" data-mass-i="${i}" data-mass-imp="${p.id}" value="${(mx.importi && mx.importi[p.id]) || ''}" style="width:120px;"></div>`).join('')}
         <button type="button" class="btn ghost small" data-mass-del="${i}" title="Rimuovi">✕</button>
       </div>`).join('') : '<p class="doc-ref" style="margin:0 0 8px;">Nessun massimale impostato.</p>'}
       <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
-    ${elenchiHtml}`;
+    ${elenchiHtml}
+    <div class="set-card" id="backup-slot"></div>`;
+  accordionize(el);
 }
 document.getElementById('panel-impostazioni').addEventListener('change', (e) => {
   const t = e.target;
@@ -2884,7 +2911,7 @@ document.getElementById('panel-impostazioni').addEventListener('change', (e) => 
     const D = impEnsureDraft();
     const mx = D.massimali[parseInt(t.dataset.massI, 10)]; if(!mx) return;
     if(!mx.importi) mx.importi = {};
-    const v = parseFloat(t.value);
+    const v = mx.tipo === 'quantita' ? Math.round(parseFloat(t.value)) : parseFloat(t.value);
     if(v > 0) mx.importi[t.dataset.massImp] = v; else delete mx.importi[t.dataset.massImp];
   } else if(t.dataset.massI !== undefined){
     const D = impEnsureDraft();
@@ -2892,7 +2919,7 @@ document.getElementById('panel-impostazioni').addEventListener('change', (e) => 
     const f = t.dataset.massF;
     mx[f] = t.value;
   } else return;
-  if(t.dataset.massI !== undefined && t.dataset.massF === 'ambito') renderImpostazioni();
+  if(t.dataset.massI !== undefined && (t.dataset.massF === 'ambito' || t.dataset.massF === 'tipo')) renderImpostazioni();
   else impMarkDirty();
 });
 async function impSave(){
@@ -2917,7 +2944,7 @@ async function impSave(){
   showNotice('Impostazioni salvate e attivate.', 'success');
 }
 document.getElementById('panel-impostazioni').addEventListener('click', (e) => {
-  if(e.target.id === 'mass-add'){ impEnsureDraft().massimali.push({id:uid(), nome:'', parole:'', ambito:'nucleo', importi:{}}); renderImpostazioni(); }
+  if(e.target.id === 'mass-add'){ impEnsureDraft().massimali.push({id:uid(), nome:'', parole:'', ambito:'nucleo', tipo:'importo', importi:{}}); renderImpostazioni(); }
   if(e.target.id === 'pag-add'){ impEnsureDraft().pagatori.push({id:'p' + uid(), nome:'Nuovo pagatore'}); renderImpostazioni(); }
   const pu = e.target.closest('[data-pag-up]');
   if(pu){ const D = impEnsureDraft(), i = parseInt(pu.dataset.pagUp, 10); swap(D.pagatori, i, i - 1); renderImpostazioni(); }
@@ -4404,6 +4431,7 @@ function uxPanelSetup(tid){
     });
     head.after(fp); anchor = fp;
   }
+  const xb = document.createElement('button'); xb.type = 'button'; xb.className = 'btn ghost small'; xb.dataset.xl = tid; xb.title = 'Scarica in Excel le righe mostrate'; xb.textContent = 'Excel'; acts.appendChild(xb);
   const tg = [...panel.querySelectorAll('.add-toggle')];
   tg.forEach((b, i) => {
     b.removeAttribute('style');
@@ -4784,6 +4812,7 @@ function dtTimelineFor(id){ const m = medical.find(x => x.id === id); return m ?
         head.querySelector('h3').textContent = mode + (t ? ' · ' + t.textContent : '');
         f.scrollTop = 0;
       }
+      try{ if(typeof nmApplyAll === 'function') nmApplyAll(); }catch(e){}
       bd.classList.toggle('on', isOpen());
       document.body.style.overflow = isOpen() ? 'hidden' : '';
     }).observe(f, {attributes:true, attributeFilter:['class']});
@@ -4791,6 +4820,197 @@ function dtTimelineFor(id){ const m = medical.find(x => x.id === id); return m ?
   bd.addEventListener('click', () => forms.filter(f => f.classList.contains('open')).forEach(closeForm));
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape') forms.filter(f => f.classList.contains('open')).forEach(closeForm); });
 })();
+
+// ---- Impostazioni: schede espandibili, una alla volta; backup nelle impostazioni ----
+let accOpen = null;
+const ACC_GROUPS = [['Famiglia', ['profilo', 'moduli']], ['Sanità', ['rimborsi', 'sanita']], ['Dati', ['elenchi', 'backup']]];
+const ACC_ICON = {profilo:'☺', moduli:'▦', rimborsi:'✚', sanita:'%', elenchi:'☰', backup:'⤓'};
+function accToday(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function accDaysAgo(iso){ if(!iso) return null; const a = Date.parse(iso + 'T00:00:00Z'), b = Date.parse(accToday() + 'T00:00:00Z'); return isNaN(a) ? null : Math.round((b - a) / 86400000); }
+function accAgo(g){ return g <= 0 ? 'oggi' : g === 1 ? 'ieri' : g + ' giorni fa'; }
+function accItalian(iso){ const m = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'], p = iso.split('-'); return +p[2] + ' ' + m[+p[1] - 1] + ' ' + p[0]; }
+function backupState(){
+  if(!settings.backupDa){ settings.backupDa = accToday(); try{ saveSettings(); }catch(e){} }
+  const g = accDaysAgo(settings.ultimoBackup);
+  if(g != null) return {g, alert:g > 30, sum:(g > 30 ? '⚠ ' : '') + 'Ultimo backup: ' + accAgo(g), line:'Ultimo backup scaricato: <b' + (g > 30 ? ' style="color:var(--stamp)"' : '') + '>' + accAgo(g) + '</b> (' + accItalian(settings.ultimoBackup) + '). Consiglio: uno al mese e prima di ogni aggiornamento dell\'app.'};
+  const d0 = accDaysAgo(settings.backupDa);
+  return {g:null, alert:d0 != null && d0 > 30, sum:(d0 != null && d0 > 30 ? '⚠ ' : '') + 'Nessun backup ancora scaricato', line:'Non hai ancora scaricato nessun backup. Consiglio: uno al mese e prima di ogni aggiornamento dell\'app.'};
+}
+function backupUiUpdate(){
+  const s = backupState();
+  const btn = document.querySelector('.tab-btn[data-tab="impostazioni"]');
+  if(btn){ let d = btn.querySelector('.bk-dot'); if(s.alert && !d){ d = document.createElement('span'); d.className = 'bk-dot'; btn.appendChild(d); } else if(!s.alert && d) d.remove(); }
+  const l = document.getElementById('backup-last'); if(l) l.innerHTML = s.line;
+  const sm = document.querySelector('.acc[data-k="backup"] .acc-t span'); if(sm) sm.textContent = s.sum;
+  const w = document.querySelector('.bk-warn'); if(w && !s.alert) w.remove();
+}
+function markBackup(){ settings.ultimoBackup = accToday(); backupUiUpdate(); try{ saveSettings(); }catch(e){} }
+function accStash(){ const bp = document.getElementById('backup-panel'); if(bp && bp.parentElement && bp.parentElement.closest('#panel-impostazioni')){ bp.style.display = 'none'; document.body.appendChild(bp); } }
+function accDescribe(card){
+  const h = card.querySelector('h3'), t = h ? h.textContent.trim() : '';
+  if(card.querySelector('#prof-nome')) return {key:'profilo', title:'Profilo della famiglia', sum:((settings.profilo && settings.profilo.nome) || 'Famiglia')};
+  if(card.querySelector('#nomi-p')) { const n = nomiMap(); return {key:'rimborsi', title:'Chi ti rimborsa', sum:n.p + ' · ' + n.s}; }
+  if(card.id === 'backup-slot') return {key:'backup', title:'Backup e ripristino', sum:backupState().sum};
+  if(t === 'Moduli'){ const on = MODULI_IDS.filter(id => settings.moduli[id].on).length; return {key:'moduli', title:'Moduli', sum:on + ' schede attive su ' + MODULI_IDS.length}; }
+  if(Object.keys(ELENCHI_DEF).some(k => ELENCHI_DEF[k].titolo === t)) return {key:'elenchi', title:'Elenchi di suggerimenti', sum:Object.keys(ELENCHI_DEF).length + ' elenchi', keep:true};
+  const nm = (settings.massimali || []).length, mx = nm + (nm === 1 ? ' massimale' : ' massimali');
+  return {key:'sanita', title:'Chi ti rimborsa e massimali', sum:((settings.pagatori || []).map(p => p.nome).join(' · ') || 'Nessun pagatore') + ' · ' + mx, strip:true};
+}
+function accordionize(el){
+  const bp = document.getElementById('backup-panel'), slot = el.querySelector('#backup-slot');
+  if(slot && bp){ slot.innerHTML = '<p id="backup-last"></p>'; slot.appendChild(bp); }
+  const eh = [...el.querySelectorAll(':scope > p.form-section-title')].find(x => /Elenchi di suggerimenti/.test(x.textContent));
+  let eHint = null; if(eh){ eHint = eh.nextElementSibling && eh.nextElementSibling.classList.contains('hint') ? eh.nextElementSibling : null; eh.remove(); if(eHint) eHint.remove(); }
+  const parts = {};
+  [...el.querySelectorAll(':scope > .set-card')].forEach(c => {
+    const d = accDescribe(c); if(!d) return;
+    (parts[d.key] = parts[d.key] || {d, cards:[]}).cards.push(c);
+  });
+  const st = backupState();
+  let html = st.alert ? '<div class="bk-warn">⚠ ' + (st.g != null ? 'L\'ultimo backup risale a ' + st.g + ' giorni fa.' : 'Non hai ancora scaricato nessun backup.') + ' Scaricane uno nella scheda «Backup e ripristino».</div>' : '';
+  const out = document.createElement('div');
+  ACC_GROUPS.forEach(([gt, keys]) => {
+    const ks = keys.filter(k => parts[k]); if(!ks.length) return;
+    const gh = document.createElement('div'); gh.className = 'set-grp'; gh.textContent = gt; out.appendChild(gh);
+    ks.forEach(k => {
+      const p = parts[k], a = document.createElement('div'); a.className = 'acc' + (accOpen === k ? ' open' : ''); a.dataset.k = k;
+      a.innerHTML = '<button type="button" class="acc-h" aria-expanded="' + (accOpen === k) + '"><span class="acc-ic">' + ACC_ICON[k] + '</span><span class="acc-t"><b>' + escHtml(p.d.title) + '</b><span>' + escHtml(p.d.sum) + '</span></span><span class="acc-ch">▸</span></button><div class="acc-b"></div>';
+      const body = a.querySelector('.acc-b');
+      if(k === 'elenchi' && eHint) body.appendChild(eHint);
+      p.cards.forEach(c => {
+        if(p.d.keep){ body.appendChild(c); return; }
+        if(p.d.strip){ const h = c.querySelector('h3'); if(h) h.remove(); }
+        else if(k !== 'backup'){ const h = c.querySelector('h3'); if(h) h.remove(); }
+        [...c.childNodes].forEach(n => body.appendChild(n));
+      });
+      out.appendChild(a);
+    });
+  });
+  const bar = el.querySelector(':scope > .imp-bar, :scope > [data-imp-bar]');
+  const keepTop = [...el.children].filter(x => !x.classList.contains('set-card'));
+  el.innerHTML = '';
+  keepTop.forEach(x => el.appendChild(x));
+  if(html) el.insertAdjacentHTML('beforeend', html);
+  while(out.firstChild) el.appendChild(out.firstChild);
+  backupUiUpdate();
+}
+document.getElementById('panel-impostazioni').addEventListener('click', (e) => {
+  const h = e.target.closest('.acc-h'); if(!h) return;
+  const a = h.parentElement, k = a.dataset.k, was = a.classList.contains('open');
+  document.querySelectorAll('#panel-impostazioni .acc').forEach(x => { x.classList.remove('open'); x.querySelector('.acc-h').setAttribute('aria-expanded', 'false'); });
+  accOpen = was ? null : k;
+  if(!was){ a.classList.add('open'); h.setAttribute('aria-expanded', 'true'); }
+});
+document.querySelector('.tab-btn[data-tab="impostazioni"]').addEventListener('click', () => { accOpen = null; try{ renderImpostazioni(); }catch(e){} });
+['backup-export-btn', 'backup-copy-btn', 'backup-download-link'].forEach(id => document.getElementById(id).addEventListener('click', () => { if(id !== 'backup-copy-btn' || document.getElementById('backup-export-text').value) markBackup(); }));
+
+// ---- Esportazione in Excel (.xlsx scritto a mano, senza librerie) ----
+const XL_CRC = (() => { const t = []; for(let n = 0; n < 256; n++){ let c = n; for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function xlCrc(b){ let c = 0xFFFFFFFF; for(let i = 0; i < b.length; i++) c = XL_CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function xlZip(files){
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  const u16 = (v) => [v & 255, (v >> 8) & 255], u32 = (v) => [v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >>> 24) & 255];
+  files.forEach(f => {
+    const nm = enc.encode(f.name), data = enc.encode(f.data), crc = xlCrc(data);
+    const lh = new Uint8Array([0x50, 0x4b, 3, 4, ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(nm.length), ...u16(0)]);
+    parts.push(lh, nm, data);
+    central.push(new Uint8Array([0x50, 0x4b, 1, 2, ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(nm.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(off)]), nm);
+    off += lh.length + nm.length + data.length;
+  });
+  const cl = central.reduce((s, x) => s + x.length, 0);
+  const end = new Uint8Array([0x50, 0x4b, 5, 6, ...u16(0), ...u16(0), ...u16(files.length), ...u16(files.length), ...u32(cl), ...u32(off), ...u16(0)]);
+  return new Blob([...parts, ...central, end], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+const xlEsc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+function xlCol(i){ let s = ''; i++; while(i > 0){ const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+function xlSerial(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 86400000 + 25569 : null; }
+// colonna: {h, w, t:'s'|'d'|'e'|'n'}  ·  riga: array di valori (stringa, numero, 'aaaa-mm-gg')
+function xlSheetXml(sh){
+  const nC = sh.cols.length, rows = [sh.cols.map(c => c.h)].concat(sh.rows);
+  let x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>' +
+    sh.cols.map((c, i) => `<col min="${i + 1}" max="${i + 1}" width="${c.w || 14}" customWidth="1"/>`).join('') + '</cols><sheetData>';
+  rows.forEach((r, ri) => {
+    x += `<row r="${ri + 1}">`;
+    for(let ci = 0; ci < nC; ci++){
+      const ref = xlCol(ci) + (ri + 1), v = r[ci], c = sh.cols[ci];
+      if(ri === 0){ x += `<c r="${ref}" t="inlineStr" s="1"><is><t>${xlEsc(v)}</t></is></c>`; continue; }
+      if(v === null || v === undefined || v === '') continue;
+      if(c.t === 'd'){ const n = xlSerial(v); if(n !== null){ x += `<c r="${ref}" s="2"><v>${n}</v></c>`; continue; } }
+      if((c.t === 'e' || c.t === 'n') && typeof v === 'number' && isFinite(v)){ x += `<c r="${ref}" s="${c.t === 'e' ? 3 : 4}"><v>${v}</v></c>`; continue; }
+      x += `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xlEsc(v)}</t></is></c>`;
+    }
+    x += '</row>';
+  });
+  return x + `</sheetData><autoFilter ref="A1:${xlCol(nC - 1)}${Math.max(rows.length, 1)}"/></worksheet>`;
+}
+function xlBuild(sheets){
+  const used = new Set();
+  sheets = sheets.map((s, i) => { let n = String(s.name || 'Foglio ' + (i + 1)).replace(/[:\\\/?*\[\]]/g, ' ').trim().slice(0, 31) || 'Foglio'; let k = n, j = 2; while(used.has(k.toLowerCase())) k = n.slice(0, 28) + ' ' + j++; used.add(k.toLowerCase()); return {...s, name:k}; });
+  const files = [
+    {name:'[Content_Types].xml', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('') + '</Types>'},
+    {name:'_rels/.rels', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+    {name:'xl/workbook.xml', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + sheets.map((s, i) => `<sheet name="${xlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets></workbook>'},
+    {name:'xl/_rels/workbook.xml.rels', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('') + `<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+    {name:'xl/styles.xml', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="2"><numFmt numFmtId="164" formatCode="dd/mm/yyyy"/><numFmt numFmtId="165" formatCode="#,##0.00\\ &quot;€&quot;"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE7EDFF"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FF9AA8BA"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="1" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>'}
+  ];
+  sheets.forEach((s, i) => files.push({name:`xl/worksheets/sheet${i + 1}.xml`, data:xlSheetXml(s)}));
+  return xlZip(files);
+}
+function xlDownload(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+// ---- Dati di ogni scheda per l'esportazione ----
+const XL_TAB = {recurring:'Pagamenti ricorrenti', medical:'Sanità integrativa', bilancio:'Bilancio annuale', contratti:'Contratti a scadenza', documenti:'Documenti personali', detrazioni:'Detrazioni fiscali'};
+const xlSort = (arr, fn, k, d) => (typeof applySort === 'function' && typeof fn === 'function') ? applySort(arr, fn, k, d) : arr;
+const xlStatoDays = (d, soon) => { if(!d) return ''; const g = daysUntil(d); return g < 0 ? 'Scaduto' : g <= soon ? 'In scadenza' : 'Valido'; };
+const xlLvLabel = (pill) => { const m = />([^<]+)</.exec(pill || ''); const t = m ? m[1].trim() : ''; return /^Rimborsato/.test(t) ? 'Rimborsato' : t; };
+function xlMedical(){
+  const rows = xlSort(getFilteredMedical(), medicalSortValue, medicalSortKey, medicalSortDir);
+  const P = settings.pagatori;
+  const cols = [{h:'Data documento', w:14, t:'d'}, {h:'Richiedente', w:16}, {h:'Prestazione', w:30}, {h:'Tipo documento', w:15}, {h:'Numero documento', w:17}, {h:'Modalità', w:11}, {h:'Totale', w:13, t:'e'}];
+  P.forEach(p => cols.push({h:p.nome + ' · stato', w:16}, {h:p.nome + ' · pagato', w:13, t:'e'}, {h:p.nome + ' · inviata', w:12, t:'d'}, {h:p.nome + ' · chiusa', w:12, t:'d'}, {h:p.nome + ' · giorni', w:10, t:'n'}));
+  cols.push({h:'Residuo', w:13, t:'e'}, {h:'Stato pratica', w:24}, {h:'Note', w:30}, {h:'Documenti', w:40});
+  return {cols, rows:rows.map(m => {
+    const n = medicalRowNumbers(m), lv = dtLevels(m);
+    const r = [m.dataDocumento, m.richiedente || '', m.descrizione || '', m.tipoDocumento || '', m.numeroDocumento || '', m.modalita || '', n.totale];
+    lv.forEach(x => { const g = dtDays(x.a, x.c); r.push(xlLvLabel(x.pill), (n.pagati && n.pagati[x.id]) || 0, x.a || '', x.c || '', g != null && g >= 0 ? g : ''); });
+    r.push(n.residuo, n.statoInfo.label, m.note || '', (m.documenti || []).map(d => d.nome + ': ' + d.url).join(' | '));
+    return r;
+  })};
+}
+function xlTabData(tid){
+  const S = { // cols: [intestazione, larghezza, tipo]
+    recurring: () => ({cols:[{h:'Voce', w:30}, {h:'Scadenza', w:12, t:'d'}, {h:'Importo', w:13, t:'e'}, {h:'Ricorrenza', w:14}, {h:'Stato', w:13}, {h:'Note', w:34}],
+      rows:xlSort(recurring, recurringSortValue, recurringSortKey, recurringSortDir).map(p => [p.nome, p.scadenza, Number(p.importo) || 0, p.ricorrenza, p.stato === 'pagato' ? 'Pagato' : (daysUntil(p.scadenza) < 0 ? 'Scaduto' : 'Da pagare'), p.note || ''])}),
+    medical: xlMedical,
+    bilancio: () => {
+      const M = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+      return {cols:[{h:'Anno', w:8, t:'n'}, {h:'Conto', w:22}, {h:'Entrate', w:14, t:'e'}, {h:'Uscite', w:14, t:'e'}, {h:'Risparmio', w:14, t:'e'}].concat(M.map(m => ({h:'Entrate ' + m, w:12, t:'e'})), M.map(m => ({h:'Uscite ' + m, w:12, t:'e'}))),
+        rows:xlSort(getFilteredBilancio(), bilancioSortValue, bilancioSortKey, bilancioSortDir).map(b => [Number(b.anno) || 0, b.conto || '', Number(b.entrate) || 0, Number(b.uscite) || 0, (Number(b.entrate) || 0) - (Number(b.uscite) || 0)].concat(M.map((m, i) => b.entrateMensili && b.entrateMensili[i] != null ? Number(b.entrateMensili[i]) : ''), M.map((m, i) => b.usciteMensili && b.usciteMensili[i] != null ? Number(b.usciteMensili[i]) : '')))};
+    },
+    contratti: () => ({cols:[{h:'Tipo', w:18}, {h:'Controparte', w:26}, {h:'Riferimento', w:22}, {h:'Inizio', w:12, t:'d'}, {h:'Scadenza', w:12, t:'d'}, {h:'Disdetta entro', w:14, t:'d'}, {h:'Canone', w:13, t:'e'}, {h:'Prezzo unitario', w:14, t:'n'}, {h:'Unità', w:10}, {h:'Stato', w:13}, {h:'Note', w:32}],
+      rows:xlSort(getFilteredContratti(), contrattiSortValue, contrattiSortKey, contrattiSortDir).map(c => [c.tipo || '', c.controparte || '', c.riferimento || '', c.dataInizio, c.dataFine, c.dataDisdetta, c.canone === '' || c.canone == null ? '' : Number(c.canone), c.prezzoUnitario === '' || c.prezzoUnitario == null ? '' : Number(c.prezzoUnitario), c.unitaMisura || '', xlStatoDays(c.dataFine, 90), c.note || ''])}),
+    documenti: () => ({cols:[{h:'Tipo', w:20}, {h:'Intestatario', w:16}, {h:'Numero', w:16}, {h:'Ente rilascio', w:20}, {h:'Rilascio', w:12, t:'d'}, {h:'Scadenza', w:12, t:'d'}, {h:'Stato', w:13}, {h:'Link', w:36}, {h:'Note', w:30}],
+      rows:xlSort(getFilteredDocumenti(), documentiSortValue, documentiSortKey, documentiSortDir).map(d => [d.tipo || '', d.intestatario || '', d.numero || '', d.enteRilascio || '', d.dataRilascio, d.dataScadenza, xlStatoDays(d.dataScadenza, 90), d.link || '', d.note || ''])}),
+    detrazioni: () => ({cols:[{h:'Categoria', w:26}, {h:'Intestatario', w:16}, {h:'Data', w:12, t:'d'}, {h:'Importo', w:13, t:'e'}, {h:'Note', w:36}],
+      rows:xlSort(getFilteredDetrazioni(), detrazioniSortValue, detrazioniSortKey, detrazioniSortDir).map(d => [d.categoria || '', d.intestatario || '', d.data, Number(d.importo) || 0, d.note || ''])})
+  };
+  const o = S[tid](); o.name = (settings.moduli && settings.moduli[tid] && settings.moduli[tid].nome) || XL_TAB[tid]; return o;
+}
+function xlFileDate(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-xl], #xl-all'); if(!b) return;
+  try{
+    if(b.id === 'xl-all'){ xlDownload(xlBuild(Object.keys(XL_TAB).filter(t => !visibleTabs || visibleTabs.includes(t)).map(xlTabData)), 'family-dashboard-' + xlFileDate() + '.xlsx'); showNotice('Excel completo scaricato.', 'success'); return; }
+    const t = b.dataset.xl, d = xlTabData(t);
+    xlDownload(xlBuild([d]), d.name.toLowerCase().replace(/[^a-z0-9à-ù]+/g, '-').replace(/^-|-$/g, '') + '-' + xlFileDate() + '.xlsx');
+    showNotice(d.rows.length + (d.rows.length === 1 ? ' riga esportata' : ' righe esportate') + ' in Excel.', 'success');
+  }catch(err){ console.error(err); showNotice('Non sono riuscito a creare il file Excel.', 'error'); }
+});
+
+const qtaTxt = (n) => n + (n === 1 ? " volta" : " volte");
 
 onAuthStateChanged(auth, async (user) => {
   if(user){
