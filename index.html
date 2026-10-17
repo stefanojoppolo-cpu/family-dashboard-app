@@ -672,6 +672,12 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-note{margin:2px 0 0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
 .md-tblw{overflow-x:auto}.md-tbl{border-collapse:collapse;font-size:12px;width:100%}
 .md-tbl th,.md-tbl td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.md-tbl th:first-child{text-align:left}.md-tbl th{color:var(--ink-soft);font-weight:700}
+.fpanel.open{display:grid !important;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px 16px;align-items:end;}
+.fpanel .ff{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.fpanel .ff label{margin:0 !important;font-size:12px;font-weight:600;color:var(--ink-soft);}
+.fpanel .ff select,.fpanel .ff input{width:100% !important;min-width:0;box-sizing:border-box;}
+.fpanel > label{grid-column:1/-1;margin:0 !important;}
+.fpanel > .btn{grid-column:1/-1;justify-self:end;margin:0 !important;}
 </style>
 </head>
 <body>
@@ -4561,6 +4567,12 @@ function uxPanelSetup(tid){
       upd();
     });
     head.after(fp); anchor = fp; upd();
+    [...fp.querySelectorAll(':scope > label')].forEach(l => {
+      const nx = l.nextElementSibling;
+      if(l.querySelector('input') || !nx || !/^(SELECT|INPUT)$/.test(nx.tagName)) return;
+      const w = document.createElement('div'); w.className = 'ff'; l.removeAttribute('style'); nx.removeAttribute('style');
+      l.before(w); w.appendChild(l); w.appendChild(nx);
+    });
   }
   const xb = document.createElement('button'); xb.type = 'button'; xb.className = 'btn ghost small'; xb.dataset.xl = tid; xb.title = 'Scarica in Excel le righe mostrate'; xb.textContent = 'Excel'; acts.appendChild(xb);
   if(tid === 'medical'){ const eb = document.createElement('button'); eb.type = 'button'; eb.className = 'btn ghost small'; eb.id = 'pay-email-btn'; eb.hidden = true; eb.textContent = '✉ Email'; acts.appendChild(eb); }
