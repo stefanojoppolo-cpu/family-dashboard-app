@@ -1683,7 +1683,8 @@ function massimaliMetrics(){
     const righe = medical.filter(m => (m.dataDocumento || '').slice(0,4) === anno && massimaleMatch(mx, m));
     const gruppi = [];
     if(mx.ambito === 'persona'){
-      const nomi = [...new Set(settings.elenchi.persone.concat(righe.map(m => (m.richiedente || '').trim()).filter(Boolean)))];
+      const nomi = [...new Set(settings.elenchi.persone.concat(medical.map(m => (m.richiedente || '').trim()).filter(Boolean)))];
+      if(!nomi.length) gruppi.push({n:'', suff:'', righe});
       nomi.forEach(n => gruppi.push({n, suff:' — ' + n, righe:righe.filter(m => (m.richiedente || '').trim() === n)}));
     } else {
       gruppi.push({n:'', suff:'', righe});
@@ -3004,6 +3005,8 @@ async function impSave(){
   if(!MODULI_IDS.some(id => impDraft.moduli[id].on)){ showNotice('Deve restare attivo almeno un modulo.'); return; }
   const incompleti = impDraft.massimali.filter(x => x.nome.trim() && !x.parole.trim());
   if(incompleti.length){ showNotice(`Il massimale "${incompleti[0].nome}" non ha parole chiave: aggiungile per poterlo calcolare.`); return; }
+  const senzaLimite = impDraft.massimali.filter(x => x.nome.trim() && !Object.values(x.importi || {}).some(v => v > 0));
+  if(senzaLimite.length){ showNotice(`Il massimale "${senzaLimite[0].nome}" non ha nessun limite: scrivi un importo (o una quantità) per almeno un pagatore, altrimenti il box non compare.`); return; }
   const tz = impDraft.pagatori.find(p => p.quota > 0);
   if(tz && !String(tz.nome || '').trim()){ showNotice('Scrivi il nome del terzo soggetto, oppure togli la spunta.'); return; }
   terzoLast(impDraft);
