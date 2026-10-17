@@ -1611,6 +1611,13 @@ function showSaveWarning(msg){
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function euro(n){ return (Number(n)||0).toLocaleString('it-IT', {style:'currency', currency:'EUR'}); }
+function normDate(s){
+  s = String(s == null ? '' : s).trim(); let m;
+  if((m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s)) || (m = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(s))) { let yy = +m[1]; if(yy < 100) yy += 2000; if(yy < 1900 || yy > 2100) return ''; return yy + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0'); }
+  if((m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4}|\d{2})$/.exec(s))){ const y = m[3].length === 2 ? '20' + m[3] : m[3]; if(+m[2] >= 1 && +m[2] <= 12 && +m[1] >= 1 && +m[1] <= 31) return y + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0'); }
+  return '';
+}
+function fixMedDates(a){ return (Array.isArray(a) ? a : []).map(m => { const n = normDate(m.dataDocumento); return n && n !== m.dataDocumento ? {...m, dataDocumento: n} : m; }); }
 function fmtDate(d){ if(!d) return '—'; const parts=d.split('-'); return parts.length===3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : d; }
 function daysUntil(d){ const today=new Date(); today.setHours(0,0,0,0); const target=new Date(d); return Math.round((target-today)/86400000); }
 
@@ -1620,7 +1627,7 @@ async function loadData(){
   try{ const r = await storageAdapter.get(KEY_RECURRING, false); recurring = r ? JSON.parse(r.value) : []; }
   catch(e){ recurring = []; }
   let rawMed = null;
-  try{ rawMed = await storageAdapter.get(KEY_MEDICAL, false); medical = rawMed ? JSON.parse(rawMed.value) : []; }
+  try{ rawMed = await storageAdapter.get(KEY_MEDICAL, false); medical = fixMedDates(rawMed ? JSON.parse(rawMed.value) : []); }
   catch(e){ medical = []; rawMed = null; }
   // Conversione automatica dal vecchio formato (FASI / 2° livello fissi): prima si salva una copia di sicurezza
   if(rawMed && Array.isArray(medical) && medical.some(m => !m.rimborsi)){
@@ -3455,6 +3462,8 @@ document.getElementById('medical-import-confirm').addEventListener('click', asyn
     }
     const [dataDocumento, tipoDocumento, numeroDocumento, richiedente, descrizione, modalita, totaleStr] = parts;
     const totale = parseFloat(totaleStr.replace(',', '.'));
+    const dataOk = normDate(dataDocumento);
+    if(!dataOk){ errors.push(`Riga ${idx+1}: data non valida («${dataDocumento}»): usa aaaa-mm-gg oppure gg/mm/aaaa.`); return; }
     if(!dataDocumento || !richiedente || !descrizione || isNaN(totale)){
       errors.push(`Riga ${idx+1}: dati mancanti o totale non numerico.`);
       return;
@@ -3468,7 +3477,7 @@ document.getElementById('medical-import-confirm').addEventListener('click', asyn
     medical.push({
       id: uid(),
       richiedente, tipoDocumento: tipoDocumento || 'Fattura', numeroDocumento: numeroDocumento || '',
-      dataDocumento, descrizione, modalita: modalita === 'Diretta' ? 'Diretta' : 'Indiretta',
+      dataDocumento: dataOk, descrizione, modalita: modalita === 'Diretta' ? 'Diretta' : 'Indiretta',
       totale, rimborsi
     });
     added++;
@@ -3961,7 +3970,7 @@ document.getElementById('backup-import-btn').addEventListener('click', async () 
     } else settings = normalizeSettings(parsed.settings);
   }
   settings.configurato = true;
-  medical = parsed.medical.map(m => migrateMedicalRecord(m, settings.pagatori));
+  medical = fixMedDates(parsed.medical.map(m => migrateMedicalRecord(m, settings.pagatori)));
   await saveSettings(); applySettings();
   await saveRecurring();
   await saveMedical();
@@ -4613,7 +4622,7 @@ try{ payEmailRefresh(); }catch(e){}
 
 // ---- Scheda Report: grafici sui dati (spese mediche, bilancio) ----
 function rpPayers(){ return settings.pagatori.map(p => ({id:p.id, nome:p.nome})); }
-function rpMedRows(){ return medical.map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:m.dataDocumento || '', who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', mod:m.modalita || '', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo}; }); }
+function rpMedRows(){ return medical.map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:normDate(m.dataDocumento), who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', mod:m.modalita || '', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo}; }); }
 function rpBilRows(){ return bilancio.map(b => ({id:b.id, anno:String(b.anno), conto:(b.conto || '').trim() || '—', e:Number(b.entrate) || 0, u:Number(b.uscite) || 0})); }
 const RP_MES = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const RP_COL = ['#2F5BEA','#1C8A5A','#B96A00','#7A4FD6','#0F8B8D','#C2410C','#6B7B8C'];
@@ -4672,7 +4681,7 @@ function rpBuild(c){
   let keyOf, keys, lab = (k) => k;
   if(c.grp === 'mese'){
     const ds = rows.map(r => r.date.slice(0, 7)).sort(); keys = [];
-    if(ds.length){ let [y, m] = ds[0].split('-').map(Number); const [ey, em] = ds[ds.length - 1].split('-').map(Number); while(y < ey || (y === ey && m <= em)){ keys.push(y + '-' + String(m).padStart(2, '0')); m++; if(m > 12){ m = 1; y++; } } }
+    if(ds.length){ let [y, m] = ds[0].split('-').map(Number); const [ey, em] = ds[ds.length - 1].split('-').map(Number); while((y < ey || (y === ey && m <= em)) && keys.length < 240){ keys.push(y + '-' + String(m).padStart(2, '0')); m++; if(m > 12){ m = 1; y++; } } }
     keyOf = r => r.date.slice(0, 7); lab = k => RP_MES[+k.slice(5) - 1] + ' ' + k.slice(2, 4);
   } else if(c.grp === 'anno'){ keyOf = r => r.date.slice(0, 4); keys = [...new Set(rows.map(keyOf))].sort(); }
   else if(c.grp === 'persona'){ keyOf = r => r.who; keys = [...new Set(rows.map(keyOf))].sort(); }
