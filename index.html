@@ -664,6 +664,14 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-body{padding:12px 24px 8px;overflow:auto;flex:1}
 .md-foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 24px 16px;border-top:1px solid var(--line);background:var(--paper-raised,#fff)}
 @media (max-width:640px){.md-head,.md-body,.md-foot{padding-left:16px;padding-right:16px}}
+.md-dates span{display:block;font-size:11.5px;color:var(--ink-soft)}.md-dates b{display:block;font-size:13.5px;margin-top:2px}
+.xrow{display:none!important}
+.dl-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.dl-chip svg{color:var(--ink-soft);flex-shrink:0}.dl-chip a{color:var(--accent);text-decoration:none}
+.dl-chip button{background:none;border:none;color:var(--stamp);cursor:pointer;padding:0;font-size:13px;line-height:1}
+.md-note{margin:2px 0 0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.md-tblw{overflow-x:auto}.md-tbl{border-collapse:collapse;font-size:12px;width:100%}
+.md-tbl th,.md-tbl td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.md-tbl th:first-child{text-align:left}.md-tbl th{color:var(--ink-soft);font-weight:700}
 </style>
 </head>
 <body>
@@ -859,6 +867,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
           <input type="checkbox" id="rf-bloccato" style="width:auto;"> Blocca definitivamente questo pagamento (non più modificabile né eliminabile)
         </label>
       </div>
+      <div class="field span3"><p class="form-section-title">Documenti collegati</p><p class="form-section-hint">Link a ricevute, contratti o altri documenti (es. su Google Drive).</p><div id="rf-docs-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input type="text" id="rf-doc-nome" placeholder="Nome (es. Ricevuta)" style="width:170px;"><input type="url" id="rf-doc-url" placeholder="Link Google Drive" style="flex:1;min-width:220px;"><button type="button" class="btn small ghost" id="rf-doc-add">+ Aggiungi</button></div></div>
       <div class="form-actions">
         <button type="button" class="btn ghost" id="rf-cancel">Annulla</button>
         <button type="button" class="btn" id="rf-save">Salva</button>
@@ -1216,6 +1225,8 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
           </div>
         </div>
       </div>
+
+      <div class="form-section"><p class="form-section-title">Documenti collegati</p><p class="form-section-hint">Link a ricevute, contratti o altri documenti (es. su Google Drive).</p><div id="cf-docs-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input type="text" id="cf-doc-nome" placeholder="Nome (es. Ricevuta)" style="width:170px;"><input type="url" id="cf-doc-url" placeholder="Link Google Drive" style="flex:1;min-width:220px;"><button type="button" class="btn small ghost" id="cf-doc-add">+ Aggiungi</button></div></div>
 
       <div class="form-actions">
         <button type="button" class="btn ghost" id="cf-cancel">Annulla</button>
@@ -3138,6 +3149,7 @@ function resetRecurringForm(){
   document.getElementById('rf-bloccato').checked = false;
   confirmingLockRecurring = false;
   document.getElementById('rf-save').textContent = 'Salva';
+  rfDocs.set([]);
 }
 document.getElementById('toggle-recurring-form').addEventListener('click', () => {
   editingRecurringId = null;
@@ -3173,7 +3185,8 @@ document.getElementById('rf-save').addEventListener('click', async (e) => {
     ricorrenza: document.getElementById('rf-ricorrenza').value,
     stato: document.getElementById('rf-stato').value,
     note: document.getElementById('rf-note').value.trim(),
-    bloccato: vuoleBloccare
+    bloccato: vuoleBloccare,
+    documenti: (rfDocs.flush(), rfDocs.get())
   };
   if(editingRecurringId){
     recurring = recurring.map(p => p.id===editingRecurringId ? entry : p);
@@ -3531,6 +3544,7 @@ document.getElementById('recurring-body').addEventListener('click', async (e) =>
     document.getElementById('rf-ricorrenza').value = item.ricorrenza;
     document.getElementById('rf-stato').value = item.stato;
     document.getElementById('rf-note').value = item.note || '';
+    rfDocs.set(item.documenti);
     document.getElementById('rf-bloccato').checked = false;
     confirmingLockRecurring = false;
     document.getElementById('rf-save').textContent = 'Salva';
@@ -3590,7 +3604,7 @@ document.getElementById('toggle-backup-panel').addEventListener('click', () => {
 
 let confirmingBackupImport = false;
 
-const REC_CSV_COLS = ['id','nome','scadenza','importo','ricorrenza','stato','note','bloccato'];
+const REC_CSV_COLS = ['id','nome','scadenza','importo','ricorrenza','stato','note','bloccato','documenti'];
 const MED_CSV_COLS = ['id','richiedente','tipoDocumento','numeroDocumento','dataDocumento','descrizione','note','modalita','totale','rimborsi','bloccata','documenti','nomi'];
 
 function csvEscape(value){
@@ -3627,12 +3641,12 @@ const BIL_CSV_COLS = ['id','anno','conto','entrate','uscite',
   'usciteGen','usciteFeb','usciteMar','usciteApr','usciteMag','usciteGiu','usciteLug','usciteAgo','usciteSet','usciteOtt','usciteNov','usciteDic','bloccato'];
 const BIL_MESI_ENTRATE_KEYS = BIL_CSV_COLS.slice(5,17);
 const BIL_MESI_USCITE_KEYS = BIL_CSV_COLS.slice(17,29);
-const CONTR_CSV_COLS = ['id','tipo','controparte','riferimento','dataInizio','dataFine','dataDisdetta','canone','prezzoUnitario','unitaMisura','note'];
+const CONTR_CSV_COLS = ['id','tipo','controparte','riferimento','dataInizio','dataFine','dataDisdetta','canone','prezzoUnitario','unitaMisura','note','documenti'];
 const DOC_CSV_COLS = ['id','tipo','intestatario','numero','link','enteRilascio','dataRilascio','dataScadenza','note'];
 const DETR_CSV_COLS = ['id','categoria','intestatario','data','importo','note'];
 
 function currentBackupCSV(){
-  const recRows = recurring.map(p => REC_CSV_COLS.map(c => csvEscape(p[c])).join(','));
+  const recRows = recurring.map(p => REC_CSV_COLS.map(c => csvEscape(c === 'documenti' ? JSON.stringify(p.documenti || []) : p[c])).join(','));
   const medRows = medical.map(m => MED_CSV_COLS.map(c => {
     if(c === 'rimborsi') return csvEscape(JSON.stringify(m.rimborsi || {}));
     if(c === 'nomi') return csvEscape(m.nomi ? JSON.stringify(m.nomi) : '');
@@ -3647,7 +3661,7 @@ function currentBackupCSV(){
     if(meseUsciteIdx !== -1) return csvEscape(b.usciteMensili && b.usciteMensili[meseUsciteIdx] !== null && b.usciteMensili[meseUsciteIdx] !== undefined ? b.usciteMensili[meseUsciteIdx] : '');
     return csvEscape(b[c]);
   }).join(','));
-  const contrRows = contratti.map(c => CONTR_CSV_COLS.map(col => csvEscape(c[col])).join(','));
+  const contrRows = contratti.map(c => CONTR_CSV_COLS.map(col => csvEscape(col === 'documenti' ? JSON.stringify(c.documenti || []) : c[col])).join(','));
   const docRows = documenti.map(d => DOC_CSV_COLS.map(col => csvEscape(d[col])).join(','));
   const detrRows = detrazioni.map(d => DETR_CSV_COLS.map(col => csvEscape(d[col])).join(','));
   return `### PAGAMENTI RICORRENTI\n${REC_CSV_COLS.join(',')}\n${recRows.join('\n')}\n\n### SPESE MEDICHE\n${MED_CSV_COLS.join(',')}\n${medRows.join('\n')}\n\n### BILANCIO ANNUALE\n${BIL_CSV_COLS.join(',')}\n${bilRows.join('\n')}\n\n### CONTRATTI A SCADENZA\n${CONTR_CSV_COLS.join(',')}\n${contrRows.join('\n')}\n\n### DOCUMENTI PERSONALI\n${DOC_CSV_COLS.join(',')}\n${docRows.join('\n')}\n\n### DETRAZIONI FISCALI\n${DETR_CSV_COLS.join(',')}\n${detrRows.join('\n')}\n\n### IMPOSTAZIONI\n${JSON.stringify(settings)}\n`;
@@ -3712,6 +3726,7 @@ function parseBackupCSVCore(text){
     REC_CSV_COLS.forEach((h,i) => obj[h] = vals[i] !== undefined ? vals[i] : '');
     obj.importo = parseFloat(obj.importo) || 0;
     obj.bloccato = obj.bloccato === 'true';
+    obj.documenti = (() => { try{ const a = JSON.parse(obj.documenti || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } })();
     return obj;
   }) : [];
 
@@ -3786,7 +3801,8 @@ function parseBackupCSVCore(text){
       canone: parseFloat(raw.canone) || 0,
       prezzoUnitario: parseFloat(raw.prezzoUnitario) || 0,
       unitaMisura: raw.unitaMisura || '',
-      note: raw.note
+      note: raw.note,
+      documenti: (() => { try{ const a = JSON.parse(raw.documenti || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } })()
     };
   }) : [];
 
@@ -4086,6 +4102,7 @@ function resetContrattiForm(){
   document.getElementById('cf-prezzo-unitario').value = '';
   document.getElementById('cf-unita-misura').value = '';
   document.getElementById('cf-note').value = '';
+  cfDocs.set([]);
 }
 document.getElementById('toggle-contratti-form').addEventListener('click', () => {
   editingContrattoId = null;
@@ -4111,7 +4128,8 @@ document.getElementById('cf-save').addEventListener('click', async () => {
     canone: parseFloat(document.getElementById('cf-canone').value) || 0,
     prezzoUnitario: parseFloat(document.getElementById('cf-prezzo-unitario').value) || 0,
     unitaMisura: document.getElementById('cf-unita-misura').value,
-    note: document.getElementById('cf-note').value.trim()
+    note: document.getElementById('cf-note').value.trim(),
+    documenti: (cfDocs.flush(), cfDocs.get())
   };
   if(editingContrattoId){
     contratti = contratti.map(c => c.id===editingContrattoId ? entry : c);
@@ -4155,6 +4173,7 @@ document.getElementById('contratti-body').addEventListener('click', async (e) =>
     document.getElementById('cf-prezzo-unitario').value = item.prezzoUnitario || '';
     document.getElementById('cf-unita-misura').value = item.unitaMisura || '';
     document.getElementById('cf-note').value = item.note || '';
+    cfDocs.set(item.documenti);
     contrattiForm.classList.add('open');
     contrattiForm.scrollIntoView({behavior:'smooth', block:'center'});
   }
@@ -4449,6 +4468,7 @@ function xSetup(bodyId){
     const row = e.target.closest('tr[data-id]');
     if(tb){
       const id = tb.dataset.xtoggle, key = bodyId + ':' + id;
+      if(typeof openGenDetail === 'function' && bodyId !== 'medical-body'){ openGenDetail(bodyId, id); return; }
       if(xOpen.has(key)) xOpen.delete(key); else xOpen.add(key);
       const r = tb.closest('tr'), x = r.nextElementSibling;
       const open = xOpen.has(key);
@@ -5073,16 +5093,16 @@ function xlMedical(){
 }
 function xlTabData(tid){
   const S = { // cols: [intestazione, larghezza, tipo]
-    recurring: () => ({cols:[{h:'Voce', w:30}, {h:'Scadenza', w:12, t:'d'}, {h:'Importo', w:13, t:'e'}, {h:'Ricorrenza', w:14}, {h:'Stato', w:13}, {h:'Note', w:34}],
-      rows:xlSort(recurring, recurringSortValue, recurringSortKey, recurringSortDir).map(p => [p.nome, p.scadenza, Number(p.importo) || 0, p.ricorrenza, p.stato === 'pagato' ? 'Pagato' : (daysUntil(p.scadenza) < 0 ? 'Scaduto' : 'Da pagare'), p.note || ''])}),
+    recurring: () => ({cols:[{h:'Voce', w:30}, {h:'Scadenza', w:12, t:'d'}, {h:'Importo', w:13, t:'e'}, {h:'Ricorrenza', w:14}, {h:'Stato', w:13}, {h:'Note', w:34}, {h:'Documenti', w:40}],
+      rows:xlSort(recurring, recurringSortValue, recurringSortKey, recurringSortDir).map(p => [p.nome, p.scadenza, Number(p.importo) || 0, p.ricorrenza, p.stato === 'pagato' ? 'Pagato' : (daysUntil(p.scadenza) < 0 ? 'Scaduto' : 'Da pagare'), p.note || '', (p.documenti || []).map(d => d.nome + ': ' + d.url).join('\n')])}),
     medical: xlMedical,
     bilancio: () => {
       const M = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
       return {cols:[{h:'Anno', w:8, t:'n'}, {h:'Conto', w:22}, {h:'Entrate', w:14, t:'e'}, {h:'Uscite', w:14, t:'e'}, {h:'Risparmio', w:14, t:'e'}].concat(M.map(m => ({h:'Entrate ' + m, w:12, t:'e'})), M.map(m => ({h:'Uscite ' + m, w:12, t:'e'}))),
         rows:xlSort(getFilteredBilancio(), bilancioSortValue, bilancioSortKey, bilancioSortDir).map(b => [Number(b.anno) || 0, b.conto || '', Number(b.entrate) || 0, Number(b.uscite) || 0, (Number(b.entrate) || 0) - (Number(b.uscite) || 0)].concat(M.map((m, i) => b.entrateMensili && b.entrateMensili[i] != null ? Number(b.entrateMensili[i]) : ''), M.map((m, i) => b.usciteMensili && b.usciteMensili[i] != null ? Number(b.usciteMensili[i]) : '')))};
     },
-    contratti: () => ({cols:[{h:'Tipo', w:18}, {h:'Controparte', w:26}, {h:'Riferimento', w:22}, {h:'Inizio', w:12, t:'d'}, {h:'Scadenza', w:12, t:'d'}, {h:'Disdetta entro', w:14, t:'d'}, {h:'Canone', w:13, t:'e'}, {h:'Prezzo unitario', w:14, t:'n'}, {h:'Unità', w:10}, {h:'Stato', w:13}, {h:'Note', w:32}],
-      rows:xlSort(getFilteredContratti(), contrattiSortValue, contrattiSortKey, contrattiSortDir).map(c => [c.tipo || '', c.controparte || '', c.riferimento || '', c.dataInizio, c.dataFine, c.dataDisdetta, c.canone === '' || c.canone == null ? '' : Number(c.canone), c.prezzoUnitario === '' || c.prezzoUnitario == null ? '' : Number(c.prezzoUnitario), c.unitaMisura || '', xlStatoDays(c.dataFine, 90), c.note || ''])}),
+    contratti: () => ({cols:[{h:'Tipo', w:18}, {h:'Controparte', w:26}, {h:'Riferimento', w:22}, {h:'Inizio', w:12, t:'d'}, {h:'Scadenza', w:12, t:'d'}, {h:'Disdetta entro', w:14, t:'d'}, {h:'Canone', w:13, t:'e'}, {h:'Prezzo unitario', w:14, t:'n'}, {h:'Unità', w:10}, {h:'Stato', w:13}, {h:'Note', w:32}, {h:'Documenti', w:40}],
+      rows:xlSort(getFilteredContratti(), contrattiSortValue, contrattiSortKey, contrattiSortDir).map(c => [c.tipo || '', c.controparte || '', c.riferimento || '', c.dataInizio, c.dataFine, c.dataDisdetta, c.canone === '' || c.canone == null ? '' : Number(c.canone), c.prezzoUnitario === '' || c.prezzoUnitario == null ? '' : Number(c.prezzoUnitario), c.unitaMisura || '', xlStatoDays(c.dataFine, 90), c.note || '', (c.documenti || []).map(d => d.nome + ': ' + d.url).join('\n')])}),
     documenti: () => ({cols:[{h:'Tipo', w:20}, {h:'Intestatario', w:16}, {h:'Numero', w:16}, {h:'Ente rilascio', w:20}, {h:'Rilascio', w:12, t:'d'}, {h:'Scadenza', w:12, t:'d'}, {h:'Stato', w:13}, {h:'Link', w:36}, {h:'Note', w:30}],
       rows:xlSort(getFilteredDocumenti(), documentiSortValue, documentiSortKey, documentiSortDir).map(d => [d.tipo || '', d.intestatario || '', d.numero || '', d.enteRilascio || '', d.dataRilascio, d.dataScadenza, xlStatoDays(d.dataScadenza, 90), d.link || '', d.note || ''])}),
     detrazioni: () => ({cols:[{h:'Categoria', w:26}, {h:'Intestatario', w:16}, {h:'Data', w:12, t:'d'}, {h:'Importo', w:13, t:'e'}, {h:'Note', w:36}],
@@ -5222,11 +5242,11 @@ function medDrill(m){
     return `<div class="md-card"><div class="md-ch"><b>${escHtml(p.nome || x.nome)}</b>${att}${x.pill}</div>
       <div class="md-steps">${mdSteps(x)}</div>
       ${imp ? `<div class="md-amt">${imp}</div>` : ''}
-      <div class="md-dates"><label>Inviata il<input type="date" data-md-id="${m.id}" data-md-pid="${x.id}" data-md-f="inviata" value="${escHtml(r.inviata)}"></label><label>Chiusa il<input type="date" data-md-id="${m.id}" data-md-pid="${x.id}" data-md-f="chiusa" value="${escHtml(r.chiusa)}"></label></div></div>`;
+      <div class="md-dates"><div><span>Inviata il</span><b>${r.inviata ? fmtDate(r.inviata) : 'n.d.'}</b></div><div><span>Chiusa il</span><b>${r.chiusa ? fmtDate(r.chiusa) : 'n.d.'}</b></div></div></div>`;
   }).join('');
   const doc = `<div class="md-top">${kv('Tipo documento', escHtml(m.tipoDocumento || ''))}${kv('Numero', escHtml(m.numeroDocumento || ''))}${kv('Modalità', escHtml(m.modalita || ''))}${kv('Note', escHtml(m.note || ''))}</div>`;
   const all = docs.length ? `<div class="md-docs">${docs.map(d => `<a href="${escHtml(d.url)}" target="_blank" rel="noopener">${escHtml(d.nome)} ↗</a>`).join('')}</div>` : `<span class="doc-ref">Nessun documento collegato — aggiungili da «Modifica».</span>`;
-  return `<div class="md">${top}<h4 class="md-h">Percorso dei rimborsi <span class="doc-ref">· puoi scrivere le date qui sotto</span></h4><div class="md-pay">${cards}</div><h4 class="md-h">Documento</h4>${doc}<h4 class="md-h">Allegati</h4>${all}</div>`;
+  return `<div class="md">${top}<h4 class="md-h">Percorso dei rimborsi</h4><div class="md-pay">${cards}</div><h4 class="md-h">Documento</h4>${doc}<h4 class="md-h">Allegati</h4>${all}</div>`;
 }
 document.addEventListener('change', async (e) => {
   const t = e.target; if(!t.dataset || t.dataset.mdId === undefined) return;
@@ -5263,6 +5283,92 @@ mdBox.addEventListener('click', (e) => {
   else if(a === 'del'){ mdConfirmDel = true; mdRender(); }
   else if(a === 'del-no'){ mdConfirmDel = false; mdRender(); }
   else if(a === 'del-yes'){ mdClose(); confirmingMedicalDeleteId = id; renderMedical(); const cb = document.querySelector('#medical-body [data-action="confirm-delete-medical"][data-id="' + id + '"]'); if(cb) cb.click(); }
+});
+
+// ---- Link a documenti per pagamenti ricorrenti e contratti ----
+function mkDocEditor(pfx){
+  let list = [];
+  const $ = (s) => document.getElementById(pfx + '-' + s);
+  const render = () => {
+    $('docs-list').innerHTML = list.length ? list.map(d => `<span class="dl-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg><a href="${escHtml(d.url)}" target="_blank" rel="noopener">${escHtml(d.nome)}</a><button type="button" data-dl-del="${d.id}" aria-label="Rimuovi documento">✕</button></span>`).join('') : '<span class="doc-ref">Nessun documento aggiunto.</span>';
+  };
+  const add = (silent) => {
+    const n = $('doc-nome').value.trim(), u = $('doc-url').value.trim();
+    if(!n && !u) return true;
+    if(!n || !u){ if(!silent) showFormError('Inserisci sia il nome che il link del documento.'); return false; }
+    if(!/^https?:\/\//i.test(u)){ showFormError('Il link deve iniziare con http:// o https://'); return false; }
+    list.push({id: uid(), nome: n, url: u}); $('doc-nome').value = ''; $('doc-url').value = ''; render(); return true;
+  };
+  $('docs-list').addEventListener('click', (e) => { const b = e.target.closest('[data-dl-del]'); if(!b) return; list = list.filter(d => d.id !== b.dataset.dlDel); render(); });
+  $('doc-add').addEventListener('click', () => add(false));
+  render();
+  return {set(v){ list = (Array.isArray(v) ? v : []).filter(d => d && d.url).map(d => ({id: d.id || uid(), nome: d.nome || 'Documento', url: d.url})); $('doc-nome').value = ''; $('doc-url').value = ''; render(); },
+          get(){ return list.map(d => ({...d})); }, flush(){ return add(true); }};
+}
+const rfDocs = mkDocEditor('rf'), cfDocs = mkDocEditor('cf');
+// ---- Popup di dettaglio generico (ricorrenti, bilancio, contratti, documenti, detrazioni) ----
+const GD = {
+  'recurring-body': {t: 'Pagamento', list: () => recurring, title: (x) => x.nome, sub: (x) => [x.ricorrenza, 'scade ' + fmtDate(x.scadenza)].join(' · '), badge: () => statusBadgeRecurring, edit: 'edit-recurring', del: 'delete-recurring', cdel: 'confirm-delete-recurring', extra: ['mark-paid'], noteKey: 'note'},
+  'bilancio-body': {t: 'Bilancio', list: () => bilancio, title: (x) => 'Bilancio ' + x.anno, sub: (x) => x.conto, edit: 'edit-bilancio', del: 'delete-bilancio', cdel: 'confirm-delete-bilancio'},
+  'contratti-body': {t: 'Contratto', list: () => contratti, title: (x) => x.tipo, sub: (x) => x.controparte, edit: 'edit-contratto', del: 'delete-contratto', cdel: 'confirm-delete-contratto', noteKey: 'note'},
+  'documenti-body': {t: 'Documento', list: () => documenti, title: (x) => x.tipo, sub: (x) => x.intestatario, edit: 'edit-documento', del: 'delete-documento', cdel: 'confirm-delete-documento', extra: ['toggle-renew-documento'], noteKey: 'note'},
+  'detrazioni-body': {t: 'Detrazione', list: () => detrazioni, title: (x) => x.categoria, sub: (x) => x.intestatario, edit: 'edit-detrazione', del: 'delete-detrazione', cdel: 'confirm-delete-detrazione', noteKey: 'note'}
+};
+let gdState = null;
+const gdBd = document.createElement('div'); gdBd.className = 'md-bd'; document.body.appendChild(gdBd);
+const gdBox = document.createElement('div'); gdBox.className = 'md-modal'; gdBox.setAttribute('role', 'dialog'); document.body.appendChild(gdBox);
+function gdFind(){ const g = GD[gdState.body]; return {g, item: g.list().find(x => x.id === gdState.id)}; }
+function gdBtn(act){ const b = document.getElementById(gdState.body); return b ? b.querySelector('button[data-action="' + act + '"][data-id="' + gdState.id + '"]') : null; }
+function gdClose(){ gdState = null; gdBox.classList.remove('on'); gdBd.classList.remove('on'); }
+function gdMonths(b){
+  const M = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+  const en = b.entrateMensili, us = b.usciteMensili;
+  if(!(Array.isArray(en) && en.some(v => v)) && !(Array.isArray(us) && us.some(v => v))) return '';
+  const row = (l, a) => `<tr><th>${l}</th>${M.map((m, i) => `<td>${a && a[i] ? euro(Number(a[i])) : '—'}</td>`).join('')}</tr>`;
+  const sav = M.map((m, i) => (Number(en && en[i]) || 0) - (Number(us && us[i]) || 0));
+  return `<h4 class="md-h">Andamento mensile</h4><div class="md-tblw"><table class="md-tbl"><tr><th></th>${M.map(m => `<th>${m}</th>`).join('')}</tr>${row('Entrate', en)}${row('Uscite', us)}<tr><th>Risparmio</th>${sav.map(v => `<td style="color:${v < 0 ? 'var(--stamp)' : 'var(--teal)'}">${v ? (v > 0 ? '+' : '') + euro(v) : '—'}</td>`).join('')}</tr></table></div>`;
+}
+function gdRender(){
+  const {g, item} = gdFind(); if(!item){ gdClose(); return; }
+  const row = document.getElementById(gdState.body).querySelector('tr[data-id="' + item.id + '"]');
+  const cells = row ? [...row.children].filter(td => td.dataset.label) : [];
+  const first = cells[0] && cells[0].dataset.label;
+  let badge = '';
+  const kv = cells.filter(td => td.dataset.label !== first).map(td => {
+    const v = td.innerHTML.trim(), lab = td.dataset.label;
+    if(/^Stato/.test(lab) && /badge/.test(v)){ badge += v + ' '; return ''; }
+    if(!v || v === '—' || lab === 'Note' || lab === 'Fornitore/Controparte') return '';
+    return `<div><span>${escHtml(lab)}</span><b>${v}</b></div>`;
+  }).join('');
+  if(gdState.body === 'recurring-body'){ badge = statusBadgeRecurring(item); }
+  const docs = [].concat(item.documenti || [], item.link ? [{nome: 'Apri documento', url: item.link}] : []);
+  const dh = docs.length ? `<div class="md-docs">${docs.map(d => `<a href="${escHtml(d.url)}" target="_blank" rel="noopener">${escHtml(d.nome)} ↗</a>`).join('')}</div>` : `<span class="doc-ref">Nessun documento collegato — aggiungili da «Modifica».</span>`;
+  const showDocs = gdState.body === 'recurring-body' || gdState.body === 'contratti-body' || gdState.body === 'documenti-body';
+  const note = g.noteKey && item[g.noteKey] ? `<h4 class="md-h">Note</h4><p class="md-note">${escHtml(item[g.noteKey])}</p>` : '';
+  const locked = !gdBtn(g.edit);
+  const pend = gdState.confirm;
+  let btns;
+  if(locked) btns = '<span class="doc-ref">🔒 Voce bloccata: non modificabile</span>';
+  else if(pend) btns = '<span style="color:var(--stamp);font-weight:700;">Eliminare questa voce?</span><button type="button" class="btn small danger" data-gd-act="del-yes">Sì, elimina</button><button type="button" class="btn small ghost" data-gd-act="del-no">Annulla</button>';
+  else btns = (g.extra || []).filter(a => gdBtn(a)).map(a => `<button type="button" class="btn small" data-gd-act="x:${a}">${escHtml(gdBtn(a).textContent.trim())}</button>`).join('') + '<button type="button" class="btn small" data-gd-act="edit">Modifica</button><button type="button" class="btn small ghost danger" data-gd-act="del">Elimina</button>';
+  gdBox.innerHTML = `<div class="md-head"><div><h3>${escHtml(g.title(item) || g.t)}</h3><div class="md-sub">${escHtml(g.sub(item) || '')}${badge ? ' · ' + badge : ''}</div></div><button type="button" class="ef-x" data-gd-act="close" aria-label="Chiudi">✕</button></div><div class="md-body"><div class="md"><div class="md-top">${kv}</div>${gdState.body === 'bilancio-body' ? gdMonths(item) : ''}${note}${showDocs ? '<h4 class="md-h">Documenti e link</h4>' + dh : ''}</div></div><div class="md-foot">${btns}<span style="flex:1"></span><button type="button" class="btn small ghost" data-gd-act="close">Chiudi</button></div>`;
+}
+function openGenDetail(body, id){ gdState = {body, id, confirm: false}; gdRender(); gdBox.classList.add('on'); gdBd.classList.add('on'); }
+gdBd.addEventListener('click', gdClose);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && gdState) gdClose(); });
+gdBox.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-gd-act]'); if(!b || !gdState) return;
+  const act = b.dataset.gdAct, {g} = gdFind();
+  if(act === 'close'){ gdClose(); return; }
+  if(act === 'del'){ gdState.confirm = true; gdRender(); return; }
+  if(act === 'del-no'){ gdState.confirm = false; gdRender(); return; }
+  if(act === 'edit'){ const x = gdBtn(g.edit); gdClose(); if(x) x.click(); return; }
+  if(act === 'del-yes'){
+    const d = gdBtn(g.del), id = gdState.id, bodyEl = document.getElementById(gdState.body); gdClose();
+    if(d){ d.click(); const c = bodyEl.querySelector('button[data-action="' + g.cdel + '"][data-id="' + id + '"]'); if(c) c.click(); }
+    return;
+  }
+  if(act.startsWith('x:')){ const x = gdBtn(act.slice(2)); gdClose(); if(x) x.click(); }
 });
 
 onAuthStateChanged(auth, async (user) => {
