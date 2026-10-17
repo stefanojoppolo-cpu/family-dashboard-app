@@ -1,14 +1,24 @@
 {
-  "name": "Family Dashboard",
-  "short_name": "Family",
-  "description": "Pagamenti, sanità integrativa, bilancio, contratti, documenti e detrazioni di famiglia",
+  "name": "Casa e Famiglia",
+  "short_name": "Casa e Famiglia",
+  "description": "Scadenze, rimborsi, contratti e documenti di famiglia",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#0176D3",
+  "theme_color": "#10253A",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

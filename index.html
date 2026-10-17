@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family Dashboard</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230176D3'/%3E%3Ccircle cx='8' cy='8' r='3' fill='white'/%3E%3Ccircle cx='17' cy='9' r='2.5' fill='white'/%3E%3Cpath d='M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M14 20c0-2.8 1.8-4.8 4-4.8s4 2 4 4.8' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Casa e Famiglia</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%232F5BEA'/%3E%3Cg transform='translate(3 3.2) scale(.75)' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 11l9-7 9 7'/%3E%3Cpath d='M5 10v10h14V10'/%3E%3Cpath d='M9 14.5l2.2 2.2L15.5 12.5'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#10253A">
@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Family Dashboard">
+<meta name="apple-mobile-web-app-title" content="Casa e Famiglia">
 <style>
   :root{
     --paper:#F3F3F6;
@@ -678,6 +678,8 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .fpanel .ff select,.fpanel .ff input{width:100% !important;min-width:0;box-sizing:border-box;}
 .fpanel > label{grid-column:1/-1;margin:0 !important;}
 .fpanel > .btn{grid-column:1/-1;justify-self:end;margin:0 !important;}
+.logo-c{width:34px;height:34px;border-radius:9px;}.logo-c svg{width:20px;height:20px;}.logo-c.ph{border-radius:50%;}
+.sb-t{display:flex;flex-direction:column;min-width:0;line-height:1.2;}.sb-t small{font-size:11.5px;color:#9FB0C3;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 </style>
 </head>
 <body>
@@ -686,11 +688,11 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
   <div style="width:100%;max-width:360px;padding:2rem;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
       <div style="width:44px;height:44px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M14 20c0-2.8 1.8-4.8 4-4.8s4 2 4 4.8"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 14.5l2.2 2.2L15.5 12.5"/></svg>
       </div>
       <div>
-        <p style="font-size:18px;font-weight:500;margin:0;">Family Dashboard</p>
-        <p style="font-size:12.5px;color:var(--ink-soft);margin:2px 0 0;">Accedi al tuo registro personale</p>
+        <p id="auth-app-name" style="font-size:18px;font-weight:700;margin:0;">Casa e Famiglia</p>
+        <p style="font-size:12.5px;color:var(--ink-soft);margin:2px 0 0;">Accedi al registro di famiglia</p>
       </div>
     </div>
     <div id="auth-error" style="display:none;background:var(--stamp-soft);color:var(--stamp);padding:10px 12px;border-radius:6px;font-size:13px;margin-bottom:14px;"></div>
@@ -736,7 +738,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
     <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:20px;">
       <div style="display:flex;align-items:center;gap:16px;">
         <div class="hdr-logo" style="width:52px;height:52px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M14 20c0-2.8 1.8-4.8 4-4.8s4 2 4 4.8"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 14.5l2.2 2.2L15.5 12.5"/></svg>
         </div>
         <div>
           <h1 style="margin:0;" id="app-title">Family Dashboard</h1>
@@ -770,7 +772,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
   <div class="summary" id="summary"></div>
 
   <nav class="tabs">
-    <div class="side-brand"><div class="logo-c" id="side-logo">F</div><span id="side-name">Famiglia</span></div>
+    <div class="side-brand"><div class="logo-c" id="side-logo"></div><div class="sb-t"><span id="side-name">Casa e Famiglia</span><small id="side-fam"></small></div></div>
     <button class="tab-btn active" data-tab="panoramica"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Panoramica</button>
     <button class="tab-btn" data-tab="recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>Pagamenti ricorrenti</button>
     <button class="tab-btn" data-tab="medical"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Sanità integrativa</button>
@@ -1481,7 +1483,7 @@ function defaultPagatori(){ return [{id:'p1', nome:'Assicurazione'}]; }
 function defaultSettings(){
   const moduli = {}; MODULI_IDS.forEach(id => { moduli[id] = {on:true, nome:MODULI_DEFAULT_NOMI[id]}; });
   const elenchi = {}; Object.keys(ELENCHI_DEF).forEach(k => { elenchi[k] = ELENCHI_DEF[k].default.slice(); });
-  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}, ultimoBackup:'', backupDa:''};
+  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', app:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}, ultimoBackup:'', backupDa:''};
 }
 function normalizeSettings(raw){
   const d = defaultSettings();
@@ -1491,6 +1493,7 @@ function normalizeSettings(raw){
   if(raw.terzoStash && typeof raw.terzoStash === 'object' && typeof raw.terzoStash.id === 'string' && String(raw.terzoStash.nome || '').trim()) d.terzoStash = {id:raw.terzoStash.id, nome:String(raw.terzoStash.nome).trim(), email:String(raw.terzoStash.email || '').trim().slice(0, 120), quota:Math.min(100, Math.max(1, parseFloat(raw.terzoStash.quota) || 50)), per:String(raw.terzoStash.per || '').trim().slice(0, 40)};
   if(raw.profilo && typeof raw.profilo === 'object'){
     d.profilo.nome = String(raw.profilo.nome || '').trim().slice(0, 40);
+    d.profilo.app = String(raw.profilo.app || '').trim().slice(0, 30);
     d.profilo.foto = typeof raw.profilo.foto === 'string' && raw.profilo.foto.startsWith('data:image/') && raw.profilo.foto.length < 150000 ? raw.profilo.foto : '';
     d.profilo.colore = /^#[0-9a-fA-F]{6}$/.test(raw.profilo.colore || '') ? raw.profilo.colore : d.profilo.colore;
   }
@@ -2848,12 +2851,14 @@ function applyProfilo(){
   const p = settings.profilo || {nome:'', foto:'', colore:'#2F5BEA'};
   const nome = p.nome || 'Famiglia';
   const ini = (nome.trim()[0] || 'F').toUpperCase();
-  const logo = document.getElementById('side-logo');
-  if(logo){ logo.style.backgroundImage = p.foto ? 'url(' + p.foto + ')' : ''; logo.textContent = p.foto ? '' : ini; }
-  const sn = document.getElementById('side-name'); if(sn) sn.textContent = nome;
+  const logo = document.getElementById('side-logo'), appN = p.app || 'Casa e Famiglia';
+  if(logo){ logo.style.backgroundImage = p.foto ? 'url(' + p.foto + ')' : ''; logo.innerHTML = p.foto ? '' : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 14.5l2.2 2.2L15.5 12.5"/></svg>'; logo.classList.toggle('ph', !!p.foto); }
+  const sn = document.getElementById('side-name'); if(sn) sn.textContent = appN;
+  const sf = document.getElementById('side-fam'); if(sf) sf.textContent = p.nome || '';
+  document.title = appN; try{ localStorage.setItem('appNome', appN); }catch(e){}
   const ora = new Date().getHours();
   const saluto = ora < 13 ? 'Buongiorno' : (ora < 18 ? 'Buon pomeriggio' : 'Buonasera');
-  const t = document.getElementById('app-title'); if(t) t.textContent = p.nome ? saluto + ', ' + p.nome.replace(/^Famiglia /i, 'famiglia ') : 'Family Dashboard';
+  const t = document.getElementById('app-title'); if(t) t.textContent = p.nome ? saluto + ', ' + p.nome.replace(/^Famiglia /i, 'famiglia ') : appN;
   document.documentElement.style.setProperty('--accent', p.colore);
   try{ uxTitles(); }catch(e){}
 }
@@ -2914,6 +2919,8 @@ function profiloCardHtml(){
         <div class="doc-ref" style="margin-top:6px;">Si ritaglia in tondo. Basta una foto qualsiasi.</div></div>
     </div>
     <div class="set-row"><input type="text" id="prof-nome" value="${escHtml(p.nome)}" maxlength="40" placeholder="es. Famiglia Rossi"></div>
+    <p class="hint" style="margin:10px 0 6px;">Nome dell'app (menu, scheda del browser, accesso)</p>
+    <div class="set-row"><input type="text" id="prof-app" value="${escHtml(p.app || '')}" maxlength="30" placeholder="Casa e Famiglia"></div>
     <p class="hint" style="margin:10px 0 6px;">Colore principale</p>
     <div class="prof-sw" id="prof-sw">${PROF_COLORI.map(col => `<button type="button" data-prof-col="${col}" class="${col === p.colore ? 'on' : ''}" style="background:${col}" aria-label="Colore ${col}"></button>`).join('')}</div>
     <div style="margin-top:14px;"><button type="button" class="btn" id="prof-save">Salva profilo</button></div>
@@ -3088,6 +3095,7 @@ async function addListValue(k){
 }
 function profEnsure(){ if(!profDraft) profDraft = {...settings.profilo}; return profDraft; }
 document.getElementById('panel-impostazioni').addEventListener('input', (e) => {
+  if(e.target.id === 'prof-app'){ profEnsure().app = e.target.value.slice(0, 30); return; }
   if(e.target.id === 'prof-nome'){ profEnsure().nome = e.target.value.slice(0, 40); const b = document.getElementById('prof-big'); if(b && !profDraft.foto) b.textContent = ((profDraft.nome || 'Famiglia').trim()[0] || 'F').toUpperCase(); }
 });
 document.getElementById('panel-impostazioni').addEventListener('change', (e) => {
@@ -3110,7 +3118,7 @@ document.getElementById('panel-impostazioni').addEventListener('click', async (e
   if(col){ profEnsure().colore = col.dataset.profCol; renderImpostazioni(); return; }
   if(id === 'prof-save'){
     const p = profEnsure();
-    settings.profilo = {nome:(p.nome || '').trim(), foto:p.foto || '', colore:p.colore || '#2F5BEA'};
+    settings.profilo = {nome:(p.nome || '').trim(), app:(p.app || '').trim().slice(0, 30), foto:p.foto || '', colore:p.colore || '#2F5BEA'};
     profDraft = null; applyProfilo(); renderImpostazioni();
     await saveSettings(); showNotice('Profilo salvato.', 'success');
   }
@@ -5414,6 +5422,7 @@ gdBox.addEventListener('click', (e) => {
   if(act.startsWith('x:')){ const x = gdBtn(act.slice(2)); gdClose(); if(x) x.click(); }
 });
 
+try{ const _an = localStorage.getItem('appNome'); if(_an){ document.title = _an; const _e = document.getElementById('auth-app-name'); if(_e) _e.textContent = _an; } }catch(e){}
 onAuthStateChanged(auth, async (user) => {
   if(user){
     document.getElementById('auth-gate').style.display = 'none';
