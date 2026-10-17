@@ -2663,7 +2663,7 @@ function dashBoxes(sec, items){
 }
 function ribbonTrackHtml(items, orizzonte){
   const pan = document.getElementById('panel-panoramica');
-  const W = Math.max(300, (pan && pan.clientWidth ? pan.clientWidth : window.innerWidth - 270) - 70);
+  const W = window.__rbW > 100 ? window.__rbW : Math.max(300, (pan && pan.clientWidth ? pan.clientWidth : window.innerWidth - 270) - 70);
   const LW = W < 520 ? 92 : 124, GAP = 8;
   const pts = items.map(it => {
     const pos = Math.max(0, Math.min(100, it.giorni / orizzonte * 100));
@@ -2717,6 +2717,19 @@ function panoBarHtml(b, secId){
     <div class="pb-track"><i class="${cl}" style="width:${pct}%"></i></div>
   </div>`;
 }
+function paintRibbon(rb){
+  const a = rb._rb; if(!a) return;
+  const html = () => `<p>Prossime scadenze</p><div class="sub">${a.vicine ? a.vicine + (a.vicine === 1 ? ' scadenza' : ' scadenze') + ' nelle prossime due settimane' : 'Nessuna scadenza nelle prossime due settimane'}</div>` + ribbonTrackHtml(a.items, a.orizzonte) + `<div class="rb-scale"><span>Oggi</span><span>tra ${a.orizzonte} giorni</span></div>`;
+  rb.innerHTML = html();
+  const tk = rb.querySelector('.rb-track'), tw = tk ? tk.clientWidth : 0;
+  if(tw > 100 && Math.abs(tw - (window.__rbW || 0)) > 1){ window.__rbW = tw; rb.innerHTML = html(); }
+}
+(function(){
+  if(typeof ResizeObserver === 'undefined') return;
+  let last = 0;
+  const el = document.getElementById('pano-ribbon'); if(!el) return;
+  new ResizeObserver(() => { const w = el.clientWidth; if(w && Math.abs(w - last) > 1){ last = w; if(el._rb) paintRibbon(el); } }).observe(el);
+})();
 function renderPanoramica(){
   const root = document.getElementById('panel-panoramica');
   root.classList.toggle('pano-edit', dashEdit);
@@ -2736,7 +2749,7 @@ function renderPanoramica(){
     const orizzonte = Math.max(30, Math.min(90, Math.max(...items.map(it => it.giorni))));
     const vicine = items.filter(it => it.giorni <= 14).length;
     rb.className = 'ribbon';
-    rb.innerHTML = `<p>Prossime scadenze</p><div class="sub">${vicine ? vicine + (vicine === 1 ? ' scadenza' : ' scadenze') + ' nelle prossime due settimane' : 'Nessuna scadenza nelle prossime due settimane'}</div>` + ribbonTrackHtml(items, orizzonte) + `<div class="rb-scale"><span>Oggi</span><span>tra ${orizzonte} giorni</span></div>`;
+    rb._rb = {items, orizzonte, vicine}; paintRibbon(rb);
   } else { rb.className = ''; rb.innerHTML = ''; }
   { const tb = document.querySelector('.tab-btn[data-tab="panoramica"]'); if(tb){ let nc = tb.querySelector('.navcount'); const nv = items.filter(it => it.giorni <= 14).length;
     if(nv){ if(!nc){ nc = document.createElement('span'); nc.className = 'navcount'; tb.appendChild(nc); } nc.textContent = nv; } else if(nc) nc.remove(); } }
