@@ -813,6 +813,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
         <div class="rp-fld"><label for="rp-m-src">Dati</label><select id="rp-m-src"></select></div>
         <div class="rp-fld"><label for="rp-m-meas">Misura</label><select id="rp-m-meas"></select></div>
         <div class="rp-fld"><label for="rp-m-grp">Raggruppa per</label><select id="rp-m-grp"></select></div>
+        <div class="rp-fld" id="rp-m-mod-w"><label for="rp-m-mod">Modalità</label><select id="rp-m-mod"><option value="">Tutte</option><option value="Indiretta">Solo indirette</option><option value="Diretta">Solo dirette</option></select></div>
         <div class="rp-fld" id="rp-m-stk-w"><label for="rp-m-stk">Suddividi per</label><select id="rp-m-stk"><option value="">Nessuno</option><option value="persona">Persona</option></select></div>
         <div class="rp-fld"><label>Tipo di grafico</label><div class="rp-seg" id="rp-m-type"><button type="button" data-t="bar">Barre</button><button type="button" data-t="hbar">Barre orizzontali</button><button type="button" data-t="line">Linee</button><button type="button" data-t="pie">Torta</button></div></div>
         <div class="rp-foot"><button type="button" class="btn ghost" id="rp-m-cancel">Annulla</button><button type="button" class="btn" id="rp-m-save">Salva grafico</button></div>
@@ -1537,7 +1538,7 @@ function normalizeSettings(raw){
   });
   if(raw.report && Array.isArray(raw.report.charts)){
     d.report.charts = raw.report.charts.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && ['med', 'bil'].includes(x.src) && ['bar', 'hbar', 'line', 'pie'].includes(x.type) && ['tot', 'rimb', 'resid', 'n', 'multi', 'giorni', 'e', 'u', 'r'].includes(x.meas) && ['mese', 'anno', 'persona', 'prestazione', 'pagatore', 'conto'].includes(x.grp))
-      .slice(0, 40).map(x => ({id:x.id.slice(0, 30), t:String(x.t || '').slice(0, 60), src:x.src, meas:x.meas, grp:x.grp, stk:x.stk === 'persona' ? 'persona' : '', type:x.type, wide:x.wide === true}));
+      .slice(0, 40).map(x => ({id:x.id.slice(0, 30), t:String(x.t || '').slice(0, 60), src:x.src, meas:x.meas, grp:x.grp, stk:x.stk === 'persona' ? 'persona' : '', mod:x.mod === 'Diretta' || x.mod === 'Indiretta' ? x.mod : '', type:x.type, wide:x.wide === true}));
   }
   Object.keys(ELENCHI_DEF).forEach(k => {
     const v = raw.elenchi && raw.elenchi[k];
@@ -4604,7 +4605,7 @@ try{ payEmailRefresh(); }catch(e){}
 
 // ---- Scheda Report: grafici sui dati (spese mediche, bilancio) ----
 function rpPayers(){ return settings.pagatori.map(p => ({id:p.id, nome:p.nome})); }
-function rpMedRows(){ return medical.map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:m.dataDocumento || '', who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo}; }); }
+function rpMedRows(){ return medical.map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:m.dataDocumento || '', who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', mod:m.modalita || '', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo}; }); }
 function rpBilRows(){ return bilancio.map(b => ({id:b.id, anno:String(b.anno), conto:(b.conto || '').trim() || '—', e:Number(b.entrate) || 0, u:Number(b.uscite) || 0})); }
 const RP_MES = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const RP_COL = ['#2F5BEA','#1C8A5A','#B96A00','#7A4FD6','#0F8B8D','#C2410C','#6B7B8C'];
@@ -4627,7 +4628,7 @@ function rpDefaultCharts(){
     {id:'d3', t:'Chi ha rimborsato', src:'med', meas:'rimb', grp:'pagatore', stk:'', type:'pie'},
     {id:'d4', t:'Dove spendi di più', src:'med', meas:'tot', grp:'prestazione', stk:'', type:'hbar'},
     {id:'d5', t:'Spese per persona', src:'med', meas:'tot', grp:'persona', stk:'', type:'pie'},
-    {id:'d7', t:'Tempi di rimborso', src:'med', meas:'giorni', grp:'pagatore', stk:'', type:'hbar'},
+    {id:'d7', t:'Tempi di rimborso', src:'med', meas:'giorni', grp:'pagatore', stk:'', mod:'Indiretta', type:'hbar'},
     {id:'d6', t:'Entrate, uscite e risparmio', src:'bil', meas:'multi', grp:'anno', stk:'', type:'bar'}
   ];
   return l.filter(c => rpAllowed(c.src));
@@ -4651,7 +4652,7 @@ function rpBuild(c){
     return {cats, series:defs.map(d => ({name:d[0], color:d[2], vals:cats.map(k => sum(k.rows, d[1]))})), fm:rpEur, stack:false, tab:'bilancio', bil:true};
   }
   const gg = c.meas === 'giorni';
-  const rows = gg ? rpGiorniRows() : rpRows(), payers = rpPayers();
+  const rows = (gg ? rpGiorniRows() : rpRows()).filter(r => !c.mod || r.mod === c.mod), payers = rpPayers();
   const M = (rs, m) => m === 'tot' ? sum(rs, r => r.tot) : m === 'rimb' ? sum(rs, r => r.rb) : m === 'resid' ? sum(rs, r => r.res) : m === 'n' ? rs.length : m === 'giorni' ? (rs.length ? sum(rs, r => r.g) / rs.length : 0) : 0;
   const fm = c.meas === 'n' ? (v => String(Math.round(v))) : gg ? (v => Math.round(v) + ' g') : rpEur;
   if(gg && c.grp === 'pagatore'){ const cats = payers.map(p => ({label:p.nome, rows:rows.filter(r => r.pn === p.nome)})).filter(k => k.rows.length); rpGiSub(cats); return {cats, series:[{name:'Giorni medi', color:acc, vals:cats.map(k => M(k.rows, 'giorni'))}], fm, stack:false, tab:'medical'}; }
@@ -4823,6 +4824,7 @@ function rpSync(){
   rpFill(rpEl('rp-m-grp'), gl, rpDraft.grp); rpDraft.grp = rpEl('rp-m-grp').value;
   const canStk = rpDraft.src === 'med' && ['tot', 'rimb', 'resid', 'n'].includes(rpDraft.meas) && ['mese', 'anno', 'prestazione'].includes(rpDraft.grp);
   rpEl('rp-m-stk-w').style.display = canStk ? '' : 'none'; if(!canStk) rpDraft.stk = ''; rpEl('rp-m-stk').value = rpDraft.stk;
+  rpEl('rp-m-mod-w').style.display = rpDraft.src === 'med' ? '' : 'none'; if(rpDraft.src !== 'med') rpDraft.mod = ''; rpEl('rp-m-mod').value = rpDraft.mod || '';
   document.querySelectorAll('#rp-m-type button').forEach(b => b.classList.toggle('on', b.dataset.t === rpDraft.type));
   rpEl('rp-pv-t').textContent = rpDraft.t || 'Anteprima';
   rpRender(rpDraft, rpEl('rp-pv'), true);
@@ -4841,6 +4843,7 @@ rpEl('rp-m-src').onchange = (e) => { rpDraft.src = e.target.value; rpDraft.meas 
 rpEl('rp-m-meas').onchange = (e) => { rpDraft.meas = e.target.value; rpSync(); };
 rpEl('rp-m-grp').onchange = (e) => { rpDraft.grp = e.target.value; rpSync(); };
 rpEl('rp-m-stk').onchange = (e) => { rpDraft.stk = e.target.value; rpSync(); };
+rpEl('rp-m-mod').onchange = (e) => { rpDraft.mod = e.target.value; rpSync(); };
 rpEl('rp-m-type').onclick = (e) => { const b = e.target.closest('button'); if(b){ rpDraft.type = b.dataset.t; rpSync(); } };
 rpEl('rp-m-save').onclick = () => {
   if(!rpDraft.t.trim()) rpDraft.t = ({giorni:'Tempi di rimborso', tot:'Spese', rimb:'Rimborsi', resid:'Residuo', n:'Pratiche', multi:'Confronto', e:'Entrate', u:'Uscite', r:'Risparmio'})[rpDraft.meas] || 'Nuovo grafico';
