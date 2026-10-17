@@ -1445,6 +1445,7 @@ function normalizeSettings(raw){
   if(!raw || typeof raw !== 'object') return d;
   d.ultimoBackup = /^\d{4}-\d{2}-\d{2}$/.test(raw.ultimoBackup || '') ? raw.ultimoBackup : '';
   d.backupDa = /^\d{4}-\d{2}-\d{2}$/.test(raw.backupDa || '') ? raw.backupDa : '';
+  if(raw.terzoStash && typeof raw.terzoStash === 'object' && typeof raw.terzoStash.id === 'string' && String(raw.terzoStash.nome || '').trim()) d.terzoStash = {id:raw.terzoStash.id, nome:String(raw.terzoStash.nome).trim(), email:String(raw.terzoStash.email || '').trim().slice(0, 120), quota:Math.min(100, Math.max(1, parseFloat(raw.terzoStash.quota) || 50)), per:String(raw.terzoStash.per || '').trim().slice(0, 40)};
   if(raw.profilo && typeof raw.profilo === 'object'){
     d.profilo.nome = String(raw.profilo.nome || '').trim().slice(0, 40);
     d.profilo.foto = typeof raw.profilo.foto === 'string' && raw.profilo.foto.startsWith('data:image/') && raw.profilo.foto.length < 150000 ? raw.profilo.foto : '';
@@ -2831,7 +2832,7 @@ function impMarkDirty(){
 }
 function impView(){ return impDraft || {moduli:settings.moduli, pagatori:settings.pagatori, massimali:settings.massimali}; }
 function impEnsureDraft(){
-  if(!impDraft) impDraft = JSON.parse(JSON.stringify({moduli:settings.moduli, pagatori:settings.pagatori, massimali:settings.massimali}));
+  if(!impDraft) impDraft = JSON.parse(JSON.stringify({moduli:settings.moduli, pagatori:settings.pagatori, massimali:settings.massimali, terzoStash:settings.terzoStash || null}));
   return impDraft;
 }
 let profDraft = null;
@@ -2885,18 +2886,30 @@ function renderImpostazioni(){
     <div class="set-card">
       <h3>${escHtml(V.moduli.medical.nome)}</h3>
       <h3 style="margin:10px 0 4px;font-size:13.5px;">Pagatori dei rimborsi</h3>
-      <p class="hint">Chi ti rimborsa le spese mediche: fondo sanitario, assicurazione, datore di lavoro… Ognuno diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta e l'importo rimborsato. Mettili nell'ordine in cui di solito invii le richieste. Ne basta uno; puoi aggiungerne altri e dare a ciascuno il nome che vuoi. Il residuo da portare in detrazione si calcola dopo tutti i rimborsi.<br><b>Terzo soggetto (facoltativo):</b> se a un pagatore dai una <b>percentuale</b> (campo «% terzo»; con «solo per» lo limiti alle spese di una persona, es. Sara), non è un'assicurazione ma una persona che si fa carico di quella quota di ciò che le assicurazioni non rimborsano (es. 50% a un familiare). Mettilo per ultimo: l'importo da richiedergli si calcola da solo, anche per l'email.</p>
-      ${V.pagatori.map((p, i) => `
-      <div class="set-row"><span style="width:18px;color:var(--ink-soft);">${i + 1}.</span>
+      <p class="hint">Chi ti rimborsa le spese mediche: fondo sanitario, assicurazione, datore di lavoro… Ognuno diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta e l'importo rimborsato. Mettili nell'ordine in cui di solito invii le richieste. Ne basta uno; puoi aggiungerne altri e dare a ciascuno il nome che vuoi. Il residuo da portare in detrazione si calcola dopo tutti i rimborsi.</p>
+      ${V.pagatori.map((p, i) => p.quota > 0 ? '' : `
+      <div class="set-row"><span style="width:18px;color:var(--ink-soft);">${V.pagatori.slice(0, i).filter(x => !(x.quota > 0)).length + 1}.</span>
         <input type="text" data-pag-i="${i}" value="${escHtml(p.nome)}" maxlength="40">
-        <input type="text" data-pag-per="${i}" value="${escHtml(p.per || '')}" maxlength="40" placeholder="solo per…" title="Facoltativo: vale solo per le spese di questa persona (es. Sara)" style="width:110px;">
-        <input type="number" min="0" max="100" step="1" data-pag-quota="${i}" value="${p.quota > 0 ? p.quota : ''}" placeholder="% terzo" title="Solo per un terzo soggetto (es. un familiare): percentuale di ciò che le assicurazioni non rimborsano" style="width:84px;">
         <input type="email" data-pag-email="${i}" value="${escHtml(p.email || '')}" maxlength="120" placeholder="Email per l'invio (facoltativa)" style="flex:1;min-width:190px;">
         <button type="button" class="btn ghost small" data-pag-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
-        <button type="button" class="btn ghost small" data-pag-down="${i}" ${i === V.pagatori.length - 1 ? 'disabled' : ''}>↓</button>
-        <button type="button" class="btn ghost small" data-pag-del="${i}" ${V.pagatori.length <= 1 ? 'disabled' : ''} title="Rimuovi">✕</button>
+        <button type="button" class="btn ghost small" data-pag-down="${i}" ${(i === V.pagatori.length - 1 || V.pagatori[i + 1].quota > 0) ? 'disabled' : ''}>↓</button>
+        <button type="button" class="btn ghost small" data-pag-del="${i}" ${V.pagatori.filter(x => !(x.quota > 0)).length <= 1 ? 'disabled' : ''} title="Rimuovi">✕</button>
       </div>`).join('')}
       <div style="margin-top:8px;"><button type="button" class="btn ghost small" id="pag-add">+ Aggiungi pagatore</button></div>
+      ${(() => {
+        const ti = V.pagatori.findIndex(x => x.quota > 0), T = ti >= 0 ? V.pagatori[ti] : null;
+        const lab = 'font-size:11.5px;color:var(--ink-soft);display:block;margin-bottom:3px;';
+        return `<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line);">
+          <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;"><input type="checkbox" id="terzo-on" ${T ? 'checked' : ''} style="width:auto;margin-top:3px;"><span><b>C'è un terzo soggetto</b> (es. un familiare o un ex coniuge) a cui chiedere parte di ciò che le assicurazioni non rimborsano?</span></label>
+          ${T ? `<div style="margin:12px 0 0 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;">
+            <div><label style="${lab}">Chi è</label><input type="text" data-pag-i="${ti}" value="${escHtml(T.nome)}" maxlength="40" placeholder="es. Cristina Pizzinat" style="width:100%;"></div>
+            <div><label style="${lab}">Che percentuale paga (%)</label><input type="number" min="1" max="100" step="1" data-pag-quota="${ti}" value="${T.quota}" style="width:100%;"></div>
+            <div><label style="${lab}">Per le spese di chi</label><input type="text" data-pag-per="${ti}" value="${escHtml(T.per || '')}" maxlength="40" placeholder="es. Sara (vuoto = tutti)" style="width:100%;"></div>
+            <div><label style="${lab}">Email per l'invio</label><input type="email" data-pag-email="${ti}" value="${escHtml(T.email || '')}" maxlength="120" placeholder="facoltativa" style="width:100%;"></div>
+          </div>
+          <p class="hint" style="margin:10px 0 0 26px;" id="terzo-esempio">${terzoEsempio(T)}</p>` : ''}
+        </div>`;
+      })()}
       <h3 style="margin:18px 0 4px;font-size:13.5px;">Massimali annui</h3>
       <p class="hint">Aggiungi i tetti di rimborso che vuoi tenere d'occhio, con un importo per ogni pagatore. Le <b>parole chiave</b> (separate da virgola) vengono cercate nel campo Prestazione delle spese dell'anno corrente. In Panoramica compare il residuo. Per i massimali in euro conta i rimborsi già pagati; per quelli a quantità (es. 1 pulizia dei denti all\'anno) conta le spese registrate nell\'anno, anche se non ancora rimborsate.</p>
       ${V.massimali.length ? V.massimali.map((mx, i) => `
@@ -2930,7 +2943,7 @@ document.getElementById('panel-impostazioni').addEventListener('change', (e) => 
     p.per = t.value.trim();
   } else if(t.dataset.pagQuota !== undefined){
     const D = impEnsureDraft(); const p = D.pagatori[parseInt(t.dataset.pagQuota, 10)]; if(!p) return;
-    p.quota = Math.min(100, Math.max(0, parseFloat(t.value) || 0));
+    p.quota = Math.min(100, Math.max(1, parseFloat(t.value) || 50));
   } else if(t.dataset.pagEmail !== undefined){
     const D = impEnsureDraft(); const p = D.pagatori[parseInt(t.dataset.pagEmail, 10)]; if(!p) return;
     p.email = t.value.trim();
@@ -2959,6 +2972,9 @@ async function impSave(){
   if(!MODULI_IDS.some(id => impDraft.moduli[id].on)){ showNotice('Deve restare attivo almeno un modulo.'); return; }
   const incompleti = impDraft.massimali.filter(x => x.nome.trim() && !x.parole.trim());
   if(incompleti.length){ showNotice(`Il massimale "${incompleti[0].nome}" non ha parole chiave: aggiungile per poterlo calcolare.`); return; }
+  const tz = impDraft.pagatori.find(p => p.quota > 0);
+  if(tz && !String(tz.nome || '').trim()){ showNotice('Scrivi il nome del terzo soggetto, oppure togli la spunta.'); return; }
+  terzoLast(impDraft);
   const nuoviIds = impDraft.pagatori.map(p => p.id);
   const tolti = settings.pagatori.filter(p => !nuoviIds.includes(p.id));
   const conDati = tolti.filter(p => medical.some(m => { const r = rimborsoDi(m, p.id); return r.stato !== 'da_inviare' || r.pagato > 0; }));
@@ -2972,6 +2988,7 @@ async function impSave(){
     await saveMedical();
   }
   settings.pagatori = norm.pagatori;
+  settings.terzoStash = norm.pagatori.some(p => p.quota > 0) ? null : (impDraft.terzoStash !== undefined ? impDraft.terzoStash : settings.terzoStash) || null;
   settings.massimali = norm.massimali;
   if(pagCambiati) settings.dashboard.sezioni = settings.dashboard.sezioni.map(s => s.id === 'medical' ? {...s, box:[]} : s);
   impDraft = null;
@@ -2982,7 +2999,7 @@ async function impSave(){
 }
 document.getElementById('panel-impostazioni').addEventListener('click', (e) => {
   if(e.target.id === 'mass-add'){ impEnsureDraft().massimali.push({id:uid(), nome:'', parole:'', ambito:'nucleo', tipo:'importo', importi:{}}); renderImpostazioni(); }
-  if(e.target.id === 'pag-add'){ impEnsureDraft().pagatori.push({id:'p' + uid(), nome:'Nuovo pagatore'}); renderImpostazioni(); }
+  if(e.target.id === 'pag-add'){ const D = impEnsureDraft(); D.pagatori.push({id:'p' + uid(), nome:'Nuovo pagatore'}); terzoLast(D); renderImpostazioni(); }
   const pu = e.target.closest('[data-pag-up]');
   if(pu){ const D = impEnsureDraft(), i = parseInt(pu.dataset.pagUp, 10); swap(D.pagatori, i, i - 1); renderImpostazioni(); }
   const pd = e.target.closest('[data-pag-down]');
@@ -5139,6 +5156,28 @@ function formPerApply(){
   settings.pagatori.forEach(p => { const s = document.getElementById('mf-rb-stato-' + p.id), box = s && s.closest('[data-pcard]'); if(box) box.style.display = (!p.per || !r || p.per.toLowerCase() === r) ? '' : 'none'; });
 }
 ['input', 'change'].forEach(ev => document.getElementById('mf-richiedente').addEventListener(ev, () => updateMedicalComputedFields()));
+
+
+function terzoEsempio(T){ const q = T.quota > 0 ? T.quota : 0, nome = T.nome || 'il terzo soggetto', per = T.per ? ' di ' + T.per : ''; return `Esempio: su una spesa${per} da 300 € rimborsata dalle assicurazioni per 150 €, a ${escHtml(nome)} si chiedono ${euro(150 * q / 100)} (${q}% di 150 €). L'importo si calcola da solo, anche nell'email di richiesta.`; }
+function terzoLast(D){ D.pagatori = D.pagatori.filter(p => !(p.quota > 0)).concat(D.pagatori.filter(p => p.quota > 0)); }
+document.addEventListener('change', (e) => {
+  if(e.target.id !== 'terzo-on') return;
+  const D = impEnsureDraft();
+  if(e.target.checked){
+    const st = D.terzoStash || settings.terzoStash;
+    D.pagatori.push(st ? {...st, quota: st.quota > 0 ? st.quota : 50} : {id:'p' + uid(), nome:'', quota:50, per:'', email:''});
+    D.terzoStash = null;
+  } else {
+    const i = D.pagatori.findIndex(p => p.quota > 0);
+    if(i >= 0) D.terzoStash = D.pagatori.splice(i, 1)[0];
+  }
+  renderImpostazioni(); impMarkDirty();
+}, true);
+document.addEventListener('input', (e) => {
+  const t = e.target; if(t.dataset.pagQuota === undefined && t.dataset.pagPer === undefined) return;
+  const D = impDraft; if(!D) return; const ex = document.getElementById('terzo-esempio'), T = D.pagatori.find(p => p.quota > 0);
+  if(!ex || !T) return; const v = {...T}; if(t.dataset.pagQuota !== undefined) v.quota = Math.min(100, Math.max(1, parseFloat(t.value) || 1)); if(t.dataset.pagPer !== undefined) v.per = t.value; ex.textContent = terzoEsempio(v);
+});
 
 onAuthStateChanged(auth, async (user) => {
   if(user){
