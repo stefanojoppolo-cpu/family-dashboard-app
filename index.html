@@ -680,6 +680,14 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .fpanel > .btn{grid-column:1/-1;justify-self:end;margin:0 !important;}
 .logo-c{width:34px;height:34px;border-radius:9px;}.logo-c svg{width:20px;height:20px;}.logo-c.ph{border-radius:50%;}
 .sb-t{display:flex;flex-direction:column;min-width:0;line-height:1.2;}.sb-t small{font-size:11.5px;color:#9FB0C3;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.msel{position:relative;}
+.msel-b{width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--paper-raised);border:1px solid var(--line);border-radius:8px;height:34px;padding:0 28px 0 10px;font-size:14px;line-height:32px;box-sizing:border-box;cursor:pointer;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.msel-b::after{content:'';position:absolute;right:11px;top:50%;width:6px;height:6px;border:solid var(--ink-soft);border-width:0 2px 2px 0;transform:translateY(-70%) rotate(45deg);}
+.msel-pop{position:absolute;z-index:40;top:100%;left:0;min-width:100%;margin-top:4px;background:var(--paper-raised);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(16,37,58,.18);padding:6px;}
+.msel-pop[hidden]{display:none;}
+.fpanel .ff .msel-o{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;}
+.fpanel .ff .msel-o:hover{background:var(--line);}
+.fpanel .ff .msel-pop input{width:auto !important;margin:0;}
 </style>
 </head>
 <body>
@@ -816,6 +824,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
         <div class="rp-fld"><label for="rp-m-meas">Misura</label><select id="rp-m-meas"></select></div>
         <div class="rp-fld"><label for="rp-m-grp">Raggruppa per</label><select id="rp-m-grp"></select></div>
         <div class="rp-fld" id="rp-m-mod-w"><label for="rp-m-mod">Modalità</label><select id="rp-m-mod"><option value="">Tutte</option><option value="Indiretta">Solo indirette</option><option value="Diretta">Solo dirette</option></select></div>
+        <div class="rp-fld" id="rp-m-es-w"><label for="rp-m-es">Esito delle pratiche</label><select id="rp-m-es"><option value="">Rimborsate e rifiutate</option><option value="ok">Solo rimborsate</option><option value="no">Solo rifiutate</option></select></div>
         <div class="rp-fld" id="rp-m-stk-w"><label for="rp-m-stk">Suddividi per</label><select id="rp-m-stk"><option value="">Nessuno</option><option value="persona">Persona</option></select></div>
         <div class="rp-fld"><label>Tipo di grafico</label><div class="rp-seg" id="rp-m-type"><button type="button" data-t="bar">Barre</button><button type="button" data-t="hbar">Barre orizzontali</button><button type="button" data-t="line">Linee</button><button type="button" data-t="pie">Torta</button></div></div>
         <div class="rp-foot"><button type="button" class="btn ghost" id="rp-m-cancel">Annulla</button><button type="button" class="btn" id="rp-m-save">Salva grafico</button></div>
@@ -895,9 +904,8 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
         <option value="">Tutti</option>
       </select>
       <label style="margin-left:18px;margin-right:8px;">Stato pratica</label>
-      <select id="medical-filter-stato">
-        <option value="">Tutti</option>
-      </select>
+      <div class="msel" id="stato-ms"><button type="button" class="msel-b" aria-haspopup="true">Tutti</button><div class="msel-pop" hidden></div></div>
+      <select id="medical-filter-stato" multiple hidden></select>
       <label style="margin-left:18px;margin-right:8px;">Anno</label>
       <select id="medical-filter-anno">
         <option value="">Tutti</option>
@@ -1541,7 +1549,7 @@ function normalizeSettings(raw){
   });
   if(raw.report && Array.isArray(raw.report.charts)){
     d.report.charts = raw.report.charts.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && ['med', 'bil'].includes(x.src) && ['bar', 'hbar', 'line', 'pie'].includes(x.type) && ['tot', 'rimb', 'resid', 'n', 'multi', 'giorni', 'e', 'u', 'r'].includes(x.meas) && ['mese', 'anno', 'persona', 'prestazione', 'pagatore', 'conto'].includes(x.grp))
-      .slice(0, 40).map(x => ({id:x.id.slice(0, 30), t:String(x.t || '').slice(0, 60), src:x.src, meas:x.meas, grp:x.grp, stk:x.stk === 'persona' ? 'persona' : '', mod:x.mod === 'Diretta' || x.mod === 'Indiretta' ? x.mod : '', type:x.type, wide:x.wide === true}));
+      .slice(0, 40).map(x => ({id:x.id.slice(0, 30), t:String(x.t || '').slice(0, 60), src:x.src, meas:x.meas, grp:x.grp, stk:x.stk === 'persona' ? 'persona' : '', mod:x.mod === 'Diretta' || x.mod === 'Indiretta' ? x.mod : '', es:x.es === 'ok' || x.es === 'no' ? x.es : '', type:x.type, wide:x.wide === true}));
   }
   Object.keys(ELENCHI_DEF).forEach(k => {
     const v = raw.elenchi && raw.elenchi[k];
@@ -1921,10 +1929,10 @@ function refreshMedicalFilterOptions(){
   if(settings.pagatori.some(p => p.id === curPag)) selPag.value = curPag;
 
   const selStato = document.getElementById('medical-filter-stato');
-  const currentStato = selStato.value;
-  selStato.innerHTML = `<option value="">Tutti</option>` + Object.keys(STATI_RIMBORSO).map(k => `<option value="${k}">${STATI_RIMBORSO[k].label}</option>`).join('');
+  const currentStato = [...selStato.selectedOptions].map(o => o.value);
+  selStato.innerHTML = Object.keys(STATI_RIMBORSO).map(k => `<option value="${k}">${STATI_RIMBORSO[k].label}</option>`).join('');
   if(selPag.value) selStato.insertAdjacentHTML('beforeend', '<option value="coda">In coda (dopo i precedenti)</option>');
-  selStato.value = currentStato;
+  [...selStato.options].forEach(o => { o.selected = currentStato.includes(o.value); }); msRender();
 
   const selAnno = document.getElementById('medical-filter-anno');
   const currentAnno = selAnno.value;
@@ -1940,9 +1948,28 @@ function efStatoPag(m, p){
   if(n.prossimo && n.prossimo.p.id === p.id) return 'da_inviare';
   return n.conclusa ? 'nessuno' : 'coda';
 }
+function msRender(){
+  const sel = document.getElementById('medical-filter-stato'), box = document.getElementById('stato-ms'); if(!sel || !box) return;
+  const b = box.querySelector('.msel-b'), pop = box.querySelector('.msel-pop');
+  const v = [...sel.selectedOptions], nm = o => o.textContent.replace(/ \(.*\)$/, '').replace('In attesa di risposta', 'In attesa');
+  b.textContent = v.length === 0 ? 'Tutti' : (v.length <= 2 ? v.map(nm).join(' + ') : v.length + ' stati');
+  pop.innerHTML = [...sel.options].map(o => `<label class="msel-o"><input type="checkbox" value="${o.value}" ${o.selected ? 'checked' : ''}> ${escHtml(o.textContent)}</label>`).join('');
+}
+(function(){
+  const box = document.getElementById('stato-ms'), sel = document.getElementById('medical-filter-stato'); if(!box) return;
+  const b = box.querySelector('.msel-b'), pop = box.querySelector('.msel-pop');
+  b.addEventListener('click', () => { pop.hidden = !pop.hidden; });
+  pop.addEventListener('change', (e) => {
+    const cb = e.target; if(!cb || cb.type !== 'checkbox') return;
+    [...sel.options].forEach(o => { if(o.value === cb.value) o.selected = cb.checked; });
+    msRender(); pop.hidden = false; sel.dispatchEvent(new Event('change', {bubbles: true}));
+  });
+  document.addEventListener('click', (e) => { if(!e.target.closest('#stato-ms')) pop.hidden = true; });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') pop.hidden = true; });
+})();
 function getFilteredMedical(){
   const filterName = document.getElementById('medical-filter').value;
-  const filterStato = document.getElementById('medical-filter-stato').value;
+  const filterStato = [...document.getElementById('medical-filter-stato').selectedOptions].map(o => o.value);
   const filterAnno = document.getElementById('medical-filter-anno').value;
   const filterPrestazione = document.getElementById('medical-filter-prestazione').value.trim().toLowerCase();
   const filterDocumento = document.getElementById('medical-filter-documento').value.trim().toLowerCase();
@@ -1950,7 +1977,7 @@ function getFilteredMedical(){
   let filtered = filterName ? medical.filter(m => m.richiedente===filterName) : medical;
   const pagSel = document.getElementById('medical-filter-pag').value, pagObj = settings.pagatori.find(p => p.id === pagSel);
   if(pagObj) filtered = filtered.filter(m => payerApplies(m, pagObj));
-  if(filterStato) filtered = filtered.filter(m => pagObj ? efStatoPag(m, pagObj) === filterStato : medicalRowNumbers(m).kind === filterStato);
+  if(filterStato.length) filtered = filtered.filter(m => filterStato.includes(pagObj ? efStatoPag(m, pagObj) : medicalRowNumbers(m).kind));
   if(filterAnno) filtered = filtered.filter(m => (m.dataDocumento||'').slice(0,4)===filterAnno);
   if(filterPrestazione) filtered = filtered.filter(m => (m.descrizione||'').toLowerCase().includes(filterPrestazione));
   if(filterDocumento) filtered = filtered.filter(m => `${m.tipoDocumento||''} ${m.numeroDocumento||''}`.toLowerCase().includes(filterDocumento));
@@ -2128,7 +2155,7 @@ function renderMedical(){
   medicalImportHint();
   const pags = settings.pagatori;
   const filterName = document.getElementById('medical-filter').value;
-  const filterStato = document.getElementById('medical-filter-stato').value;
+  const filterStato = [...document.getElementById('medical-filter-stato').selectedOptions].map(o => o.value);
   const filterAnno = document.getElementById('medical-filter-anno').value;
   const body = document.getElementById('medical-body');
   const filtered = getFilteredMedical();
@@ -2190,7 +2217,7 @@ function renderMedical(){
       </td>
     </tr>` : ''}`;
   }).join('');
-  const titolo = filterName || filterStato || filterAnno ? ' — ' + [filterName, filterStato ? (STATI_RIMBORSO[filterStato] ? STATI_RIMBORSO[filterStato].label : 'In coda') : '', filterAnno].filter(Boolean).join(', ') : '';
+  const titolo = filterName || filterStato.length || filterAnno ? ' — ' + [filterName, filterStato.map(k => STATI_RIMBORSO[k] ? STATI_RIMBORSO[k].label : 'In coda').join(' + '), filterAnno].filter(Boolean).join(', ') : '';
   const subtotal = `
     <tr class="subtotal-row">
       <td></td><td></td><td>Totale${escHtml(titolo)}</td><td></td>
@@ -4576,6 +4603,7 @@ const UX_NUOVO = {recurring: '+ Nuovo pagamento', medical: '+ Nuova spesa', bila
 function uxFilterCount(fp){
   let n = 0;
   fp.querySelectorAll('select, input').forEach(el => {
+    if(el.closest('.msel-pop')) return;
     if(el.type === 'checkbox') { if(el.checked) n++; }
     else if(el.value && el.value.trim()) n++;
   });
@@ -4606,7 +4634,7 @@ function uxPanelSetup(tid){
     head.after(fp); anchor = fp; upd();
     [...fp.querySelectorAll(':scope > label')].forEach(l => {
       const nx = l.nextElementSibling;
-      if(l.querySelector('input') || !nx || !/^(SELECT|INPUT)$/.test(nx.tagName)) return;
+      if(l.querySelector('input') || !nx || !(/^(SELECT|INPUT)$/.test(nx.tagName) || nx.classList.contains('msel'))) return;
       const w = document.createElement('div'); w.className = 'ff'; l.removeAttribute('style'); nx.removeAttribute('style');
       l.before(w); w.appendChild(l); w.appendChild(nx);
     });
@@ -4682,7 +4710,7 @@ function rpBuild(c){
     return {cats, series:defs.map(d => ({name:d[0], color:d[2], vals:cats.map(k => sum(k.rows, d[1]))})), fm:rpEur, stack:false, tab:'bilancio', bil:true};
   }
   const gg = c.meas === 'giorni';
-  const rows = (gg ? rpGiorniRows() : rpRows()).filter(r => !c.mod || r.mod === c.mod), payers = rpPayers();
+  const rows = (gg ? rpGiorniRows() : rpRows()).filter(r => !c.mod || r.mod === c.mod).filter(r => !gg || !c.es || r.es === c.es), payers = rpPayers();
   const M = (rs, m) => m === 'tot' ? sum(rs, r => r.tot) : m === 'rimb' ? sum(rs, r => r.rb) : m === 'resid' ? sum(rs, r => r.res) : m === 'n' ? rs.length : m === 'giorni' ? (rs.length ? sum(rs, r => r.g) / rs.length : 0) : 0;
   const fm = c.meas === 'n' ? (v => String(Math.round(v))) : gg ? (v => Math.round(v) + ' g') : rpEur;
   if(gg && c.grp === 'pagatore'){ const cats = payers.map(p => ({label:p.nome, rows:rows.filter(r => r.pn === p.nome)})).filter(k => k.rows.length); rpGiSub(cats); return {cats, series:[{name:'Giorni medi', color:acc, vals:cats.map(k => M(k.rows, 'giorni'))}], fm, stack:false, tab:'medical'}; }
@@ -4855,6 +4883,7 @@ function rpSync(){
   const canStk = rpDraft.src === 'med' && ['tot', 'rimb', 'resid', 'n'].includes(rpDraft.meas) && ['mese', 'anno', 'prestazione'].includes(rpDraft.grp);
   rpEl('rp-m-stk-w').style.display = canStk ? '' : 'none'; if(!canStk) rpDraft.stk = ''; rpEl('rp-m-stk').value = rpDraft.stk;
   rpEl('rp-m-mod-w').style.display = rpDraft.src === 'med' ? '' : 'none'; if(rpDraft.src !== 'med') rpDraft.mod = ''; rpEl('rp-m-mod').value = rpDraft.mod || '';
+  rpEl('rp-m-es-w').style.display = rpDraft.meas === 'giorni' ? '' : 'none'; if(rpDraft.meas !== 'giorni') rpDraft.es = ''; rpEl('rp-m-es').value = rpDraft.es || '';
   document.querySelectorAll('#rp-m-type button').forEach(b => b.classList.toggle('on', b.dataset.t === rpDraft.type));
   rpEl('rp-pv-t').textContent = rpDraft.t || 'Anteprima';
   rpRender(rpDraft, rpEl('rp-pv'), true);
@@ -4874,6 +4903,7 @@ rpEl('rp-m-meas').onchange = (e) => { rpDraft.meas = e.target.value; rpSync(); }
 rpEl('rp-m-grp').onchange = (e) => { rpDraft.grp = e.target.value; rpSync(); };
 rpEl('rp-m-stk').onchange = (e) => { rpDraft.stk = e.target.value; rpSync(); };
 rpEl('rp-m-mod').onchange = (e) => { rpDraft.mod = e.target.value; rpSync(); };
+rpEl('rp-m-es').onchange = (e) => { rpDraft.es = e.target.value; rpSync(); };
 rpEl('rp-m-type').onclick = (e) => { const b = e.target.closest('button'); if(b){ rpDraft.type = b.dataset.t; rpSync(); } };
 rpEl('rp-m-save').onclick = () => {
   if(!rpDraft.t.trim()) rpDraft.t = ({giorni:'Tempi di rimborso', tot:'Spese', rimb:'Rimborsi', resid:'Residuo', n:'Pratiche', multi:'Confronto', e:'Entrate', u:'Uscite', r:'Risparmio'})[rpDraft.meas] || 'Nuovo grafico';
@@ -4962,13 +4992,13 @@ function dtSamples(){
   medical.forEach(m => dtLevels(m).forEach(lv => {
     if(!lv.pill) return;
     const cl = dtClassOf(lv.pill), g = dtDays(lv.a, lv.c);
-    if((cl === 'ok' || cl === 'no') && g != null && g >= 0) out.push({id:m.id, pn:lv.nome, g});
+    if((cl === 'ok' || cl === 'no') && g != null && g >= 0) out.push({id:m.id, pn:lv.nome, g, es:cl});
   }));
   return out;
 }
 function rpGiorniRows(){
   const by = {}; rpRows().forEach(r => { by[r.id] = r; });
-  return dtSamples().filter(s => by[s.id]).map(s => ({...by[s.id], pn:s.pn, g:s.g}));
+  return dtSamples().filter(s => by[s.id]).map(s => ({...by[s.id], pn:s.pn, g:s.g, es:s.es}));
 }
 
 function dtTimelineFor(id){ const m = medical.find(x => x.id === id); return m ? dtTimeline(m) : ''; }
