@@ -3355,9 +3355,7 @@ function ckMedBase(){
 }
 function ckFull(n){ return (typeof settings !== 'undefined' && settings.nomiCompleti && settings.nomiCompleti[n]) || n; }
 function ckImpMsg(c, mb){
-  const sp = ckSp(c.specialistaId), p = c.prenotazione || {}, str = p.struttura || c.struttura || (ckSede(sp, c.sedeId) || {}).struttura || '';
-  const da = (typeof settings !== 'undefined' && settings.profilo && settings.profilo.nome) || '';
-  return 'Buongiorno ' + mb.nome + ',\navrei bisogno dell\'impegnativa per ' + ckFull(c.persona) + ': ' + c.tipo + (sp ? ' (' + sp.nome + (str ? ', ' + str : '') + ')' : (str ? ' presso ' + str : '')) + (p.data ? ', visita prevista il ' + ckFmt(p.data) : '') + '.\nGrazie mille' + (da ? ',\n' + da : '') + '.';
+  return 'Buongiorno Dottore,\navrei bisogno dell\'impegnativa per ' + c.tipo + '.\nLe ricordo che occorre inserire il quesito diagnostico, necessario per poter chiedere il rimborso all\'assicurazione.\nGrazie mille,\n' + ckFull(c.persona);
 }
 function ckImpBtn(c, cls){ const mb = ckMedBase(); return mb ? `<button type="button" class="btn small ${cls || 'ghost'}" data-ck="impreq" data-id="${c.id}">💬 Richiedi impegnativa</button>` : ''; }
 function ckCell(sp, cls){ if(!sp || !sp.cellulare) return ''; const w = ckWa(sp.cellulare); return `<span class="${cls || ''}">📱 <a href="tel:${escHtml(ckTel(sp.cellulare))}">${escHtml(sp.cellulare)}</a>${w ? ` · <a href="${escHtml(w)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</span>`; }
