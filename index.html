@@ -3315,6 +3315,9 @@ function ckColor(n){ n = String(n || '').trim().toLowerCase(); let h = 0; for(co
 function ckFmt(iso){ return iso ? fmtDate(iso) : '—'; }
 function ckFmtLong(iso, ora){ if(!iso) return '—'; const p = iso.split('-').map(Number), d = new Date(p[0], p[1] - 1, p[2]); return CK_GG[d.getDay()] + ' ' + p[2] + ' ' + CK_MESI_C[p[1] - 1] + (p[0] !== new Date().getFullYear() ? ' ' + p[0] : '') + (ora ? ', ' + ora : ''); }
 function ckSafeUrl(u){ u = String(u || '').trim(); return /^https?:\/\//i.test(u) ? u : ''; }
+function ckTel(n){ return String(n || '').replace(/[^\d+]/g, ''); }
+function ckWa(n){ let d = ckTel(n).replace(/^\+/, ''); if(/^3\d{8,9}$/.test(d)) d = '39' + d; else if(/^0039/.test(d)) d = d.slice(2); return d.length >= 8 ? 'https://wa.me/' + d : ''; }
+function ckCell(sp, cls){ if(!sp || !sp.cellulare) return ''; const w = ckWa(sp.cellulare); return `<span class="${cls || ''}">📱 <a href="tel:${escHtml(ckTel(sp.cellulare))}">${escHtml(sp.cellulare)}</a>${w ? ` · <a href="${escHtml(w)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</span>`; }
 function ckSp(id){ return specialists.find(s => s.id === id); }
 function ckSede(sp, sedeId){ if(!sp || !sp.sedi || !sp.sedi.length) return null; return sp.sedi.find(s => s.id === sedeId) || sp.sedi.find(s => s.id === sp.sedeDefault) || sp.sedi[0]; }
 function ckCadLabel(c){ const m = +c.cadenza; if(!m) return 'Una tantum'; if(m === 6) return 'Ogni 6 mesi'; if(m % 12 === 0) return m === 12 ? 'Ogni anno' : 'Ogni ' + (m / 12) + ' anni'; return 'Ogni ' + m + ' mesi'; }
@@ -3497,7 +3500,7 @@ function ckSpecHtml(){
       ${x.note ? `<div class="ck-note">${escHtml(x.note)}</div>` : ''}</div>`;
     }).join('');
     const usati = checkups.filter(c => c.specialistaId === s.id).map(c => c.persona + ' · ' + c.tipo);
-    return `<div class="ck-sp"><div class="ck-sp-h"><span class="ck-av">${escHtml(ini)}</span><div><b>${escHtml(s.nome)}</b><div class="ck-mut">${escHtml(s.specialita || '')}</div></div></div>${sedi || '<div class="ck-mut">Nessuna sede inserita.</div>'}
+    return `<div class="ck-sp"><div class="ck-sp-h"><span class="ck-av">${escHtml(ini)}</span><div><b>${escHtml(s.nome)}</b><div class="ck-mut">${escHtml(s.specialita || '')}</div></div></div>${s.cellulare ? `<div class="ck-sede-l" style="margin-top:0">${ckCell(s)}</div>` : ''}${sedi || '<div class="ck-mut">Nessuna sede inserita.</div>'}
       ${s.note ? `<div class="ck-note">${escHtml(s.note)}</div>` : ''}${usati.length ? `<div class="ck-mut" style="font-size:12px">Usato per: ${escHtml(usati.join('; '))}</div>` : ''}
       <div class="ck-sp-a"><button type="button" class="btn small" data-ck="spbook" data-id="${s.id}">Prenota</button><button type="button" class="btn small ghost" data-ck="editsp" data-id="${s.id}">Modifica</button></div></div>`;
   }).join('');
@@ -3625,6 +3628,7 @@ function ckBook(id){
 function ckSpBox(spId, sedeId){
   const sp = ckSp(spId), sede = ckSede(sp, sedeId), u = sede ? ckSafeUrl(sede.sito) : '';
   return `<div class="ck-fld"><label>Specialista</label><div class="ck-row2"><select class="ck-in" id="ck-bsp">${ckSpOpts(spId)}</select><select class="ck-in" id="ck-bsede">${ckSedeOpts(spId, sede && sede.id)}</select></div></div>
+  ${sp && sp.cellulare ? `<div class="ck-sede-l" style="margin-top:8px">Cellulare dello specialista: ${ckCell(sp)}</div>` : ''}
   ${sede ? `<div class="ck-contacts"><div><span>Telefono</span><b>${escHtml(sede.tel || '—')}</b>${sede.tel ? `<a class="btn small ghost" href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">Chiama</a>` : ''}</div><div><span>Email</span><b>${escHtml(sede.email || '—')}</b>${sede.email ? `<a class="btn small ghost" href="mailto:${escHtml(sede.email)}?subject=${encodeURIComponent('Richiesta prenotazione')}">Scrivi email</a>` : ''}</div><div><span>Sito</span><b>${escHtml(sede.sito || '—')}</b>${u ? `<a class="btn small ghost" href="${escHtml(u)}" target="_blank" rel="noopener">Apri sito</a>` : ''}</div></div>${sede.note ? `<div class="ck-note">Nota: ${escHtml(sede.note)}</div>` : ''}` : (spId ? '' : '<p class="ck-mut" style="margin:6px 0 0">Scegli lo specialista per vedere telefono ed email, oppure indica solo la struttura.</p>')}`;
 }
 async function ckSaveBook(id){
@@ -3712,13 +3716,13 @@ function ckDownloadDue(c){
 // ----- Specialisti
 function ckSpForm(id){
   const s = id ? ckSp(id) : null;
-  ckSpDraft = s ? JSON.parse(JSON.stringify(s)) : {id: '', nome: '', specialita: '', note: '', sedi: [{id: uid(), struttura: '', indirizzo: '', tel: '', email: '', sito: '', note: ''}], sedeDefault: ''};
+  ckSpDraft = s ? JSON.parse(JSON.stringify(s)) : {id: '', nome: '', specialita: '', cellulare: '', note: '', sedi: [{id: uid(), struttura: '', indirizzo: '', tel: '', email: '', sito: '', note: ''}], sedeDefault: ''};
   if(!ckSpDraft.sedeDefault && ckSpDraft.sedi[0]) ckSpDraft.sedeDefault = ckSpDraft.sedi[0].id;
   ckCtx = {t: 'sp', id}; ckSpDraw();
 }
 function ckSpRead(){
   if(!ckSpDraft || !$ck('spn')) return;
-  ckSpDraft.nome = $ck('spn').value; ckSpDraft.specialita = $ck('sps').value; ckSpDraft.note = $ck('spnote').value;
+  ckSpDraft.nome = $ck('spn').value; ckSpDraft.specialita = $ck('sps').value; ckSpDraft.cellulare = $ck('spc').value; ckSpDraft.note = $ck('spnote').value;
   ckBox.querySelectorAll('.ck-sedef').forEach((el, i) => { const x = ckSpDraft.sedi[i]; if(!x) return; el.querySelectorAll('[data-f]').forEach(inp => { x[inp.dataset.f] = inp.value; }); });
   const r = ckBox.querySelector('input[name="ck-sdef"]:checked'); if(r && ckSpDraft.sedi[+r.value]) ckSpDraft.sedeDefault = ckSpDraft.sedi[+r.value].id;
 }
@@ -3727,7 +3731,7 @@ function ckSpDraw(){
   const sedi = d.sedi.map((x, i) => `<div class="ck-sedef"><div class="ck-sedef-h"><b>Sede ${i + 1}</b><label class="ck-rad"><input type="radio" name="ck-sdef" value="${i}"${x.id === d.sedeDefault ? ' checked' : ''}> predefinita</label>${d.sedi.length > 1 ? `<button type="button" class="btn small ghost danger" data-ck="rmsede" data-i="${i}">Rimuovi</button>` : ''}</div>
     <div class="ck-form">${ckFld('Struttura', `<input class="ck-in" data-f="struttura" value="${escHtml(x.struttura)}" placeholder="es. Casa di Cura Toniolo">`, 'ck-span')}${ckFld('Indirizzo', `<input class="ck-in" data-f="indirizzo" value="${escHtml(x.indirizzo)}">`, 'ck-span')}
     ${ckFld('Telefono', `<input class="ck-in" data-f="tel" value="${escHtml(x.tel)}">`)}${ckFld('Email', `<input class="ck-in" data-f="email" type="email" value="${escHtml(x.email)}">`)}${ckFld('Sito / prenotazione online', `<input class="ck-in" data-f="sito" value="${escHtml(x.sito)}" placeholder="https://…">`, 'ck-span')}${ckFld('Note (es. si prenota il martedì)', `<input class="ck-in" data-f="note" value="${escHtml(x.note)}">`, 'ck-span')}</div></div>`).join('');
-  ckShow(`${ckHead(ckCtx.id ? 'Modifica specialista' : 'Nuovo specialista')}<div class="md-body"><div class="ck-form">${ckFld('Nome', `<input class="ck-in" id="ck-spn" value="${escHtml(d.nome)}" placeholder="es. Dott. Ricci">`)}${ckFld('Specialità', `<input class="ck-in" id="ck-sps" value="${escHtml(d.specialita)}" placeholder="es. Cardiologo">`)}</div>
+  ckShow(`${ckHead(ckCtx.id ? 'Modifica specialista' : 'Nuovo specialista')}<div class="md-body"><div class="ck-form">${ckFld('Nome', `<input class="ck-in" id="ck-spn" value="${escHtml(d.nome)}" placeholder="es. Dott. Ricci">`)}${ckFld('Specialità', `<input class="ck-in" id="ck-sps" value="${escHtml(d.specialita)}" placeholder="es. Cardiologo">`)}${ckFld('Cellulare', `<input class="ck-in" id="ck-spc" type="tel" value="${escHtml(d.cellulare || '')}" placeholder="es. 333 1234567">`)}</div>
     <h4 class="md-h">Sedi dove riceve</h4>${sedi}<button type="button" class="btn small ghost" data-ck="addsede">+ Aggiungi un'altra sede</button>
     <div class="ck-form" style="margin-top:12px">${ckFld('Note sullo specialista', `<textarea class="ck-in" id="ck-spnote" rows="2">${escHtml(d.note)}</textarea>`, 'ck-span')}</div></div>
     <div class="md-foot">${ckCtx.id ? `<button type="button" class="btn small ghost danger" data-ck="delsp" data-id="${ckCtx.id}" style="margin-right:auto">${ckCtx.del ? 'Confermi l\'eliminazione?' : 'Elimina'}</button>` : ''}<button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small primary" data-ck="savesp">Salva</button></div>`);
@@ -3737,7 +3741,7 @@ async function ckSpSave(){
   if(!d.nome.trim()){ showFormError('Inserisci il nome dello specialista.'); return; }
   const sedi = d.sedi.filter(x => x.struttura.trim() || x.indirizzo.trim() || x.tel.trim() || x.email.trim() || x.sito.trim());
   for(const x of sedi){ if(x.sito.trim() && !ckSafeUrl(x.sito)){ showFormError('Il sito deve iniziare con http:// o https://'); return; } }
-  const out = {id: ckCtx.id || uid(), nome: d.nome.trim(), specialita: d.specialita.trim(), note: d.note.trim(), sedi: sedi.map(x => ({...x, struttura: x.struttura.trim(), tel: x.tel.trim(), email: x.email.trim(), sito: x.sito.trim()})), sedeDefault: ''};
+  const out = {id: ckCtx.id || uid(), nome: d.nome.trim(), specialita: d.specialita.trim(), cellulare: (d.cellulare || '').trim(), note: d.note.trim(), sedi: sedi.map(x => ({...x, struttura: x.struttura.trim(), tel: x.tel.trim(), email: x.email.trim(), sito: x.sito.trim()})), sedeDefault: ''};
   out.sedeDefault = (sedi.find(x => x.id === d.sedeDefault) || sedi[0] || {}).id || '';
   if(ckCtx.id) specialists = specialists.map(s => s.id === ckCtx.id ? out : s); else specialists.push(out);
   await saveSpecialists(); ckClose(); renderAll();
@@ -3762,7 +3766,7 @@ async function ckImpGo(){
     if(!x || typeof x.nome !== 'string' || !x.nome.trim()) return;
     if(has.has(x.nome.trim().toLowerCase())){ skip++; return; }
     const sedi = (Array.isArray(x.sedi) ? x.sedi : []).map(y => ({id: uid(), struttura: String(y.struttura || ''), indirizzo: String(y.indirizzo || ''), tel: String(y.tel || ''), email: String(y.email || ''), sito: ckSafeUrl(y.sito) ? String(y.sito) : '', note: String(y.note || '')}));
-    specialists.push({id: uid(), nome: x.nome.trim(), specialita: String(x.specialita || ''), note: String(x.note || ''), sedi, sedeDefault: sedi[0] ? sedi[0].id : ''});
+    specialists.push({id: uid(), nome: x.nome.trim(), specialita: String(x.specialita || ''), cellulare: String(x.cellulare || ''), note: String(x.note || ''), sedi, sedeDefault: sedi[0] ? sedi[0].id : ''});
     has.add(x.nome.trim().toLowerCase()); n++;
   });
   await saveSpecialists(); ckClose(); ckView = 'spec'; renderAll();
