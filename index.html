@@ -721,6 +721,10 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
 .bz-miss{font-size:12px;color:#8A5200}
 @media (max-width:640px){.ck-form,.ck-row2{grid-template-columns:1fr}.ck-contacts{grid-template-columns:1fr}.ck-contacts>div{border-right:0;border-bottom:1px solid var(--line)}}
 
+.ck-lr{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;background:none;border:0;border-top:1px solid var(--line);padding:11px 4px;cursor:pointer;color:var(--ink)}.ck-lr:first-of-type{border-top:0}.ck-lr:hover{background:var(--paper)}
+.ck-lr-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.ck-lr-d{display:flex;flex-direction:column;gap:2px;text-align:right;font-size:13px;font-weight:600}
+@media (max-width:640px){.ck-lr{flex-wrap:wrap}.ck-lr-d{text-align:left;order:3;flex-basis:100%;padding-left:21px}}
+
 .md-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 24px 12px;border-bottom:1px solid var(--line)}
 .md-head h3{margin:0;font-size:18px;font-weight:800}.md-who{font-weight:600;color:var(--ink-soft);font-size:14px;margin-left:6px}
 .md-sub{margin-top:5px;font-size:13px;color:var(--ink-soft)}
@@ -3515,7 +3519,7 @@ function renderCheckup(){
   const ae = document.activeElement;
   if(!(ckView === 'spec' && ae && ae.id === 'ck-search')){
     root.innerHTML = ckView === 'spec' ? ckSpecHtml() : `<div class="ck-head"><div><h2 class="ck-h2">${escHtml((settings.moduli.checkup && settings.moduli.checkup.nome) || 'Check-up e visite')}</h2><p class="ck-mut">Controlli ricorrenti e visite specialistiche della famiglia, con promemoria e prenotazione.</p></div>
-      <div class="ck-head-a"><button type="button" class="btn" data-ck="view" data-v="spec">Specialisti</button><button type="button" class="btn primary" data-ck="newck">+ Nuovo controllo</button></div></div>${ckTodoHtml()}${ckCalHtml()}`;
+      <div class="ck-head-a"><button type="button" class="btn ghost" data-ck="list">Elenco (${checkups.length})</button><button type="button" class="btn" data-ck="view" data-v="spec">Specialisti</button><button type="button" class="btn primary" data-ck="newck">+ Nuovo controllo</button></div></div>${ckTodoHtml()}${ckCalHtml()}`;
   }
   // contatore nel menu e bozze in Sanità
   const btn = document.querySelector('.tab-btn[data-tab="checkup"]');
@@ -3777,6 +3781,28 @@ async function ckImpGo(){
   showNotice(n + ' specialisti importati' + (skip ? ', ' + skip + ' già presenti' : '') + '.', 'success');
 }
 
+
+// ----- Elenco di tutti i controlli
+let ckListPers = '';
+function ckListShow(){
+  ckCtx = {t: 'list'};
+  const pers = [...new Set(checkups.map(c => c.persona).filter(Boolean))].sort();
+  const rank = {scaduto: 0, conferma: 1, prenotare: 2, prenotata: 3, futuro: 4, senza: 5, chiuso: 6};
+  const rows = checkups.filter(c => !ckListPers || c.persona === ckListPers).map(c => ({c, s: ckState(c)}))
+    .sort((a, b) => (rank[a.s.k] - rank[b.s.k]) || String(a.s.data || '9').localeCompare(String(b.s.data || '9')));
+  const body = rows.map(({c, s: st}) => {
+    const sp = ckSp(c.specialistaId), p = c.prenotazione;
+    const next = p ? 'Prenotata: ' + ckFmtLong(p.data, p.ora) : st.data ? (st.k === 'scaduto' ? 'Scaduto il ' : 'Scadenza ') + ckFmt(st.data) : '—';
+    return `<button type="button" class="ck-lr" data-ck="open" data-id="${c.id}"><span class="ck-dot" style="background:${ckColor(c.persona)}"></span>
+      <span class="ck-lr-m"><b>${escHtml(c.tipo)}</b><span class="ck-mut">${escHtml(c.persona)} · ${escHtml(ckCadLabel(c))}${sp ? ' · ' + escHtml(sp.nome) : ''}</span></span>
+      <span class="ck-lr-d"><span>${escHtml(next)}</span><span class="ck-mut">${c.ultima ? 'ultima ' + ckFmt(c.ultima) : 'mai fatto'}</span></span>${ckPill(st.k)}</button>`;
+  }).join('');
+  ckShow(`${ckHead('Tutti i controlli', checkups.length + ' inseriti')}<div class="md-body">
+    ${pers.length > 1 ? `<div class="ck-fld" style="margin-bottom:10px;max-width:240px"><select class="ck-in" id="ck-lpers"><option value="">Tutta la famiglia</option>${pers.map(x => `<option${x === ckListPers ? ' selected' : ''}>${escHtml(x)}</option>`).join('')}</select></div>` : ''}
+    ${body || '<div class="ck-empty">Nessun controllo inserito. Usa «+ Nuovo controllo».</div>'}</div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Chiudi</button><button type="button" class="btn small primary" data-ck="newck">+ Nuovo controllo</button></div>`);
+}
+
 // ----- Eventi
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('[data-ck]'); if(!b) return;
@@ -3804,6 +3830,7 @@ document.addEventListener('click', async (e) => {
   if(a === 'delyes'){ const c = checkups.find(x => x.id === id); if(c && c.prenotazione && c.prenotazione.medId){ const mid = c.prenotazione.medId; const mm = medical.find(m => m.id === mid); if(mm && mm.bozza){ medical = medical.filter(m => m.id !== mid); await saveMedical(); } } checkups = checkups.filter(x => x.id !== id); await saveCheckups(); ckClose(); return renderAll(); }
   if(a === 'medcomplete'){ ckClose(); jumpToTab('medical'); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); return; }
   if(a === 'showbozze'){ const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); return; }
+  if(a === 'list') return ckListShow();
   if(a === 'impsp') return ckImpAsk();
   if(a === 'impgo') return ckImpGo();
   if(a === 'newsp') return ckSpForm('');
@@ -3820,6 +3847,7 @@ document.addEventListener('click', async (e) => {
 });
 document.addEventListener('change', (e) => {
   const t = e.target;
+  if(t.id === 'ck-lpers'){ ckListPers = t.value; return ckListShow(); }
   if(t.dataset && t.dataset.pick !== undefined){
     const x = ckSediNote()[+t.value], i = +t.dataset.pick; if(!x || !ckSpDraft) return;
     ckSpRead(); const dst = ckSpDraft.sedi[i]; ['struttura', 'indirizzo', 'tel', 'email', 'sito', 'note'].forEach(f => { dst[f] = x[f] || ''; }); return ckSpDraw();
