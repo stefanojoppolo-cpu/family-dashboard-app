@@ -3551,6 +3551,22 @@ const ckHead = (t, s) => `<div class="md-head"><div><h3>${t}</h3>${s ? `<div cla
 const ckFld = (l, inner, cls) => `<div class="ck-fld ${cls || ''}"><label>${l}</label>${inner}</div>`;
 
 // ----- Scheda controllo
+function ckRefs(c){
+  const out = [];
+  (c.storico || []).forEach(h => { const m = h.medId && medical.find(x => x.id === h.medId); if(!m) return;
+    (m.documenti || []).forEach(d => { const u = d && ckSafeUrl(d.url); if(u && /^referto/i.test(String(d.nome || '').trim())) out.push({data: h.data, struttura: h.struttura || m.struttura || '', nome: d.nome, url: u}); }); });
+  return out.sort((a, b) => String(b.data).localeCompare(String(a.data)));
+}
+function ckRefShow(id){
+  const c = checkups.find(x => x.id === id); if(!c) return ckClose();
+  ckCtx = {t: 'refs', id};
+  const r = ckRefs(c);
+  ckShow(`${ckHead('Referti · ' + c.tipo, c.persona + ' · ' + r.length + (r.length === 1 ? ' referto' : ' referti'))}<div class="md-body">
+    ${r.length ? `<ul class="ck-hist">${r.map(x => `<li>${ckFmt(x.data)}${x.struttura ? ' · ' + escHtml(x.struttura) : ''} · <a href="${escHtml(x.url)}" target="_blank" rel="noopener">📄 ${escHtml(x.nome)} ↗</a></li>`).join('')}</ul>
+    <p class="ck-mut" style="margin:10px 0 0">Raccolgo i documenti chiamati «Referto…» nelle spese collegate in Sanità. I file restano dove li hai salvati (es. Google Drive).</p>` : '<div class="ck-empty">Nessun referto trovato. Nella spesa collegata in Sanità aggiungi un documento il cui nome inizia per «Referto».</div>'}</div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="open" data-id="${c.id}">← Torna al controllo</button>${r.length ? `<button type="button" class="btn small ghost" data-ck="refcopy" data-id="${c.id}">Copia i link</button><button type="button" class="btn small ghost" data-ck="reftxt" data-id="${c.id}">Scarica elenco</button><button type="button" class="btn small primary" data-ck="refopen" data-id="${c.id}">Apri tutti</button>` : ''}</div>`);
+}
+function ckRefText(c){ return c.tipo + ' · ' + c.persona + '\n' + ckRefs(c).map(x => ckFmt(x.data) + (x.struttura ? ' · ' + x.struttura : '') + '\n' + x.url).join('\n\n') + '\n'; }
 function ckDetail(id){
   const c = checkups.find(x => x.id === id); if(!c) return ckClose();
   ckCtx = {t: 'detail', id, del: ckCtx && ckCtx.id === id && ckCtx.del};
@@ -3576,7 +3592,7 @@ function ckDetail(id){
     ${(sp || sede) ? `<h4 class="md-h">${sp ? 'Specialista' : 'Struttura'}</h4><div class="md-top">${sp ? kv('Nome', escHtml(sp.nome) + (sp.specialita ? ' · ' + escHtml(sp.specialita) : '')) : ''}${kv('Struttura', sede ? escHtml(sede.struttura || '') : '')}${kv('Indirizzo', sede ? escHtml(sede.indirizzo || '') : '')}${kv('Contatti', contatti)}</div>${sede && sede.note ? `<p class="md-note">${escHtml(sede.note)}</p>` : ''}` : ''}
     ${p ? `<h4 class="md-h">Prenotazione</h4><div class="md-top">${kv('Quando', ckFmtLong(p.data, p.ora))}${kv('Struttura', escHtml(p.struttura || ''))}${kv('Impegnativa', imp)}${kv('Spesa in Sanità', med ? (med.bozza ? 'Bozza, da completare' : 'Registrata') : '')}</div>` : ''}
     ${c.note ? `<h4 class="md-h">Note</h4><p class="md-note">${escHtml(c.note)}</p>` : ''}
-    ${storico ? `<h4 class="md-h">Storico visite</h4><ul class="ck-hist">${storico}</ul>` : ''}</div>
+    ${storico ? `<h4 class="md-h">Storico visite${ckRefs(c).length ? ` <button type="button" class="btn small ghost" data-ck="refs" data-id="${c.id}" style="margin-left:8px">📄 Tutti i referti (${ckRefs(c).length})</button>` : ''}</h4><ul class="ck-hist">${storico}</ul>` : ''}</div>
     <div class="md-foot">${acts}</div>`);
 }
 
@@ -3855,6 +3871,10 @@ document.addEventListener('click', async (e) => {
   if(a === 'delyes'){ const c = checkups.find(x => x.id === id); if(c && c.prenotazione && c.prenotazione.medId){ const mid = c.prenotazione.medId; const mm = medical.find(m => m.id === mid); if(mm && mm.bozza){ medical = medical.filter(m => m.id !== mid); await saveMedical(); } } checkups = checkups.filter(x => x.id !== id); await saveCheckups(); ckClose(); return renderAll(); }
   if(a === 'medcomplete'){ ckClose(); jumpToTab('medical'); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); return; }
   if(a === 'showbozze'){ const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); return; }
+  if(a === 'refs') return ckRefShow(id);
+  if(a === 'refcopy'){ const c = checkups.find(x => x.id === id); if(!c) return; const txt = ckRefs(c).map(x => x.url).join('\n'); const done = () => showNotice('Link copiati negli appunti.', 'success'); const fb = () => { const ta = document.createElement('textarea'); ta.value = txt; document.body.append(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ showNotice('Copia non riuscita: usa «Scarica elenco».'); } ta.remove(); }; if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fb); else fb(); return; }
+  if(a === 'reftxt'){ const c = checkups.find(x => x.id === id); if(c) ckSaveFile('referti-' + c.tipo.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.txt', ckRefText(c)); return; }
+  if(a === 'refopen'){ const c = checkups.find(x => x.id === id); if(c) ckRefs(c).forEach(x => window.open(x.url, '_blank', 'noopener')); return; }
   if(a === 'list') return ckListShow();
   if(a === 'impsp') return ckImpAsk();
   if(a === 'impgo') return ckImpGo();
