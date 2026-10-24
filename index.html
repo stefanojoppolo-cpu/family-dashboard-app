@@ -3410,7 +3410,7 @@ function ckTodoHtml(){
       acts = `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Cambia data</button>`;
     } else {
       sub = ckFmtLong(s.data, c.prenotazione.ora) + (sp ? ' · ' + sp.nome : '') + (c.prenotazione.struttura ? ' · ' + c.prenotazione.struttura : '');
-      acts = `<button type="button" class="btn small ghost" data-ck="open" data-id="${c.id}">Dettagli</button>`;
+      acts = `<button type="button" class="btn small ghost" data-ck="open" data-id="${c.id}">Dettagli</button><button type="button" class="btn small ghost" data-ck="gcal" data-id="${c.id}">Aggiungi a Google Calendar</button>`;
     }
     const miss = s.k === 'prenotata' && !c.prenotazione.impegnativa ? '<span class="ck-pill ck-p-outred">Manca impegnativa</span>' : ckPill(s.k);
     return `<div class="ck-it"><div class="ck-it-h"><span class="ck-dot" style="background:${ckColor(c.persona)}"></span><b class="ck-it-t">${escHtml(c.tipo)} · ${escHtml(c.persona)}</b>${miss}</div>
@@ -3557,9 +3557,9 @@ function ckDetail(id){
   if(ckCtx.del) acts = `<span style="color:var(--stamp);font-weight:700">Eliminare questo controllo?</span><button type="button" class="btn small danger" data-ck="delyes" data-id="${c.id}">Sì, elimina</button><button type="button" class="btn small ghost" data-ck="delno" data-id="${c.id}">Annulla</button>`;
   else {
     acts = '';
-    if(s.k === 'prenotata') acts += `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Modifica prenotazione</button><button type="button" class="btn small ghost" data-ck="ics" data-id="${c.id}">Aggiungi al calendario (.ics)</button>`;
+    if(s.k === 'prenotata') acts += `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Modifica prenotazione</button><button type="button" class="btn small ghost" data-ck="gcal" data-id="${c.id}">Google Calendar</button><button type="button" class="btn small ghost" data-ck="ics" data-id="${c.id}">File .ics</button>`;
     else if(s.k === 'conferma') acts += `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Cambia data</button>`;
-    else if(s.k !== 'chiuso') acts += `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>` + (due ? `<button type="button" class="btn small ghost" data-ck="icsdue" data-id="${c.id}">Promemoria scadenza (.ics)</button>` : '');
+    else if(s.k !== 'chiuso') acts += `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>` + (due ? `<button type="button" class="btn small ghost" data-ck="gcaldue" data-id="${c.id}">Promemoria su Google Calendar</button><button type="button" class="btn small ghost" data-ck="icsdue" data-id="${c.id}">Scadenza .ics</button>` : '');
     if(med && med.bozza) acts += `<button type="button" class="btn small ghost" data-ck="medcomplete" data-id="${med.id}">Completa la spesa</button>`;
     acts += `<button type="button" class="btn small ghost" data-ck="editck" data-id="${c.id}">Modifica</button><button type="button" class="btn small ghost danger" data-ck="delck" data-id="${c.id}">Elimina</button>`;
   }
@@ -3624,7 +3624,7 @@ function ckBook(id){
     ${ckFld('Struttura <span class="ck-mut">· precompilata dallo specialista</span>', `<input class="ck-in" id="ck-strut" value="${escHtml(p.struttura || (sede && sede.struttura) || '')}">`, 'ck-span')}
     ${ckFld('Impegnativa del medico <span class="ck-mut">· link al documento (puoi aggiungerlo dopo)</span>', `<input class="ck-in" id="ck-imp" type="url" placeholder="https://drive.google.com/…" value="${escHtml(p.impegnativa || '')}">`, 'ck-span')}
     </div>
-    <label class="ck-chk"><input type="checkbox" id="ck-ics"${c.prenotazione ? '' : ' checked'}> Scarica il file per il calendario (.ics) con promemoria
+    <label class="ck-chk"><input type="checkbox" id="ck-ics"${c.prenotazione ? '' : ' checked'}> Scarica il file per il calendario (.ics) con promemoria <span class="ck-mut">· per Google Calendar usa il pulsante nella scheda</span>
       <select class="ck-in ck-in-s" id="ck-icsrem"><option value="-P1D">1 giorno prima</option><option value="-P2D">2 giorni prima</option><option value="-P7D">1 settimana prima</option><option value="-PT2H">2 ore prima</option></select></label>
     <div class="ck-info"><b>Cosa succede quando salvi</b><br>${ckMedOn() ? '1. In Sanità integrativa nasce la riga «' + escHtml(c.tipo) + ' · ' + escHtml(c.persona) + '» in bozza: importo e fattura li inserisci dopo la visita.<br>' : ''}2. Il controllo passa a «Prenotata» e compare nel calendario.<br>3. Dopo la visita ti chiedo di confermarla e il prossimo controllo parte dalla data in cui l'hai fatta davvero.</div></div>
     <div class="md-foot">${c.prenotazione ? `<button type="button" class="btn small ghost danger" data-ck="cancelbook" data-id="${c.id}" style="margin-right:auto">Annulla prenotazione</button>` : ''}<button type="button" class="btn small ghost" data-ck="close">Chiudi</button><button type="button" class="btn small primary" data-ck="savebook" data-id="${c.id}">Salva prenotazione</button></div>`);
@@ -3707,15 +3707,28 @@ function ckSaveFile(name, txt){
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], {type: 'text/calendar;charset=utf-8'})); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
-function ckDownloadIcs(c, rem){
-  if(!c || !c.prenotazione) return; const p = c.prenotazione, sp = ckSp(p.specialistaId || c.specialistaId), sede = ckSede(sp, p.sedeId || c.sedeId);
-  const txt = ckIcs({uid: 'ck-' + c.id + '-' + p.data, titolo: c.tipo + ' · ' + c.persona, data: p.data, ora: p.ora, loc: [p.struttura, sede && sede.indirizzo].filter(Boolean).join(', '), desc: [sp ? sp.nome : '', sede && sede.tel ? 'Tel. ' + sede.tel : '', p.impegnativa ? 'Impegnativa: ' + p.impegnativa : 'Ricorda l\'impegnativa del medico'].filter(Boolean).join('\n'), trigger: rem || '-P1D'});
-  ckSaveFile('visita-' + p.data + '.ics', txt);
+function ckBookEv(c, rem){
+  if(!c || !c.prenotazione) return null; const p = c.prenotazione, sp = ckSp(p.specialistaId || c.specialistaId), sede = ckSede(sp, p.sedeId || c.sedeId);
+  return {uid: 'ck-' + c.id + '-' + p.data, titolo: c.tipo + ' · ' + c.persona, data: p.data, ora: p.ora, loc: [p.struttura, sede && sede.indirizzo].filter(Boolean).join(', '), desc: [sp ? sp.nome : '', sede && sede.tel ? 'Tel. ' + sede.tel : '', p.impegnativa ? 'Impegnativa: ' + p.impegnativa : 'Ricorda l\'impegnativa del medico'].filter(Boolean).join('\n'), trigger: rem || '-P1D'};
 }
-function ckDownloadDue(c){
-  const due = ckDue(c); if(!due) return;
-  ckSaveFile('scadenza-' + due + '.ics', ckIcs({uid: 'ckdue-' + c.id + '-' + due, titolo: 'Prenotare: ' + c.tipo + ' · ' + c.persona, data: due, desc: 'Scadenza del controllo ' + c.tipo + ' per ' + c.persona + '.', trigger: '-P7D'}));
+function ckDueEv(c){
+  const due = c && ckDue(c); if(!due) return null;
+  return {uid: 'ckdue-' + c.id + '-' + due, titolo: 'Prenotare: ' + c.tipo + ' · ' + c.persona, data: due, desc: 'Scadenza del controllo ' + c.tipo + ' per ' + c.persona + '.', trigger: '-P7D'};
 }
+function ckDownloadIcs(c, rem){ const ev = ckBookEv(c, rem); if(ev) ckSaveFile('visita-' + ev.data + '.ics', ckIcs(ev)); }
+function ckDownloadDue(c){ const ev = ckDueEv(c); if(ev) ckSaveFile('scadenza-' + ev.data + '.ics', ckIcs(ev)); }
+function ckGcalUrl(ev){
+  if(!ev) return '';
+  const p = ev.data.split('-').map(Number); let dates;
+  if(ev.ora){
+    const h = ev.ora.split(':').map(Number), a = new Date(p[0], p[1] - 1, p[2], h[0], h[1]), b = new Date(a.getTime() + 3600000);
+    const f = (x) => x.getFullYear() + ck2(x.getMonth() + 1) + ck2(x.getDate()) + 'T' + ck2(x.getHours()) + ck2(x.getMinutes()) + '00';
+    dates = f(a) + '/' + f(b);
+  } else { const n = new Date(p[0], p[1] - 1, p[2] + 1); dates = ev.data.replace(/-/g, '') + '/' + ckIso(n).replace(/-/g, ''); }
+  let tz = ''; try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }catch(e){}
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(ev.titolo) + '&dates=' + dates + (ev.ora && tz ? '&ctz=' + encodeURIComponent(tz) : '') + (ev.loc ? '&location=' + encodeURIComponent(ev.loc) : '') + (ev.desc ? '&details=' + encodeURIComponent(ev.desc) : '');
+}
+function ckGcal(ev){ const u = ckGcalUrl(ev); if(u) window.open(u, '_blank', 'noopener'); }
 
 // ----- Specialisti
 function ckSpForm(id){
@@ -3823,6 +3836,8 @@ document.addEventListener('click', async (e) => {
   if(a === 'cancelbook') return ckCancelBook(id);
   if(a === 'done') return ckDoneAsk(id);
   if(a === 'doneyes') return ckDoneSave(id);
+  if(a === 'gcal') return ckGcal(ckBookEv(checkups.find(x => x.id === id)));
+  if(a === 'gcaldue') return ckGcal(ckDueEv(checkups.find(x => x.id === id)));
   if(a === 'ics'){ const c = checkups.find(x => x.id === id); return ckDownloadIcs(c, '-P1D'); }
   if(a === 'icsdue'){ const c = checkups.find(x => x.id === id); return ckDownloadDue(c); }
   if(a === 'delck'){ ckCtx = {t: 'detail', id, del: true}; return ckDetail(id); }
