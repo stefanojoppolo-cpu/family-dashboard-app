@@ -3509,7 +3509,8 @@ function ckSpecHtml(){
 // ---------- Pannello ----------
 function renderCheckup(){
   const root = document.getElementById('ck-root'); if(!root) return;
-  if(!root.contains(document.activeElement) || ckView !== 'spec'){
+  const ae = document.activeElement;
+  if(!(ckView === 'spec' && ae && ae.id === 'ck-search')){
     root.innerHTML = ckView === 'spec' ? ckSpecHtml() : `<div class="ck-head"><div><h2 class="ck-h2">${escHtml((settings.moduli.checkup && settings.moduli.checkup.nome) || 'Check-up e visite')}</h2><p class="ck-mut">Controlli ricorrenti e visite specialistiche della famiglia, con promemoria e prenotazione.</p></div>
       <div class="ck-head-a"><button type="button" class="btn" data-ck="view" data-v="spec">Specialisti</button><button type="button" class="btn primary" data-ck="newck">+ Nuovo controllo</button></div></div>${ckTodoHtml()}${ckCalHtml()}`;
   }
