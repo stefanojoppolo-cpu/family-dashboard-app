@@ -3726,10 +3726,14 @@ function ckSpRead(){
   ckBox.querySelectorAll('.ck-sedef').forEach((el, i) => { const x = ckSpDraft.sedi[i]; if(!x) return; el.querySelectorAll('[data-f]').forEach(inp => { x[inp.dataset.f] = inp.value; }); });
   const r = ckBox.querySelector('input[name="ck-sdef"]:checked'); if(r && ckSpDraft.sedi[+r.value]) ckSpDraft.sedeDefault = ckSpDraft.sedi[+r.value].id;
 }
+function ckSediNote(){
+  const m = new Map(); specialists.forEach(sp => (sp.sedi || []).forEach(x => { if(!x.struttura) return; const k = (x.struttura + '|' + (x.indirizzo || '')).toLowerCase(); if(!m.has(k)) m.set(k, x); }));
+  return [...m.values()];
+}
 function ckSpDraw(){
-  const d = ckSpDraft;
+  const d = ckSpDraft, note = ckSediNote();
   const sedi = d.sedi.map((x, i) => `<div class="ck-sedef"><div class="ck-sedef-h"><b>Sede ${i + 1}</b><label class="ck-rad"><input type="radio" name="ck-sdef" value="${i}"${x.id === d.sedeDefault ? ' checked' : ''}> predefinita</label>${d.sedi.length > 1 ? `<button type="button" class="btn small ghost danger" data-ck="rmsede" data-i="${i}">Rimuovi</button>` : ''}</div>
-    <div class="ck-form">${ckFld('Struttura', `<input class="ck-in" data-f="struttura" value="${escHtml(x.struttura)}" placeholder="es. Casa di Cura Toniolo">`, 'ck-span')}${ckFld('Indirizzo', `<input class="ck-in" data-f="indirizzo" value="${escHtml(x.indirizzo)}">`, 'ck-span')}
+    ${note.length ? `<div class="ck-fld" style="margin-bottom:10px"><label>Usa una sede già in rubrica</label><select class="ck-in" data-pick="${i}"><option value="">— scegli per compilare i campi —</option>${note.map((x, j) => `<option value="${j}">${escHtml(x.struttura)}${x.indirizzo ? ' · ' + escHtml(x.indirizzo) : ''}</option>`).join('')}</select></div>` : ''}<div class="ck-form">${ckFld('Struttura', `<input class="ck-in" data-f="struttura" value="${escHtml(x.struttura)}" placeholder="es. Casa di Cura Toniolo">`, 'ck-span')}${ckFld('Indirizzo', `<input class="ck-in" data-f="indirizzo" value="${escHtml(x.indirizzo)}">`, 'ck-span')}
     ${ckFld('Telefono', `<input class="ck-in" data-f="tel" value="${escHtml(x.tel)}">`)}${ckFld('Email', `<input class="ck-in" data-f="email" type="email" value="${escHtml(x.email)}">`)}${ckFld('Sito / prenotazione online', `<input class="ck-in" data-f="sito" value="${escHtml(x.sito)}" placeholder="https://…">`, 'ck-span')}${ckFld('Note (es. si prenota il martedì)', `<input class="ck-in" data-f="note" value="${escHtml(x.note)}">`, 'ck-span')}</div></div>`).join('');
   ckShow(`${ckHead(ckCtx.id ? 'Modifica specialista' : 'Nuovo specialista')}<div class="md-body"><div class="ck-form">${ckFld('Nome', `<input class="ck-in" id="ck-spn" value="${escHtml(d.nome)}" placeholder="es. Dott. Ricci">`)}${ckFld('Specialità', `<input class="ck-in" id="ck-sps" value="${escHtml(d.specialita)}" placeholder="es. Cardiologo">`)}${ckFld('Cellulare', `<input class="ck-in" id="ck-spc" type="tel" value="${escHtml(d.cellulare || '')}" placeholder="es. 333 1234567">`)}</div>
     <h4 class="md-h">Sedi dove riceve</h4>${sedi}<button type="button" class="btn small ghost" data-ck="addsede">+ Aggiungi un'altra sede</button>
@@ -3816,6 +3820,10 @@ document.addEventListener('click', async (e) => {
 });
 document.addEventListener('change', (e) => {
   const t = e.target;
+  if(t.dataset && t.dataset.pick !== undefined){
+    const x = ckSediNote()[+t.value], i = +t.dataset.pick; if(!x || !ckSpDraft) return;
+    ckSpRead(); const dst = ckSpDraft.sedi[i]; ['struttura', 'indirizzo', 'tel', 'email', 'sito', 'note'].forEach(f => { dst[f] = x[f] || ''; }); return ckSpDraw();
+  }
   if(t.id === 'ck-cad'){ $ck('cadx').style.display = t.value === 'x' ? '' : 'none'; }
   else if(t.id === 'ck-sp'){ $ck('sede').innerHTML = ckSedeOpts(t.value, ''); }
   else if(t.id === 'ck-bsp' || t.id === 'ck-bsede'){
