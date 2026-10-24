@@ -3322,6 +3322,10 @@ function ckSafeUrl(u){ u = String(u || '').trim(); return /^https?:\/\//i.test(u
 function ckTel(n){ return String(n || '').replace(/[^\d+]/g, ''); }
 function ckWa(n){ let d = ckTel(n).replace(/^\+/, ''); if(/^3\d{8,9}$/.test(d)) d = '39' + d; else if(/^0039/.test(d)) d = d.slice(2); return d.length >= 8 ? 'https://wa.me/' + d : ''; }
 function ckCell(sp, cls){ if(!sp || !sp.cellulare) return ''; const w = ckWa(sp.cellulare); return `<span class="${cls || ''}">📱 <a href="tel:${escHtml(ckTel(sp.cellulare))}">${escHtml(sp.cellulare)}</a>${w ? ` · <a href="${escHtml(w)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</span>`; }
+function ckStrutture(){ const set = new Map(); ckSediNote().forEach(x => set.set(x.struttura.trim().toLowerCase(), x.struttura.trim())); checkups.forEach(c => { if(c.struttura && !set.has(c.struttura.trim().toLowerCase())) set.set(c.struttura.trim().toLowerCase(), c.struttura.trim()); }); return [...set.values()].sort((a, b) => a.localeCompare(b)); }
+function ckStrInfo(name){ name = String(name || '').trim(); if(!name) return null; return ckSediNote().find(x => x.struttura.trim().toLowerCase() === name.toLowerCase()) || {struttura: name}; }
+function ckContatto(c){ const sp = ckSp(c.specialistaId), sede = ckSede(sp, c.sedeId); return {sp, sede: sede || ckStrInfo(c.struttura)}; }
+function ckStrOpts(cur){ const l = ckStrutture(), known = l.some(x => x.toLowerCase() === String(cur || '').toLowerCase()); return '<option value="">— nessuna —</option>' + l.map(x => `<option value="${escHtml(x)}"${known && x.toLowerCase() === String(cur).toLowerCase() ? ' selected' : ''}>${escHtml(x)}</option>`).join('') + `<option value="__altra"${cur && !known ? ' selected' : ''}>Altra struttura…</option>`; }
 function ckSp(id){ return specialists.find(s => s.id === id); }
 function ckSede(sp, sedeId){ if(!sp || !sp.sedi || !sp.sedi.length) return null; return sp.sedi.find(s => s.id === sedeId) || sp.sedi.find(s => s.id === sp.sedeDefault) || sp.sedi[0]; }
 function ckCadLabel(c){ const m = +c.cadenza; if(!m) return 'Una tantum'; if(m === 6) return 'Ogni 6 mesi'; if(m % 12 === 0) return m === 12 ? 'Ogni anno' : 'Ogni ' + (m / 12) + ' anni'; return 'Ogni ' + m + ' mesi'; }
@@ -3399,12 +3403,12 @@ function ckTodoHtml(){
       <div class="ck-it-s">Eseguita il ${ckFmt(m.dataDocumento)} · mancano importo e fattura</div>
       <div class="ck-it-a"><button type="button" class="btn small" data-ck="medcomplete" data-id="${m.id}">Completa la spesa</button></div></div>`;
     }
-    const c = it.c, s = it.s, sp = ckSp(c.specialistaId), sede = ckSede(sp, c.sedeId);
+    const c = it.c, s = it.s, {sp, sede} = ckContatto(c);
     let sub = '', acts = '';
     if(s.k === 'scaduto' || s.k === 'prenotare'){
       sub = (s.k === 'scaduto' ? 'Scaduto il ' : 'Entro il ') + ckFmt(s.data) + (c.ultima ? ' · ultima il ' + ckFmt(c.ultima) : '');
       acts = `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>`;
-      if(sede && sede.tel) acts += `<a class="btn small ghost" href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">Chiama ${escHtml(sp.nome)}</a>`;
+      if(sede && sede.tel) acts += `<a class="btn small ghost" href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">Chiama ${escHtml(sp ? sp.nome : sede.struttura)}</a>`;
     } else if(s.k === 'conferma'){
       sub = 'Visita del ' + ckFmtLong(s.data, c.prenotazione.ora) + ': è stata eseguita?';
       acts = `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Cambia data</button>`;
@@ -3547,7 +3551,7 @@ const ckFld = (l, inner, cls) => `<div class="ck-fld ${cls || ''}"><label>${l}</
 function ckDetail(id){
   const c = checkups.find(x => x.id === id); if(!c) return ckClose();
   ckCtx = {t: 'detail', id, del: ckCtx && ckCtx.id === id && ckCtx.del};
-  const s = ckState(c), sp = ckSp(c.specialistaId), sede = ckSede(sp, c.sedeId), p = c.prenotazione, due = ckDue(c);
+  const s = ckState(c), {sp, sede} = ckContatto(c), p = c.prenotazione, due = ckDue(c);
   const kv = (k, v) => v ? `<div><span>${k}</span><b>${v}</b></div>` : '';
   const contatti = sede ? [sede.tel ? `<a href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">${escHtml(sede.tel)}</a>` : '', sede.email ? `<a href="mailto:${escHtml(sede.email)}">${escHtml(sede.email)}</a>` : ''].filter(Boolean).join(' · ') : '';
   const med = p && p.medId ? medical.find(m => m.id === p.medId) : null;
@@ -3565,7 +3569,7 @@ function ckDetail(id){
   }
   ckShow(`${ckHead(escHtml(c.tipo) + ' <span class="md-who">' + escHtml(c.persona) + '</span>', ckPill(s.k) + (s.data ? ' · ' + (s.k === 'prenotata' || s.k === 'conferma' ? ckFmtLong(s.data, p && p.ora) : (s.k === 'scaduto' ? 'scaduto il ' : 'entro il ') + ckFmt(s.data)) : ''))}
     <div class="md-body"><div class="md-top">${kv('Cadenza', ckCadLabel(c))}${kv('Ultima visita', c.ultima ? ckFmt(c.ultima) : '')}${kv('Prossima scadenza', due && !p ? ckFmt(due) : '')}${kv('Preavviso', (c.preavviso == null ? 30 : c.preavviso) + ' giorni')}</div>
-    ${sp ? `<h4 class="md-h">Specialista</h4><div class="md-top">${kv('Nome', escHtml(sp.nome) + (sp.specialita ? ' · ' + escHtml(sp.specialita) : ''))}${kv('Struttura', sede ? escHtml(sede.struttura || '') : '')}${kv('Indirizzo', sede ? escHtml(sede.indirizzo || '') : '')}${kv('Contatti', contatti)}</div>${sede && sede.note ? `<p class="md-note">${escHtml(sede.note)}</p>` : ''}` : ''}
+    ${(sp || sede) ? `<h4 class="md-h">${sp ? 'Specialista' : 'Struttura'}</h4><div class="md-top">${sp ? kv('Nome', escHtml(sp.nome) + (sp.specialita ? ' · ' + escHtml(sp.specialita) : '')) : ''}${kv('Struttura', sede ? escHtml(sede.struttura || '') : '')}${kv('Indirizzo', sede ? escHtml(sede.indirizzo || '') : '')}${kv('Contatti', contatti)}</div>${sede && sede.note ? `<p class="md-note">${escHtml(sede.note)}</p>` : ''}` : ''}
     ${p ? `<h4 class="md-h">Prenotazione</h4><div class="md-top">${kv('Quando', ckFmtLong(p.data, p.ora))}${kv('Struttura', escHtml(p.struttura || ''))}${kv('Impegnativa', imp)}${kv('Spesa in Sanità', med ? (med.bozza ? 'Bozza, da completare' : 'Registrata') : '')}</div>` : ''}
     ${c.note ? `<h4 class="md-h">Note</h4><p class="md-note">${escHtml(c.note)}</p>` : ''}
     ${storico ? `<h4 class="md-h">Storico visite</h4><ul class="ck-hist">${storico}</ul>` : ''}</div>
@@ -3589,8 +3593,9 @@ function ckForm(id, pre){
     ${ckFld('Prossima scadenza <span class="ck-mut">· se vuota la calcolo dall\'ultima visita</span>', `<input class="ck-in" id="ck-scad" type="date" value="${escHtml(c ? c.scad || '' : pre.scad || '')}">`)}
     ${ckFld('Specialista', `<select class="ck-in" id="ck-sp">${ckSpOpts(c ? c.specialistaId : pre.specialistaId)}</select>`)}
     ${ckFld('Sede / struttura', `<select class="ck-in" id="ck-sede">${ckSedeOpts(c ? c.specialistaId : pre.specialistaId, c ? c.sedeId : pre.sedeId)}</select>`)}
+    ${ckFld('Struttura <span class="ck-mut">· anche senza specialista (es. risonanza, esami)</span>', `<select class="ck-in" id="ck-str">${ckStrOpts(c ? c.struttura : pre.struttura)}</select><input class="ck-in" id="ck-strx" placeholder="Nome della struttura" value="${escHtml(c && c.struttura && !ckStrutture().some(x => x.toLowerCase() === c.struttura.toLowerCase()) ? c.struttura : '')}" style="margin-top:6px;${(c && c.struttura && !ckStrutture().some(x => x.toLowerCase() === c.struttura.toLowerCase())) ? '' : 'display:none'}">`, 'ck-span')}
     ${ckFld('Note', `<textarea class="ck-in" id="ck-note" rows="2">${escHtml(c ? c.note || '' : '')}</textarea>`, 'ck-span')}
-    </div><p class="ck-mut" style="margin:8px 0 0">Non hai ancora lo specialista in rubrica? Salva e aggiungilo da «Specialisti».</p></div>
+    </div><p class="ck-mut" style="margin:8px 0 0">Non hai ancora lo specialista in rubrica? Salva e aggiungilo da «Specialisti». La struttura si può scegliere anche senza specialista.</p></div>
     <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small" data-ck="savechk" data-id="${id || ''}">Salva</button><button type="button" class="btn small primary" data-ck="savechkbook" data-id="${id || ''}">Salva e prenota</button></div>`);
 }
 async function ckSaveForm(id, thenBook){
@@ -3602,7 +3607,7 @@ async function ckSaveForm(id, thenBook){
   if(isNaN(cad) || cad < 0){ showFormError('Indica la cadenza in mesi.'); return; }
   if(!(ult && cad > 0) && !scad){ showFormError('Indica l\'ultima visita (con una cadenza) oppure la data di scadenza.'); return; }
   if((ult && normDate(ult) !== ult) || (scad && normDate(scad) !== scad)){ showFormError('Controlla le date inserite.'); return; }
-  const base = {persona, tipo, cadenza: cad, preavviso: parseInt($ck('pre').value, 10) || 30, ultima: ult, scad: scad, specialistaId: $ck('sp').value, sedeId: $ck('sede').value, note: $ck('note').value.trim()};
+  const base = {persona, tipo, cadenza: cad, preavviso: parseInt($ck('pre').value, 10) || 30, ultima: ult, scad: scad, specialistaId: $ck('sp').value, sedeId: $ck('sede').value, struttura: ($ck('str').value === '__altra' ? $ck('strx').value.trim() : $ck('str').value), note: $ck('note').value.trim()};
   let cid = id;
   if(id) checkups = checkups.map(c => c.id === id ? {...c, ...base} : c);
   else { cid = uid(); checkups.push({id: cid, attivo: true, storico: [], prenotazione: null, ...base}); }
@@ -3613,11 +3618,11 @@ async function ckSaveForm(id, thenBook){
 // ----- Prenotazione
 function ckBook(id){
   const c = checkups.find(x => x.id === id); if(!c) return;
-  const p = c.prenotazione || {}, spId = p.specialistaId || c.specialistaId || '', sp = ckSp(spId), sede = ckSede(sp, p.sedeId || c.sedeId);
+  const p = c.prenotazione || {}, spId = p.specialistaId || c.specialistaId || '', sp = ckSp(spId), sede = ckSede(sp, p.sedeId || c.sedeId) || (!spId ? ckStrInfo(c.struttura) : null);
   ckCtx = {t: 'book', id};
   const s = ckState(c);
   ckShow(`${ckHead((c.prenotazione ? 'Modifica prenotazione' : 'Prenota') + ': ' + escHtml(c.tipo), escHtml(c.persona) + ' · ' + ckCadLabel(c).toLowerCase() + (ckDue(c) && !c.prenotazione ? ' · scadenza prevista ' + ckFmt(ckDue(c)) : ''))}
-    <div class="md-body"><div id="ck-spbox">${ckSpBox(spId, sede && sede.id)}</div>
+    <div class="md-body"><div id="ck-spbox">${ckSpBox(spId, sede && sede.id, !spId && sede)}</div>
     <div class="ck-form" style="margin-top:12px">
     ${ckFld('Data', `<input class="ck-in" id="ck-data" type="date" value="${escHtml(p.data || '')}">`)}
     ${ckFld('Ora', `<input class="ck-in" id="ck-ora" type="time" value="${escHtml(p.ora || '')}">`)}
@@ -3629,9 +3634,10 @@ function ckBook(id){
     <div class="ck-info"><b>Cosa succede quando salvi</b><br>${ckMedOn() ? '1. In Sanità integrativa nasce la riga «' + escHtml(c.tipo) + ' · ' + escHtml(c.persona) + '» in bozza: importo e fattura li inserisci dopo la visita.<br>' : ''}2. Il controllo passa a «Prenotata» e compare nel calendario.<br>3. Dopo la visita ti chiedo di confermarla e il prossimo controllo parte dalla data in cui l'hai fatta davvero.</div></div>
     <div class="md-foot">${c.prenotazione ? `<button type="button" class="btn small ghost danger" data-ck="cancelbook" data-id="${c.id}" style="margin-right:auto">Annulla prenotazione</button>` : ''}<button type="button" class="btn small ghost" data-ck="close">Chiudi</button><button type="button" class="btn small primary" data-ck="savebook" data-id="${c.id}">Salva prenotazione</button></div>`);
 }
-function ckSpBox(spId, sedeId){
-  const sp = ckSp(spId), sede = ckSede(sp, sedeId), u = sede ? ckSafeUrl(sede.sito) : '';
+function ckSpBox(spId, sedeId, fb){
+  const sp = ckSp(spId), sede = ckSede(sp, sedeId) || fb || null, u = sede ? ckSafeUrl(sede.sito) : '';
   return `<div class="ck-fld"><label>Specialista</label><div class="ck-row2"><select class="ck-in" id="ck-bsp">${ckSpOpts(spId)}</select><select class="ck-in" id="ck-bsede">${ckSedeOpts(spId, sede && sede.id)}</select></div></div>
+  ${sede && !sp && sede.struttura ? `<div class="ck-sede-l" style="margin-top:8px">Struttura: <b>${escHtml(sede.struttura)}</b>${sede.indirizzo ? ' · ' + escHtml(sede.indirizzo) : ''}</div>` : ''}
   ${sp && sp.cellulare ? `<div class="ck-sede-l" style="margin-top:8px">Cellulare dello specialista: ${ckCell(sp)}</div>` : ''}
   ${sede ? `<div class="ck-contacts"><div><span>Telefono</span><b>${escHtml(sede.tel || '—')}</b>${sede.tel ? `<a class="btn small ghost" href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">Chiama</a>` : ''}</div><div><span>Email</span><b>${escHtml(sede.email || '—')}</b>${sede.email ? `<a class="btn small ghost" href="mailto:${escHtml(sede.email)}?subject=${encodeURIComponent('Richiesta prenotazione')}">Scrivi email</a>` : ''}</div><div><span>Sito</span><b>${escHtml(sede.sito || '—')}</b>${u ? `<a class="btn small ghost" href="${escHtml(u)}" target="_blank" rel="noopener">Apri sito</a>` : ''}</div></div>${sede.note ? `<div class="ck-note">Nota: ${escHtml(sede.note)}</div>` : ''}` : (spId ? '' : '<p class="ck-mut" style="margin:6px 0 0">Scegli lo specialista per vedere telefono ed email, oppure indica solo la struttura.</p>')}`;
 }
@@ -3708,7 +3714,7 @@ function ckSaveFile(name, txt){
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
 function ckBookEv(c, rem){
-  if(!c || !c.prenotazione) return null; const p = c.prenotazione, sp = ckSp(p.specialistaId || c.specialistaId), sede = ckSede(sp, p.sedeId || c.sedeId);
+  if(!c || !c.prenotazione) return null; const p = c.prenotazione, sp = ckSp(p.specialistaId || c.specialistaId), sede = ckSede(sp, p.sedeId || c.sedeId) || (!sp ? ckStrInfo(p.struttura || c.struttura) : null);
   return {uid: 'ck-' + c.id + '-' + p.data, titolo: c.tipo + ' · ' + c.persona, data: p.data, ora: p.ora, loc: [p.struttura, sede && sede.indirizzo].filter(Boolean).join(', '), desc: [sp ? sp.nome : '', sede && sede.tel ? 'Tel. ' + sede.tel : '', p.impegnativa ? 'Impegnativa: ' + p.impegnativa : 'Ricorda l\'impegnativa del medico'].filter(Boolean).join('\n'), trigger: rem || '-P1D'};
 }
 function ckDueEv(c){
@@ -3858,7 +3864,7 @@ document.addEventListener('click', async (e) => {
     const sid = ckCtx.id; specialists = specialists.filter(s => s.id !== sid); checkups = checkups.map(c => c.specialistaId === sid ? {...c, specialistaId: '', sedeId: ''} : c);
     await saveSpecialists(); await saveCheckups(); ckClose(); return renderAll();
   }
-  if(a === 'spbook'){ const s = ckSp(id); return ckForm('', {specialistaId: id, sedeId: s && s.sedeDefault, tipo: s && s.specialita ? 'Visita ' + s.specialita.toLowerCase() : '', scad: ckToday()}); }
+  if(a === 'spbook'){ const s = ckSp(id); return ckForm('', {specialistaId: id, sedeId: s && s.sedeDefault, struttura: (ckSede(s, s && s.sedeDefault) || {}).struttura || '', tipo: s && s.specialita ? 'Visita ' + s.specialita.toLowerCase() : '', scad: ckToday()}); }
 });
 document.addEventListener('change', (e) => {
   const t = e.target;
@@ -3868,11 +3874,16 @@ document.addEventListener('change', (e) => {
     ckSpRead(); const dst = ckSpDraft.sedi[i]; ['struttura', 'indirizzo', 'tel', 'email', 'sito', 'note'].forEach(f => { dst[f] = x[f] || ''; }); return ckSpDraw();
   }
   if(t.id === 'ck-cad'){ $ck('cadx').style.display = t.value === 'x' ? '' : 'none'; }
-  else if(t.id === 'ck-sp'){ $ck('sede').innerHTML = ckSedeOpts(t.value, ''); }
+  else if(t.id === 'ck-sp' || t.id === 'ck-sede'){
+    if(t.id === 'ck-sp') $ck('sede').innerHTML = ckSedeOpts(t.value, '');
+    const sd = ckSede(ckSp($ck('sp').value), $ck('sede').value);
+    if(sd && sd.struttura){ const hit = [...$ck('str').options].find(o => o.value.toLowerCase() === sd.struttura.toLowerCase()); if(hit){ $ck('str').value = hit.value; $ck('strx').style.display = 'none'; } else { $ck('str').value = '__altra'; $ck('strx').value = sd.struttura; $ck('strx').style.display = ''; } }
+  }
+  else if(t.id === 'ck-str'){ $ck('strx').style.display = t.value === '__altra' ? '' : 'none'; }
   else if(t.id === 'ck-bsp' || t.id === 'ck-bsede'){
-    const spId = $ck('bsp').value, sedeId = t.id === 'ck-bsp' ? '' : $ck('bsede').value, sede = ckSede(ckSp(spId), sedeId);
+    const spId = $ck('bsp').value, sedeId = t.id === 'ck-bsp' ? '' : $ck('bsede').value, sede = ckSede(ckSp(spId), sedeId), cc = checkups.find(x => x.id === ckCtx.id), fb = !spId && cc ? ckStrInfo(cc.struttura) : null;
     const imp = $ck('imp').value, data = $ck('data').value, ora = $ck('ora').value;
-    $ck('spbox').innerHTML = ckSpBox(spId, sede && sede.id); $ck('strut').value = sede ? sede.struttura || '' : $ck('strut').value; $ck('imp').value = imp; $ck('data').value = data; $ck('ora').value = ora;
+    $ck('spbox').innerHTML = ckSpBox(spId, sede && sede.id, fb); $ck('strut').value = sede ? sede.struttura || '' : (fb ? fb.struttura : $ck('strut').value); $ck('imp').value = imp; $ck('data').value = data; $ck('ora').value = ora;
   }
 });
 document.addEventListener('input', (e) => { if(e.target.id === 'ck-search'){ ckSearch = e.target.value; const pos = e.target.selectionStart; renderCheckupSearch(pos); } });
