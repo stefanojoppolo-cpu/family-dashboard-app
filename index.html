@@ -1523,8 +1523,8 @@ let detrazioni = [];
 
 const KEY_SETTINGS = "settings";
 const KEY_MEDICAL_BACKUP = "medical-expenses-pre-fase2";
-const MODULI_IDS = ['recurring','medical','bilancio','contratti','documenti','detrazioni'];
-const MODULI_DEFAULT_NOMI = {recurring:'Pagamenti ricorrenti', medical:'Sanità integrativa', bilancio:'Bilancio annuale', contratti:'Contratti a scadenza', documenti:'Documenti personali', detrazioni:'Detrazioni fiscali'};
+const MODULI_IDS = ['recurring','medical','checkup','bilancio','contratti','documenti','detrazioni'];
+const MODULI_DEFAULT_NOMI = {recurring:'Pagamenti ricorrenti', medical:'Sanità integrativa', checkup:'Check-up e visite', bilancio:'Bilancio annuale', contratti:'Contratti a scadenza', documenti:'Documenti personali', detrazioni:'Detrazioni fiscali'};
 const ELENCHI_DEF = {
   persone: {titolo:'Persone', hint:'Compaiono come suggerimento in Sanità (richiedente), Documenti (intestatario) e Detrazioni (intestatario).', default:[]},
   prestazioni: {titolo:'Prestazioni sanitarie', hint:'Suggerimenti per il campo Prestazione.', default:['Visita specialistica','Esami del sangue','Visita dentistica','Fisioterapia','Farmaci']},
@@ -1899,7 +1899,7 @@ function extraMetrics(id){
   return [];
 }
 function metricsSezione(id, conMassimali){
-  const fn = {recurring:metricsRecurring, medical:() => metricsMedical(conMassimali !== false), bilancio:metricsBilancio, contratti:metricsContratti, documenti:metricsDocumenti, detrazioni:metricsDetrazioni}[id];
+  const fn = {recurring:metricsRecurring, checkup:metricsCheckup, medical:() => metricsMedical(conMassimali !== false), bilancio:metricsBilancio, contratti:metricsContratti, documenti:metricsDocumenti, detrazioni:metricsDetrazioni}[id];
   const items = fn();
   items.forEach((it, i) => { if(it.k === undefined) it.k = 'm' + i; });
   return items.concat(extraMetrics(id));
@@ -2736,7 +2736,7 @@ function buildUrgentItems(){
   });
   try{ ckUrgent(items); }catch(e){ console.error(e); }
   items.sort((a,b) => a.giorni - b.giorni);
-  const filtrati = visibleTabs ? items.filter(it => visibleTabs.includes(it.tab === 'checkup' ? 'medical' : it.tab)) : items;
+  const filtrati = visibleTabs ? items.filter(it => visibleTabs.includes(it.tab)) : items;
   return filtrati.slice(0, 8);
 }
 
@@ -2862,7 +2862,7 @@ function renderPanoramica(){
     `).join('');
   }
 
-  const icone = {recurring:ICONA_RECURRING, medical:ICONA_MEDICAL, bilancio:ICONA_BILANCIO, contratti:ICONA_CONTRATTI, documenti:ICONA_DOCUMENTI, detrazioni:ICONA_DETRAZIONI};
+  const icone = {recurring:ICONA_RECURRING, medical:ICONA_MEDICAL, checkup:ICONA_CHECKUP, bilancio:ICONA_BILANCIO, contratti:ICONA_CONTRATTI, documenti:ICONA_DOCUMENTI, detrazioni:ICONA_DETRAZIONI};
   const sezioni = dashSezioni().filter(s => !visibleTabs || visibleTabs.includes(s.id));
   const html = sezioni.map((s, si) => {
     if(!s.on && !dashEdit) return '';
@@ -2935,7 +2935,7 @@ function applyElenchi(){
 function applyModuliLabels(){
   document.querySelectorAll('.tab-btn').forEach(btn => {
     const id = btn.dataset.tab;
-    if(settings.moduli[id] && btn.lastChild) btn.lastChild.textContent = settings.moduli[id].nome;
+    if(settings.moduli[id]){ const tn = [...btn.childNodes].filter(n => n.nodeType === 3).pop(); if(tn) tn.textContent = settings.moduli[id].nome; }
   });
 }
 function showWelcome(){
@@ -3356,6 +3356,17 @@ function ckRestore(parsed){
   medical = medical.map(m => ex[m.id] ? {...m, ...(ex[m.id].bozza ? {bozza: true} : {}), ...(ex[m.id].checkupId ? {checkupId: ex[m.id].checkupId} : {}), ...(ex[m.id].struttura ? {struttura: ex[m.id].struttura} : {})} : m);
 }
 
+function ckMedOn(){ return !visibleTabs || visibleTabs.includes('medical'); }
+const ICONA_CHECKUP = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><path d="M9 15.5l2 2 4-4"/></svg>';
+function metricsCheckup(){
+  const st = checkups.map(ckState), n = (k) => st.filter(x => x.k === k).length;
+  const dp = n('scaduto') + n('prenotare'), pr = n('prenotata'), cf = n('conferma'), bz = medical.filter(m => m.bozza).length;
+  return [
+    {k:'ckdp', valore: dp, label:'Da prenotare', cls: dp ? 'warn' : ''},
+    {k:'ckpr', valore: pr, label:'Prenotate', cls:''},
+    {k:'ckcf', valore: cf, label:'Da confermare', cls: cf ? 'warn' : ''}
+  ].concat(ckMedOn() ? [{k:'ckbz', valore: bz, label:'Spese da completare', cls: bz ? 'warn' : ''}] : []);
+}
 // ---------- Elenco "Da fare" ----------
 function ckTodo(){
   const out = [], t = ckToday();
@@ -3499,7 +3510,7 @@ function ckSpecHtml(){
 function renderCheckup(){
   const root = document.getElementById('ck-root'); if(!root) return;
   if(!root.contains(document.activeElement) || ckView !== 'spec'){
-    root.innerHTML = ckView === 'spec' ? ckSpecHtml() : `<div class="ck-head"><div><h2 class="ck-h2">Check-up e visite specialistiche</h2><p class="ck-mut">Controlli ricorrenti e visite specialistiche della famiglia, con promemoria e prenotazione.</p></div>
+    root.innerHTML = ckView === 'spec' ? ckSpecHtml() : `<div class="ck-head"><div><h2 class="ck-h2">${escHtml((settings.moduli.checkup && settings.moduli.checkup.nome) || 'Check-up e visite')}</h2><p class="ck-mut">Controlli ricorrenti e visite specialistiche della famiglia, con promemoria e prenotazione.</p></div>
       <div class="ck-head-a"><button type="button" class="btn" data-ck="view" data-v="spec">Specialisti</button><button type="button" class="btn primary" data-ck="newck">+ Nuovo controllo</button></div></div>${ckTodoHtml()}${ckCalHtml()}`;
   }
   // contatore nel menu e bozze in Sanità
@@ -3607,7 +3618,7 @@ function ckBook(id){
     </div>
     <label class="ck-chk"><input type="checkbox" id="ck-ics"${c.prenotazione ? '' : ' checked'}> Scarica il file per il calendario (.ics) con promemoria
       <select class="ck-in ck-in-s" id="ck-icsrem"><option value="-P1D">1 giorno prima</option><option value="-P2D">2 giorni prima</option><option value="-P7D">1 settimana prima</option><option value="-PT2H">2 ore prima</option></select></label>
-    <div class="ck-info"><b>Cosa succede quando salvi</b><br>1. In Sanità integrativa nasce la riga «${escHtml(c.tipo)} · ${escHtml(c.persona)}» in bozza: importo e fattura li inserisci dopo la visita.<br>2. Il controllo passa a «Prenotata» e compare nel calendario.<br>3. Dopo la visita ti chiedo di confermarla e il prossimo controllo parte dalla data in cui l'hai fatta davvero.</div></div>
+    <div class="ck-info"><b>Cosa succede quando salvi</b><br>${ckMedOn() ? '1. In Sanità integrativa nasce la riga «' + escHtml(c.tipo) + ' · ' + escHtml(c.persona) + '» in bozza: importo e fattura li inserisci dopo la visita.<br>' : ''}2. Il controllo passa a «Prenotata» e compare nel calendario.<br>3. Dopo la visita ti chiedo di confermarla e il prossimo controllo parte dalla data in cui l'hai fatta davvero.</div></div>
     <div class="md-foot">${c.prenotazione ? `<button type="button" class="btn small ghost danger" data-ck="cancelbook" data-id="${c.id}" style="margin-right:auto">Annulla prenotazione</button>` : ''}<button type="button" class="btn small ghost" data-ck="close">Chiudi</button><button type="button" class="btn small primary" data-ck="savebook" data-id="${c.id}">Salva prenotazione</button></div>`);
 }
 function ckSpBox(spId, sedeId){
@@ -3626,7 +3637,7 @@ async function ckSaveBook(id){
   if(med && med.bozza){
     const keep = (med.documenti || []).filter(d => d.nome !== 'Impegnativa');
     medical = medical.map(m => m.id === med.id ? {...m, richiedente: c.persona, descrizione: c.tipo, dataDocumento: data, struttura: strut, documenti: keep.concat(docs)} : m);
-  } else if(!med){
+  } else if(!med && ckMedOn()){
     medId = uid();
     medical.push({id: medId, richiedente: c.persona, tipoDocumento: 'Fattura', numeroDocumento: '', dataDocumento: data, descrizione: c.tipo, note: '', modalita: 'Indiretta', totale: '', rimborsi: {}, nomi: undefined, bloccata: false, documenti: docs, bozza: true, checkupId: c.id, struttura: strut});
   }
@@ -5075,7 +5086,7 @@ function applyTabVisibility(){
   const tabButtons = document.querySelectorAll('.tab-btn');
   tabButtons.forEach(btn => {
     const tab = btn.dataset.tab;
-    const consentita = tab === 'panoramica' || tab === 'impostazioni' || !visibleTabs || visibleTabs.includes(tab) || (tab === 'checkup' && visibleTabs.includes('medical')) || (tab === 'report' && (visibleTabs.includes('medical') || visibleTabs.includes('bilancio')));
+    const consentita = tab === 'panoramica' || tab === 'impostazioni' || !visibleTabs || visibleTabs.includes(tab) || (tab === 'report' && (visibleTabs.includes('medical') || visibleTabs.includes('bilancio')));
     btn.style.display = consentita ? '' : 'none';
   });
   const attivo = document.querySelector('.tab-btn.active');
