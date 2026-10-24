@@ -5460,11 +5460,11 @@ try{ payEmailRefresh(); }catch(e){}
 
 // ---- Scheda Report: grafici sui dati (spese mediche, bilancio) ----
 function rpPayers(){ return settings.pagatori.map(p => ({id:p.id, nome:p.nome})); }
-function rpMedRows(){ return medical.filter(m => !m.bozza).map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:normDate(m.dataDocumento), who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', mod:m.modalita || '', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo}; }); }
+function rpMedRows(){ return medical.filter(m => !m.bozza).map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:normDate(m.dataDocumento), who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', mod:m.modalita || '', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo, done:!!(n.conclusa || n.soloQuota)}; }); }
 function rpBilRows(){ return bilancio.map(b => ({id:b.id, anno:String(b.anno), conto:(b.conto || '').trim() || '—', e:Number(b.entrate) || 0, u:Number(b.uscite) || 0})); }
 const RP_MES = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const RP_COL = ['#2F5BEA','#1C8A5A','#B96A00','#7A4FD6','#0F8B8D','#C2410C','#6B7B8C'];
-const RP_MEAS = {med:[['tot','Totale speso'],['rimb','Rimborsato'],['resid','Residuo da portare in detrazione'],['n','Numero di pratiche'],['multi','Speso / rimborsato / residuo'],['giorni','Tempi di rimborso (giorni medi)']],
+const RP_MEAS = {med:[['tot','Totale speso'],['rimb','Rimborsato'],['resid','Residuo (spesa meno rimborsi)'],['n','Numero di pratiche'],['multi','Speso / rimborsato / residuo'],['giorni','Tempi di rimborso (giorni medi)']],
                  bil:[['multi','Entrate / uscite / risparmio'],['e','Entrate'],['u','Uscite'],['r','Risparmio']]};
 const RP_GRP = {med:[['mese','Mese'],['anno','Anno'],['persona','Persona'],['prestazione','Prestazione'],['pagatore','Pagatore']], bil:[['anno','Anno'],['conto','Conto']]};
 const RP_MLAB = {giorni:'Giorni medi', tot:'Totale speso', rimb:'Rimborsato', resid:'Residuo', n:'Pratiche', e:'Entrate', u:'Uscite', r:'Risparmio'};
@@ -5645,8 +5645,8 @@ function renderReport(){
   per.value = rpF.per; who.value = rpF.who;
   rpEl('rp-reset').hidden = !(rpF.per !== 'all' || rpF.who);
   rpEl('rp-per').parentElement.style.display = medOk ? '' : 'none';
-  const r = medOk ? rpRows() : [], tot = r.reduce((s, x) => s + x.tot, 0), rb = r.reduce((s, x) => s + x.rb, 0), rs = r.reduce((s, x) => s + x.res, 0);
-  rpEl('rp-kpis').innerHTML = medOk ? [['Speso', rpEur(tot), r.length + ' pratiche', ''], ['Rimborsato', rpEur(rb), tot ? Math.round(rb / tot * 100) + '% del totale' : '—', 'var(--teal)'], ['Da portare in detrazione', rpEur(rs), 'dopo tutti i rimborsi', 'var(--accent)'], ['Media per pratica', rpEur(r.length ? tot / r.length : 0), 'spesa media', '']]
+  const r = medOk ? rpRows() : [], tot = r.reduce((s, x) => s + x.tot, 0), rb = r.reduce((s, x) => s + x.rb, 0), rs = r.filter(x => x.done).reduce((s, x) => s + x.res, 0), rsAp = r.filter(x => !x.done).reduce((s, x) => s + x.res, 0);
+  rpEl('rp-kpis').innerHTML = medOk ? [['Speso', rpEur(tot), r.length + ' pratiche', ''], ['Rimborsato', rpEur(rb), tot ? Math.round(rb / tot * 100) + '% del totale' : '—', 'var(--teal)'], ['Da portare in detrazione', rpEur(rs), rsAp > 0.004 ? 'pratiche concluse · altri ' + rpEur(rsAp) + ' ancora da rimborsare' : 'pratiche concluse', 'var(--accent)'], ['Media per pratica', rpEur(r.length ? tot / r.length : 0), 'spesa media', '']]
     .map(k => `<div class="rp-card rp-kpi"><small>${k[0]}</small><b style="${k[3] ? 'color:' + k[3] : ''}">${k[1]}</b><em>${k[2]}</em></div>`).join('') : '';
   const list = rpCharts().filter(c => rpAllowed(c.src)), g = rpEl('rp-grid');
   g.innerHTML = list.map(c => `<div class="rp-card${c.wide ? ' wide' : ''}" data-id="${escHtml(c.id)}"><div class="rp-head"><div><h3>${escHtml(c.t)}</h3><p>${escHtml(rpSub(c))}</p></div><div class="rp-acts"><button type="button" class="rp-ico" data-a="up" title="Sposta su" aria-label="Sposta su">↑</button><button type="button" class="rp-ico" data-a="edit" title="Modifica" aria-label="Modifica">✎</button><button type="button" class="rp-ico" data-a="dup" title="Duplica" aria-label="Duplica">⧉</button><button type="button" class="rp-ico" data-a="del" title="Elimina" aria-label="Elimina">✕</button></div></div><div class="rp-cb"></div></div>`).join('') + '<div class="rp-add" id="rp-add2" tabindex="0" role="button">+ Nuovo grafico</div>';
