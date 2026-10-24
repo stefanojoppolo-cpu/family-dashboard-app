@@ -1101,7 +1101,7 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
         <p class="form-section-hint">Link a fattura, richiesta del medico e altri documenti utili per il rimborso (es. su Google Drive).</p>
         <div id="mf-documenti-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <input type="text" id="mf-doc-nome" placeholder="Nome (es. Fattura)" style="width:170px;">
+          <input type="text" id="mf-doc-nome" list="preset-nome-documento" placeholder="Nome (es. Referto)" style="width:170px;"><datalist id="preset-nome-documento"></datalist>
           <input type="url" id="mf-doc-url" placeholder="Link Google Drive" style="flex:1;min-width:220px;">
           <button type="button" class="btn small ghost" id="mf-doc-add">+ Aggiungi</button>
         </div>
@@ -1536,6 +1536,7 @@ const ELENCHI_DEF = {
   conti: {titolo:'Conti correnti', hint:'Suggerimenti per il Bilancio annuale.', default:[]},
   tipiContratto: {titolo:'Tipi di contratto', hint:'Suggerimenti per i Contratti a scadenza.', default:['Luce','Gas','Telefono','Internet casa','TV','Affitto','Assicurazione auto','Assicurazione casa']},
   tipiDocumento: {titolo:'Tipi di documento', hint:'Suggerimenti per i Documenti personali.', default:["Carta d'identità",'Patente','Passaporto','Tessera sanitaria','Codice fiscale']},
+  nomiDocumento: {titolo:'Nomi dei documenti collegati', hint:'Nomi standard per i link in Sanità (Documenti collegati): scegli dall\'elenco così si chiamano sempre uguali (es. «Referto»).', default:['Fattura','Richiesta medico','Impegnativa','Prescrizione','Referto','Ricevuta di pagamento']},
   categorieDetrazione: {titolo:'Categorie di detrazione', hint:'Suggerimenti per le Detrazioni fiscali.', default:['Farmaci','Interessi mutuo','Spese scolastiche','Attività sportive figli','Assicurazioni vita/infortuni','Ristrutturazioni edilizie','Spese veterinarie','Spese funebri','Erogazioni liberali']}
 };
 const ELENCHI_DATALIST = {
@@ -1545,7 +1546,8 @@ const ELENCHI_DATALIST = {
   conti: ['preset-conto'],
   tipiContratto: ['preset-tipo-contratto'],
   tipiDocumento: ['preset-tipo-documento'],
-  categorieDetrazione: ['preset-categoria-detrazione']
+  categorieDetrazione: ['preset-categoria-detrazione'],
+  nomiDocumento: ['preset-nome-documento']
 };
 // Dove sono usati i valori nei dati già salvati (per "rinomina anche nei dati")
 const ELENCHI_CAMPI = {
@@ -1555,7 +1557,8 @@ const ELENCHI_CAMPI = {
   conti: [['bilancio','conto']],
   tipiContratto: [['contratti','tipo']],
   tipiDocumento: [['documenti','tipo']],
-  categorieDetrazione: [['detrazioni','categoria']]
+  categorieDetrazione: [['detrazioni','categoria']],
+  nomiDocumento: []
 };
 function defaultPagatori(){ return [{id:'p1', nome:'Assicurazione'}]; }
 function defaultSettings(){
@@ -3556,7 +3559,8 @@ function ckDetail(id){
   const contatti = sede ? [sede.tel ? `<a href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">${escHtml(sede.tel)}</a>` : '', sede.email ? `<a href="mailto:${escHtml(sede.email)}">${escHtml(sede.email)}</a>` : ''].filter(Boolean).join(' · ') : '';
   const med = p && p.medId ? medical.find(m => m.id === p.medId) : null;
   const imp = p && ckSafeUrl(p.impegnativa) ? `<a href="${escHtml(ckSafeUrl(p.impegnativa))}" target="_blank" rel="noopener">Apri impegnativa ↗</a>` : '<span class="ck-pill ck-p-outred">Manca impegnativa</span>';
-  const storico = (c.storico || []).slice().reverse().map(h => `<li>${ckFmt(h.data)}${h.struttura ? ' · ' + escHtml(h.struttura) : ''}</li>`).join('');
+  const ckRef = (h) => { const m = h.medId && medical.find(x => x.id === h.medId); return m ? (m.documenti || []).filter(d => d && d.url && /^referto/i.test(String(d.nome || '').trim())) : []; };
+  const storico = (c.storico || []).slice().reverse().map(h => `<li>${ckFmt(h.data)}${h.struttura ? ' · ' + escHtml(h.struttura) : ''}${ckRef(h).map(d => ` · <a href="${escHtml(d.url)}" target="_blank" rel="noopener">📄 ${escHtml(d.nome)}</a>`).join('')}</li>`).join('');
   let acts;
   if(ckCtx.del) acts = `<span style="color:var(--stamp);font-weight:700">Eliminare questo controllo?</span><button type="button" class="btn small danger" data-ck="delyes" data-id="${c.id}">Sì, elimina</button><button type="button" class="btn small ghost" data-ck="delno" data-id="${c.id}">Annulla</button>`;
   else {
