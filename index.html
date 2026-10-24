@@ -3502,7 +3502,7 @@ function ckSpecHtml(){
       <div class="ck-sp-a"><button type="button" class="btn small" data-ck="spbook" data-id="${s.id}">Prenota</button><button type="button" class="btn small ghost" data-ck="editsp" data-id="${s.id}">Modifica</button></div></div>`;
   }).join('');
   return `<div class="ck-sph"><button type="button" class="ck-back" data-ck="view" data-v="cal">‹ Check-up e visite</button></div>
-    <div class="ck-sptools"><input type="search" id="ck-search" class="ck-in" placeholder="Cerca specialista o struttura…" value="${escHtml(ckSearch)}"><button type="button" class="btn" data-ck="newsp">+ Nuovo specialista</button></div>
+    <div class="ck-sptools"><input type="search" id="ck-search" class="ck-in" placeholder="Cerca specialista o struttura…" value="${escHtml(ckSearch)}"><button type="button" class="btn ghost" data-ck="impsp">Importa</button><button type="button" class="btn" data-ck="newsp">+ Nuovo specialista</button></div>
     <div class="ck-spgrid">${cards || '<div class="ck-card ck-empty">Nessuno specialista: aggiungi i medici di riferimento della famiglia (con le loro sedi) e li ritroverai nella prenotazione.</div>'}</div>`;
 }
 
@@ -3742,6 +3742,32 @@ async function ckSpSave(){
   await saveSpecialists(); ckClose(); renderAll();
 }
 
+
+// ----- Importa specialisti (JSON)
+function ckImpAsk(){
+  ckCtx = {t: 'imp'};
+  ckShow(`${ckHead('Importa specialisti', 'Da un file .json oppure incollando il contenuto')}<div class="md-body"><p class="ck-mut" style="margin:0 0 8px">Formato: elenco di specialisti con nome, specialità, note e sedi (struttura, indirizzo, tel, email, sito). Chi è già in rubrica (stesso nome) viene saltato.</p>
+    <input type="file" id="ck-impfile" accept=".json,application/json" class="ck-in" style="margin-bottom:10px"><textarea class="ck-in" id="ck-imptxt" rows="9" placeholder='[{"nome":"Dott. Mario Rossi","specialita":"Cardiologo","sedi":[{"struttura":"Studio X"}]}]'></textarea></div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small primary" data-ck="impgo">Importa</button></div>`);
+}
+async function ckImpGo(){
+  let txt = $ck('imptxt').value.trim();
+  const f = $ck('impfile').files && $ck('impfile').files[0];
+  if(f){ try{ txt = await f.text(); }catch(e){ showFormError('Non riesco a leggere il file.'); return; } }
+  let arr; try{ arr = JSON.parse(txt); }catch(e){ showFormError('Il contenuto non è un JSON valido.'); return; }
+  if(!Array.isArray(arr)){ showFormError('Atteso un elenco di specialisti.'); return; }
+  const has = new Set(specialists.map(s => String(s.nome).trim().toLowerCase())); let n = 0, skip = 0;
+  arr.forEach(x => {
+    if(!x || typeof x.nome !== 'string' || !x.nome.trim()) return;
+    if(has.has(x.nome.trim().toLowerCase())){ skip++; return; }
+    const sedi = (Array.isArray(x.sedi) ? x.sedi : []).map(y => ({id: uid(), struttura: String(y.struttura || ''), indirizzo: String(y.indirizzo || ''), tel: String(y.tel || ''), email: String(y.email || ''), sito: ckSafeUrl(y.sito) ? String(y.sito) : '', note: String(y.note || '')}));
+    specialists.push({id: uid(), nome: x.nome.trim(), specialita: String(x.specialita || ''), note: String(x.note || ''), sedi, sedeDefault: sedi[0] ? sedi[0].id : ''});
+    has.add(x.nome.trim().toLowerCase()); n++;
+  });
+  await saveSpecialists(); ckClose(); ckView = 'spec'; renderAll();
+  showNotice(n + ' specialisti importati' + (skip ? ', ' + skip + ' già presenti' : '') + '.', 'success');
+}
+
 // ----- Eventi
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('[data-ck]'); if(!b) return;
@@ -3769,6 +3795,8 @@ document.addEventListener('click', async (e) => {
   if(a === 'delyes'){ const c = checkups.find(x => x.id === id); if(c && c.prenotazione && c.prenotazione.medId){ const mid = c.prenotazione.medId; const mm = medical.find(m => m.id === mid); if(mm && mm.bozza){ medical = medical.filter(m => m.id !== mid); await saveMedical(); } } checkups = checkups.filter(x => x.id !== id); await saveCheckups(); ckClose(); return renderAll(); }
   if(a === 'medcomplete'){ ckClose(); jumpToTab('medical'); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); return; }
   if(a === 'showbozze'){ const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); return; }
+  if(a === 'impsp') return ckImpAsk();
+  if(a === 'impgo') return ckImpGo();
   if(a === 'newsp') return ckSpForm('');
   if(a === 'editsp') return ckSpForm(id);
   if(a === 'addsede'){ ckSpRead(); ckSpDraft.sedi.push({id: uid(), struttura: '', indirizzo: '', tel: '', email: '', sito: '', note: ''}); return ckSpDraw(); }
