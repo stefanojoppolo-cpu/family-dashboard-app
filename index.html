@@ -658,6 +658,69 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+/* ---- Check-up e visite ---- */
+#panel-checkup .ck-card:last-child{margin-bottom:0}
+.ck-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}.ck-head>div:first-child{flex:1;min-width:240px}
+.ck-h2{margin:0;font-size:22px;font-weight:800}.ck-mut{color:var(--ink-soft);font-size:13px}
+.ck-head p{margin:4px 0 0}.ck-head-a{display:flex;gap:8px}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ck-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:14px}
+.ck-card-h{font-size:15px;font-weight:800;margin-bottom:4px}
+.ck-empty{color:var(--ink-soft);font-size:13.5px;padding:10px 0}
+.ck-it{padding:11px 0;border-top:1px solid var(--line)}.ck-card-h+.ck-it{border-top:0}
+.ck-it-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ck-it-t{flex:1;min-width:160px;font-size:14px}
+.ck-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.ck-it-s{font-size:12.5px;color:var(--ink-soft);margin:3px 0 0 17px}.ck-it-a{margin:8px 0 0 17px;display:flex;gap:8px;flex-wrap:wrap}
+.ck-it-a a.btn{text-decoration:none}
+.ck-pill{font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;white-space:nowrap;display:inline-block}
+.ck-p-red{background:var(--stamp-soft);color:var(--stamp)}.ck-p-amb{background:var(--gold-soft);color:#8A5200}.ck-p-blue{background:var(--accent-soft);color:var(--accent)}
+.ck-p-gray{background:#E8ECF2;color:var(--ink-soft)}.ck-p-grn{background:var(--teal-soft);color:var(--teal)}.ck-p-outred{border:1.5px solid #E6A6A1;color:var(--stamp);background:#fff;padding:2px 8px}
+.ck-cal-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ck-cal-t{margin:0;font-size:18px;font-weight:800;min-width:150px;text-align:center}
+.ck-nb{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:16px;font-weight:700;cursor:pointer;color:var(--ink)}
+.ck-seg{display:flex;background:var(--paper);border-radius:10px;padding:3px}.ck-seg button{border:0;background:none;font:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);padding:5px 13px;border-radius:8px;cursor:pointer}
+.ck-seg button.on{background:#fff;color:var(--ink);font-weight:800;box-shadow:0 1px 2px rgba(16,37,58,.1)}
+.ck-stat{margin-left:6px;font-weight:700}
+.ck-leg{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft);font-weight:600;margin:10px 0}.ck-leg span{display:flex;align-items:center;gap:6px}
+.ck-ld{width:12px;height:12px;border-radius:50%;display:inline-block}.ck-ld-d{border:1.5px dashed var(--accent);box-sizing:border-box}
+.ck-gh,.ck-gb{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.ck-gh div{font-size:11.5px;font-weight:800;color:var(--ink-soft);padding:6px 8px;text-transform:uppercase}
+.ck-gb{border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.ck-day{min-height:92px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px 6px;min-width:0}.ck-out{background:var(--paper)}
+.ck-dn{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:3px}.ck-today .ck-dn{background:var(--ink);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.ck-chip{display:block;width:100%;text-align:left;font:inherit;font-size:11.5px;font-weight:800;border:0;border-radius:6px;padding:3px 6px;margin-bottom:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;box-sizing:border-box}
+.ck-more{font-size:11px;color:var(--ink-soft);font-weight:700}
+.ck-year{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.ck-mini{border:1px solid var(--line);border-radius:12px;padding:10px 12px}.ck-cur{border-color:#B9C8F5;background:var(--accent-soft)}
+.ck-mini-t{border:0;background:none;font:inherit;font-size:14px;font-weight:800;cursor:pointer;color:var(--ink);padding:0;margin-bottom:6px}
+.ck-mini-g{display:grid;grid-template-columns:repeat(7,1fr);justify-items:center;row-gap:2px}.ck-mini-g span{font-size:10px;font-weight:800;color:var(--ink-soft)}
+.ck-mini-g b,.ck-mini-g i{width:24px;height:24px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;font-style:normal}.ck-mini-g b[data-ck]{cursor:pointer}
+.ck-mob{display:none}
+.ck-ag{display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--line)}.ck-ag-d{width:44px;text-align:center;flex-shrink:0;display:flex;flex-direction:column}.ck-ag-d span{font-size:11px;font-weight:800;color:var(--ink-soft)}.ck-ag-d b{font-size:21px;line-height:1.1}
+.ck-ag-c{flex:1;text-align:left;font:inherit;border-radius:10px;padding:8px 12px;cursor:pointer;background:none;display:flex;flex-direction:column;border:0}.ck-ag-c span{font-size:12.5px;opacity:.9}
+@media (max-width:760px){.ck-desk{display:none}.ck-mob{display:block}.ck-stat{display:none}.ck-year{grid-template-columns:1fr 1fr}}
+.ck-sph{margin-bottom:8px}.ck-back{border:0;background:none;font:inherit;font-weight:700;color:var(--accent);cursor:pointer;padding:0}
+.ck-sptools{display:flex;gap:10px;margin:10px 0 14px}.ck-sptools .ck-in{flex:1;max-width:340px}
+.ck-spgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.ck-sp{background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:9px}
+.ck-sp-h{display:flex;align-items:center;gap:12px}.ck-av{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ck-sede-v{border-top:1px solid var(--line);padding-top:8px;font-size:13.5px}.ck-sede-n{font-weight:800}.ck-sede-l{display:flex;gap:12px;flex-wrap:wrap;margin-top:3px}.ck-sede-l a,.ck-contacts a{color:var(--accent);text-decoration:none;font-weight:600}
+.ck-note{font-size:12.5px;color:var(--ink-soft);background:var(--gold-soft);border-radius:8px;padding:6px 10px;margin-top:6px}.ck-sp-a{display:flex;gap:8px;margin-top:auto}
+.ck-in{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;color:var(--ink);width:100%;box-sizing:border-box}.ck-in-s{width:auto;padding:6px 10px;margin-left:auto}
+.ck-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ck-fld label{display:block;font-size:12.5px;font-weight:800;color:var(--ink-soft);margin-bottom:5px}.ck-span{grid-column:1/-1}
+.ck-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ck-contacts{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden}
+.ck-contacts>div{padding:10px 12px;border-right:1px solid var(--line);min-width:0;display:flex;flex-direction:column;gap:3px;align-items:flex-start}.ck-contacts>div:last-child{border-right:0}
+.ck-contacts span{font-size:11.5px;font-weight:700;color:var(--ink-soft)}.ck-contacts b{font-size:13.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ck-chk{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;margin-top:12px}
+.ck-info{background:var(--accent-soft);border-radius:12px;padding:12px 15px;margin-top:12px;font-size:13px;line-height:1.55}
+.ck-sedef{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}.ck-sedef-h{display:flex;align-items:center;gap:12px;margin-bottom:8px}.ck-rad{margin-left:auto;font-size:13px;font-weight:600;display:flex;gap:5px;align-items:center}
+.ck-hist{margin:4px 0 0;padding-left:18px;font-size:13.5px}
+.ck-modal .md-body{padding:16px 22px;overflow:auto}.ck-modal .md-foot{display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap;padding:12px 22px;border-top:1px solid var(--line)}
+.ck-bznote{background:var(--gold-soft);border:1.5px dashed #E3B45C;border-radius:10px;padding:9px 14px;margin:10px 0;font-size:13px;color:#8A5200}
+tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #E3B45C;border-bottom:1px dashed #E3B45C}
+.bz-tag{font-size:10.5px;font-weight:800;color:#8A5200;background:#FDE7B8;border-radius:5px;padding:2px 6px;margin-left:6px;vertical-align:1px}.bz-na{color:#A9742C}
+.bz-miss{font-size:12px;color:#8A5200}
+@media (max-width:640px){.ck-form,.ck-row2{grid-template-columns:1fr}.ck-contacts{grid-template-columns:1fr}.ck-contacts>div{border-right:0;border-bottom:1px solid var(--line)}}
+
 .md-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 24px 12px;border-bottom:1px solid var(--line)}
 .md-head h3{margin:0;font-size:18px;font-weight:800}.md-who{font-weight:600;color:var(--ink-soft);font-size:14px;margin-left:6px}
 .md-sub{margin-top:5px;font-size:13px;color:var(--ink-soft)}
@@ -784,6 +847,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
     <button class="tab-btn active" data-tab="panoramica"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Panoramica</button>
     <button class="tab-btn" data-tab="recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>Pagamenti ricorrenti</button>
     <button class="tab-btn" data-tab="medical"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Sanità integrativa</button>
+    <button class="tab-btn" data-tab="checkup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><path d="M9 15.5l2 2 4-4"/></svg>Check-up e visite</button>
     <button class="tab-btn" data-tab="bilancio"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="17" y1="20" x2="17" y2="15"/></svg>Bilancio annuale</button>
     <button class="tab-btn" data-tab="contratti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Contratti a scadenza</button>
     <button class="tab-btn" data-tab="documenti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.3"/><path d="M8 17c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>Documenti personali</button>
@@ -1055,6 +1119,8 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
       </div>
     </div>
   </section>
+
+  <section class="panel" id="panel-checkup"><div id="ck-root"></div></section>
 
   <section class="panel" id="panel-bilancio">
     <div class="filter-bar">
@@ -1736,7 +1802,7 @@ function metricsMedical(conMassimali){
   const piu = pags.length > 1;
   const anno = new Date().getFullYear();
   const righe = medical.map(m => ({m, n: medicalRowNumbers(m)}));
-  const aperte = righe.filter(x => !x.n.conclusa && !x.n.soloQuota);
+  const aperte = righe.filter(x => !x.m.bozza && !x.n.conclusa && !x.n.soloQuota);
   const ancora = aperte.reduce((s, x) => s + x.n.residuo, 0);
   const detr = righe.filter(x => (x.n.conclusa || x.n.soloQuota) && (x.m.dataDocumento || '').slice(0,4) === String(anno)).reduce((s, x) => s + x.n.residuo, 0);
   const items = [{k:'aperte', valore: aperte.length, label:'Pratiche aperte', cls: aperte.length ? 'pend' : ''}];
@@ -1883,6 +1949,7 @@ function rowClassRecurring(p){
   return '';
 }
 const STATI_RIMBORSO = {
+  bozza:      {label:'Da completare', cls:'soon'},
   da_inviare: {label:'Da inviare', cls:'pending'},
   attesa:     {label:'In attesa di risposta', cls:'soon'},
   chiusa:     {label:'Chiusa', cls:'paid'},
@@ -1942,6 +2009,7 @@ function refreshMedicalFilterOptions(){
 }
 
 function efStatoPag(m, p){
+  if(m.bozza) return 'bozza';
   const r = rimborsoDi(m, p.id).stato;
   if(r !== 'da_inviare') return r;
   const n = medicalRowNumbers(m);
@@ -1991,6 +2059,7 @@ function spesaCoperta(m){
   return t - s <= 0.004;
 }
 function medicalRowNumbers(m){
+  if(m && m.bozza) return {totale:0, pagati:{}, totPagato:0, residuo:0, prossimo:null, daRichiedere:0, kind:'bozza', statoInfo:{label:'Da completare', cls:'soon'}, conclusa:false, soloQuota:false};
   const totale = Number(m.totale) || 0;
   const pags = settings.pagatori;
   const pagati = {};
@@ -2174,14 +2243,14 @@ function renderMedical(){
     const docs = m.documenti || [];
     const isExpanded = expandedMedicalIds.has(m.id);
     return `
-    <tr data-id="${m.id}">
+    <tr data-id="${m.id}"${m.bozza ? ' class="row-bozza"' : ''}>
       <td><button type="button" class="btn small ghost" data-action="toggle-doc-row" data-id="${m.id}" style="padding:4px 8px;" aria-label="Mostra documenti collegati">${isExpanded ? '▾' : '▸'}</button></td>
       <td data-label="Richiedente">${avatarHtml(m.richiedente)}</td>
-      <td data-label="Prestazione">${escHtml(m.descrizione)}${(m.tipoDocumento || m.numeroDocumento) ? `<div class="sub">${escHtml([m.tipoDocumento, m.numeroDocumento].filter(Boolean).join(' '))}</div>` : ''}</td>
+      <td data-label="Prestazione">${escHtml(m.descrizione)}${m.bozza ? '<span class="bz-tag">BOZZA</span>' : ''}${m.bozza && m.struttura ? `<div class="sub">${escHtml(m.struttura)}</div>` : ''}${m.bozza ? `<div class="bz-miss">Da completare: importo${(m.documenti || []).some(d => d.nome !== 'Impegnativa') ? '' : ', fattura'}${(m.documenti || []).some(d => d.nome === 'Impegnativa') ? '' : ' · manca impegnativa'}</div>` : ''}${(!m.bozza && (m.tipoDocumento || m.numeroDocumento)) ? `<div class="sub">${escHtml([m.tipoDocumento, m.numeroDocumento].filter(Boolean).join(' '))}</div>` : ''}</td>
       <td data-label="Data">${fmtShort(m.dataDocumento)}</td>
-      <td class="amount" data-label="Totale"><b>${euro(n.totale)}</b></td>
+      <td class="amount" data-label="Totale">${m.bozza ? '<i class="bz-na">da inserire</i>' : `<b>${euro(n.totale)}</b>`}</td>
       ${pags.map(p => `<td data-label="${escHtml(p.nome)}">${payerPill(m, p)}</td>`).join('')}
-      <td class="amount" data-label="Residuo">${euro(n.residuo)}</td>
+      <td class="amount" data-label="Residuo">${m.bozza ? '—' : euro(n.residuo)}</td>
       <td data-label="Stato pratica"><span class="badge ${n.statoInfo.cls}">${escHtml(n.statoInfo.label)}</span></td>
       <td data-label="Tipo documento">${escHtml(m.tipoDocumento)}</td>
       <td data-label="Numero documento">${escHtml(m.numeroDocumento)}</td>
@@ -2196,7 +2265,7 @@ function renderMedical(){
             <button class="btn small" data-action="confirm-delete-medical" data-id="${m.id}">Sì, elimina</button>
             <button class="btn small ghost" data-action="cancel-delete-medical" data-id="${m.id}">Annulla</button>
           ` : `
-            <button class="btn small ghost" data-action="edit-medical" data-id="${m.id}">Modifica</button>
+            <button class="btn small${m.bozza ? '' : ' ghost'}" data-action="edit-medical" data-id="${m.id}">${m.bozza ? 'Completa' : 'Modifica'}</button>
             <button class="btn small ghost danger" data-action="delete-medical" data-id="${m.id}">Elimina</button>
           `}
         </div>
@@ -2665,8 +2734,9 @@ function buildUrgentItems(){
     const g = daysUntil(d.dataScadenza);
     if(g <= 90) items.push({icona: ICONA_DOCUMENTI, label: `${d.tipo} di ${d.intestatario}`, giorni: g, tab: 'documenti'});
   });
+  try{ ckUrgent(items); }catch(e){ console.error(e); }
   items.sort((a,b) => a.giorni - b.giorni);
-  const filtrati = visibleTabs ? items.filter(it => visibleTabs.includes(it.tab)) : items;
+  const filtrati = visibleTabs ? items.filter(it => visibleTabs.includes(it.tab === 'checkup' ? 'medical' : it.tab)) : items;
   return filtrati.slice(0, 8);
 }
 
@@ -3209,9 +3279,524 @@ function renderAll(){
   renderDocumenti();
   renderDetrazioni();
   renderPanoramica();
+  try{ renderCheckup(); }catch(e){ console.error(e); }
   try{ renderReport(); }catch(e){ console.error(e); }
   renderImpostazioni();
   applyModalitaVisibility();
+}
+
+// ================= Check-up e visite specialistiche =================
+const KEY_CHECKUPS = 'checkups', KEY_SPECIALISTS = 'specialists';
+let checkups = [], specialists = [];
+let ckView = 'cal', ckMode = 'mese', ckY = new Date().getFullYear(), ckM = new Date().getMonth();
+let ckSearch = '', ckSpDraft = null, ckCtx = null;
+const CK_MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const CK_MESI_C = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+const CK_GG = ['dom','lun','mar','mer','gio','ven','sab'];
+const ck2 = (n) => String(n).padStart(2, '0');
+const ckIso = (d) => d.getFullYear() + '-' + ck2(d.getMonth() + 1) + '-' + ck2(d.getDate());
+const ckToday = () => ckIso(new Date());
+const $ck = (id) => document.getElementById('ck-' + id);
+function ckAddMonths(iso, n){
+  const p = iso.split('-').map(Number); const t = new Date(p[0], p[1] - 1 + n, 1);
+  const last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate(); t.setDate(Math.min(p[2], last)); return ckIso(t);
+}
+function ckDue(c){ if(c.ultima && +c.cadenza > 0) return ckAddMonths(c.ultima, +c.cadenza); return c.scad || ''; }
+function ckGiorni(iso){ const a = iso.split('-').map(Number), t = new Date(); return Math.round((Date.UTC(a[0], a[1] - 1, a[2]) - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000); }
+function ckState(c){
+  if(c.attivo === false) return {k: 'chiuso'};
+  const t = ckToday();
+  if(c.prenotazione && c.prenotazione.data){ const d = c.prenotazione.data; return {k: d >= t ? 'prenotata' : 'conferma', data: d, g: ckGiorni(d)}; }
+  const due = ckDue(c); if(!due) return {k: 'senza'};
+  const g = ckGiorni(due), pre = c.preavviso == null ? 30 : +c.preavviso;
+  return {k: g < 0 ? 'scaduto' : g <= pre ? 'prenotare' : 'futuro', data: due, g};
+}
+function ckColor(n){ n = String(n || '').trim().toLowerCase(); let h = 0; for(const ch of n) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AV_COL[h % AV_COL.length]; }
+function ckFmt(iso){ return iso ? fmtDate(iso) : '—'; }
+function ckFmtLong(iso, ora){ if(!iso) return '—'; const p = iso.split('-').map(Number), d = new Date(p[0], p[1] - 1, p[2]); return CK_GG[d.getDay()] + ' ' + p[2] + ' ' + CK_MESI_C[p[1] - 1] + (p[0] !== new Date().getFullYear() ? ' ' + p[0] : '') + (ora ? ', ' + ora : ''); }
+function ckSafeUrl(u){ u = String(u || '').trim(); return /^https?:\/\//i.test(u) ? u : ''; }
+function ckSp(id){ return specialists.find(s => s.id === id); }
+function ckSede(sp, sedeId){ if(!sp || !sp.sedi || !sp.sedi.length) return null; return sp.sedi.find(s => s.id === sedeId) || sp.sedi.find(s => s.id === sp.sedeDefault) || sp.sedi[0]; }
+function ckCadLabel(c){ const m = +c.cadenza; if(!m) return 'Una tantum'; if(m === 6) return 'Ogni 6 mesi'; if(m % 12 === 0) return m === 12 ? 'Ogni anno' : 'Ogni ' + (m / 12) + ' anni'; return 'Ogni ' + m + ' mesi'; }
+function ckPill(k){
+  const M = {scaduto: ['Scaduto', 'ck-p-red'], prenotare: ['Da prenotare', 'ck-p-amb'], conferma: ['Da confermare', 'ck-p-amb'], prenotata: ['Prenotata', 'ck-p-blue'], futuro: ['Programmato', 'ck-p-gray'], chiuso: ['Completato', 'ck-p-grn'], senza: ['Da programmare', 'ck-p-gray']}[k] || ['', ''];
+  return `<span class="ck-pill ${M[1]}">${M[0]}</span>`;
+}
+async function saveCheckups(){
+  try{ await storageAdapter.set(KEY_CHECKUPS, JSON.stringify(checkups), false); }
+  catch(e){ console.error(e); showSaveWarning('Il salvataggio dei check-up non è riuscito. Riprova o ricarica la pagina.'); }
+}
+async function saveSpecialists(){
+  try{ await storageAdapter.set(KEY_SPECIALISTS, JSON.stringify(specialists), false); }
+  catch(e){ console.error(e); showSaveWarning('Il salvataggio degli specialisti non è riuscito. Riprova o ricarica la pagina.'); }
+}
+{
+  const _ld = loadData;
+  loadData = async function(){
+    await _ld();
+    try{ const r = await storageAdapter.get(KEY_CHECKUPS, false); const v = r ? JSON.parse(r.value) : []; checkups = Array.isArray(v) ? v : []; }catch(e){ checkups = []; }
+    try{ const r = await storageAdapter.get(KEY_SPECIALISTS, false); const v = r ? JSON.parse(r.value) : []; specialists = Array.isArray(v) ? v : []; }catch(e){ specialists = []; }
+  };
+  const _cb = currentBackupCSV;
+  currentBackupCSV = function(){
+    const medExtra = {}; medical.forEach(m => { if(m.bozza || m.checkupId || m.struttura) medExtra[m.id] = {bozza: !!m.bozza, checkupId: m.checkupId || '', struttura: m.struttura || ''}; });
+    return _cb() + '\n\n### CHECKUP E SPECIALISTI\n' + JSON.stringify({checkups, specialists, medExtra}) + '\n';
+  };
+  const _pb = parseBackupCSV;
+  parseBackupCSV = function(text){
+    let ck = null; const mk = /\n*###\s*CHECKUP E SPECIALISTI\s*\n/;
+    if(mk.test(text)){ const p = text.split(mk); text = p[0]; try{ ck = JSON.parse((p[1] || '').trim()); }catch(e){ ck = null; } }
+    const o = _pb(text); o.checkup = ck; return o;
+  };
+}
+function ckRestore(parsed){
+  const ck = parsed && parsed.checkup; if(!ck) return;
+  checkups = Array.isArray(ck.checkups) ? ck.checkups : []; specialists = Array.isArray(ck.specialists) ? ck.specialists : [];
+  const ex = ck.medExtra || {};
+  medical = medical.map(m => ex[m.id] ? {...m, ...(ex[m.id].bozza ? {bozza: true} : {}), ...(ex[m.id].checkupId ? {checkupId: ex[m.id].checkupId} : {}), ...(ex[m.id].struttura ? {struttura: ex[m.id].struttura} : {})} : m);
+}
+
+// ---------- Elenco "Da fare" ----------
+function ckTodo(){
+  const out = [], t = ckToday();
+  checkups.forEach(c => {
+    const s = ckState(c);
+    if(s.k === 'scaduto' || s.k === 'prenotare' || s.k === 'conferma') out.push({k: s.k, c, s, ord: s.data});
+    else if(s.k === 'prenotata' && (!c.prenotazione.impegnativa || s.g <= 7)) out.push({k: 'prenotata', c, s, ord: s.data});
+  });
+  medical.forEach(m => {
+    if(!m.bozza || !m.dataDocumento || m.dataDocumento > t) return;
+    if(checkups.some(c => c.prenotazione && c.prenotazione.medId === m.id)) return;
+    out.push({k: 'bozza', m, ord: m.dataDocumento});
+  });
+  out.sort((a, b) => a.ord < b.ord ? -1 : a.ord > b.ord ? 1 : 0);
+  return out;
+}
+function ckTodoHtml(){
+  const list = ckTodo();
+  const rows = list.map(it => {
+    if(it.k === 'bozza'){
+      const m = it.m;
+      return `<div class="ck-it"><div class="ck-it-h"><span class="ck-dot" style="background:${ckColor(m.richiedente)}"></span><b class="ck-it-t">${escHtml(m.descrizione)} · ${escHtml(m.richiedente)}</b><span class="ck-pill ck-p-amb">Da completare</span></div>
+      <div class="ck-it-s">Eseguita il ${ckFmt(m.dataDocumento)} · mancano importo e fattura</div>
+      <div class="ck-it-a"><button type="button" class="btn small" data-ck="medcomplete" data-id="${m.id}">Completa la spesa</button></div></div>`;
+    }
+    const c = it.c, s = it.s, sp = ckSp(c.specialistaId), sede = ckSede(sp, c.sedeId);
+    let sub = '', acts = '';
+    if(s.k === 'scaduto' || s.k === 'prenotare'){
+      sub = (s.k === 'scaduto' ? 'Scaduto il ' : 'Entro il ') + ckFmt(s.data) + (c.ultima ? ' · ultima il ' + ckFmt(c.ultima) : '');
+      acts = `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>`;
+      if(sede && sede.tel) acts += `<a class="btn small ghost" href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">Chiama ${escHtml(sp.nome)}</a>`;
+    } else if(s.k === 'conferma'){
+      sub = 'Visita del ' + ckFmtLong(s.data, c.prenotazione.ora) + ': è stata eseguita?';
+      acts = `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Cambia data</button>`;
+    } else {
+      sub = ckFmtLong(s.data, c.prenotazione.ora) + (sp ? ' · ' + sp.nome : '') + (c.prenotazione.struttura ? ' · ' + c.prenotazione.struttura : '');
+      acts = `<button type="button" class="btn small ghost" data-ck="open" data-id="${c.id}">Dettagli</button>`;
+    }
+    const miss = s.k === 'prenotata' && !c.prenotazione.impegnativa ? '<span class="ck-pill ck-p-outred">Manca impegnativa</span>' : ckPill(s.k);
+    return `<div class="ck-it"><div class="ck-it-h"><span class="ck-dot" style="background:${ckColor(c.persona)}"></span><b class="ck-it-t">${escHtml(c.tipo)} · ${escHtml(c.persona)}</b>${miss}</div>
+      <div class="ck-it-s">${escHtml(sub)}</div><div class="ck-it-a">${acts}</div></div>`;
+  }).join('');
+  return `<div class="ck-card"><div class="ck-card-h">Da fare <span class="ck-mut">· ${list.length}</span></div>${rows || '<div class="ck-empty">Niente da fare per ora: nessun controllo in scadenza e nessuna prenotazione da completare.</div>'}</div>`;
+}
+
+// ---------- Eventi del calendario ----------
+function ckEvents(){
+  const ev = [];
+  checkups.forEach(c => {
+    const s = ckState(c);
+    if(c.prenotazione && c.prenotazione.data) ev.push({date: c.prenotazione.data, t: 'book', c});
+    else if(s.data && (s.k === 'scaduto' || s.k === 'prenotare' || s.k === 'futuro')) ev.push({date: s.data, t: 'due', c});
+    (c.storico || []).forEach(h => { if(h && h.data) ev.push({date: h.data, t: 'done', c}); });
+  });
+  return ev;
+}
+function ckChip(e){
+  const col = ckColor(e.c.persona), st = e.t === 'book' ? `background:${col};color:#fff;` : e.t === 'due' ? `border:1.5px dashed ${col};color:${col};` : 'background:#E3E8EE;color:#5B6B7C;';
+  const ora = e.t === 'book' && e.c.prenotazione.ora ? e.c.prenotazione.ora + ' ' : '';
+  return `<button type="button" class="ck-chip" style="${st}" data-ck="open" data-id="${e.c.id}" title="${escHtml(e.c.tipo + ' · ' + e.c.persona)}">${escHtml(ora + e.c.tipo)}</button>`;
+}
+function ckMonthHtml(){
+  const ev = ckEvents(), by = {}; ev.forEach(e => { (by[e.date] = by[e.date] || []).push(e); });
+  const first = new Date(ckY, ckM, 1), off = (first.getDay() + 6) % 7, n = new Date(ckY, ckM + 1, 0).getDate(), t = ckToday();
+  let cells = '';
+  for(let i = 0; i < Math.ceil((off + n) / 7) * 7; i++){
+    const d = i - off + 1;
+    if(d < 1 || d > n){ cells += '<div class="ck-day ck-out"></div>'; continue; }
+    const iso = ckY + '-' + ck2(ckM + 1) + '-' + ck2(d), list = by[iso] || [];
+    cells += `<div class="ck-day${iso === t ? ' ck-today' : ''}"><div class="ck-dn">${d}</div>${list.slice(0, 3).map(ckChip).join('')}${list.length > 3 ? `<div class="ck-more">+${list.length - 3}</div>` : ''}</div>`;
+  }
+  return `<div class="ck-grid"><div class="ck-gh">${['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(x => `<div>${x}</div>`).join('')}</div><div class="ck-gb">${cells}</div></div>`;
+}
+function ckYearHtml(){
+  const ev = ckEvents(), by = {}; ev.forEach(e => { (by[e.date] = by[e.date] || []).push(e); });
+  const t = ckToday();
+  return `<div class="ck-year">${CK_MESI.map((nm, mi) => {
+    const off = (new Date(ckY, mi, 1).getDay() + 6) % 7, n = new Date(ckY, mi + 1, 0).getDate();
+    let d = ''; for(let i = 0; i < off; i++) d += '<i></i>';
+    for(let k = 1; k <= n; k++){
+      const iso = ckY + '-' + ck2(mi + 1) + '-' + ck2(k), l = by[iso]; let st = '';
+      if(l){ const e = l.find(x => x.t === 'book') || l.find(x => x.t === 'due') || l[0], col = ckColor(e.c.persona); st = e.t === 'book' ? `background:${col};color:#fff;font-weight:800;` : e.t === 'due' ? `border:1.5px dashed ${col};color:${col};font-weight:800;` : 'background:#E3E8EE;color:#5B6B7C;font-weight:800;'; }
+      d += `<b style="${st}${iso === t ? 'box-shadow:0 0 0 2px var(--ink);' : ''}"${l ? ` data-ck="open" data-id="${l[0].c.id}"` : ''}>${k}</b>`;
+    }
+    return `<div class="ck-mini${mi === new Date().getMonth() && ckY === new Date().getFullYear() ? ' ck-cur' : ''}"><button type="button" class="ck-mini-t" data-ck="gomonth" data-m="${mi}">${nm[0].toUpperCase() + nm.slice(1)}</button><div class="ck-mini-g">${['L', 'M', 'M', 'G', 'V', 'S', 'D'].map(x => `<span>${x}</span>`).join('')}${d}</div></div>`;
+  }).join('')}</div>`;
+}
+function ckAgendaHtml(){
+  const t = ckToday(), list = ckEvents().filter(e => e.t !== 'done' && e.date >= t).sort((a, b) => a.date < b.date ? -1 : 1).slice(0, 12);
+  if(!list.length) return '<div class="ck-empty">Nessun appuntamento in programma.</div>';
+  return list.map(e => {
+    const p = e.date.split('-').map(Number), d = new Date(p[0], p[1] - 1, p[2]), col = ckColor(e.c.persona);
+    const st = e.t === 'book' ? `background:${col};color:#fff;` : `border:1.5px dashed ${col};color:${col};`;
+    const sp = ckSp(e.c.specialistaId);
+    return `<div class="ck-ag"><div class="ck-ag-d"><span>${CK_GG[d.getDay()].toUpperCase()}</span><b>${p[2]}</b><span>${CK_MESI_C[p[1] - 1].toUpperCase()}</span></div>
+      <button type="button" class="ck-ag-c" style="${st}" data-ck="open" data-id="${e.c.id}"><b>${escHtml((e.t === 'book' && e.c.prenotazione.ora ? e.c.prenotazione.ora + ' ' : '') + e.c.tipo + (e.t === 'due' ? ' · scadenza' : ''))}</b><span>${escHtml(e.c.persona + (e.t === 'book' && e.c.prenotazione.struttura ? ' · ' + e.c.prenotazione.struttura : e.t === 'due' ? ' · da prenotare' : '') + (sp && e.t === 'book' ? '' : ''))}</span></button></div>`;
+  }).join('');
+}
+function ckLegend(){
+  const pers = [...new Set(checkups.map(c => c.persona).filter(Boolean))];
+  return `<div class="ck-leg"><span><i class="ck-ld" style="background:var(--accent)"></i>Prenotata</span><span><i class="ck-ld ck-ld-d"></i>Scadenza prevista</span><span><i class="ck-ld" style="background:#D9DFE7"></i>Eseguita</span>${pers.map(p => `<span><i class="ck-ld" style="background:${ckColor(p)};width:10px;height:10px"></i>${escHtml(p)}</span>`).join('')}</div>`;
+}
+function ckCalHtml(){
+  const ev = ckEvents(), yEv = ev.filter(e => e.date.slice(0, 4) === String(ckY));
+  const stat = `${yEv.filter(e => e.t === 'done').length} eseguiti · ${yEv.filter(e => e.t === 'book').length} prenotati · ${yEv.filter(e => e.t === 'due').length} in scadenza`;
+  const title = ckMode === 'mese' ? CK_MESI[ckM][0].toUpperCase() + CK_MESI[ckM].slice(1) + ' ' + ckY : String(ckY);
+  return `<div class="ck-card ck-cal"><div class="ck-cal-h">
+    <button type="button" class="ck-nb" data-ck="prev" aria-label="Precedente">‹</button><h3 class="ck-cal-t">${title}</h3><button type="button" class="ck-nb" data-ck="next" aria-label="Successivo">›</button>
+    <button type="button" class="btn small ghost" data-ck="today">Oggi</button>
+    <div class="ck-seg"><button type="button" class="${ckMode === 'mese' ? 'on' : ''}" data-ck="mode" data-v="mese">Mese</button><button type="button" class="${ckMode === 'anno' ? 'on' : ''}" data-ck="mode" data-v="anno">Anno</button></div>
+    <span class="ck-mut ck-stat">${stat}</span></div>
+    ${ckLegend()}
+    <div class="ck-desk">${ckMode === 'mese' ? ckMonthHtml() : ckYearHtml()}</div>
+    <div class="ck-mob"><div class="ck-card-h" style="margin-top:6px">Prossimi appuntamenti</div>${ckAgendaHtml()}</div></div>`;
+}
+
+// ---------- Rubrica specialisti ----------
+function ckSpecHtml(){
+  const q = ckSearch.trim().toLowerCase();
+  const list = specialists.filter(s => !q || (s.nome + ' ' + (s.specialita || '') + ' ' + (s.sedi || []).map(x => x.struttura).join(' ')).toLowerCase().includes(q));
+  const cards = list.map(s => {
+    const ini = (s.nome || '?').replace(/^(dott\.?ssa|dott\.?|dr\.?|prof\.?)\s+/i, '').split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    const sedi = (s.sedi || []).slice().sort((a, b) => (a.id === s.sedeDefault ? -1 : 0) - (b.id === s.sedeDefault ? -1 : 0)).map(x => {
+      const u = ckSafeUrl(x.sito);
+      return `<div class="ck-sede-v"><div class="ck-sede-n">${escHtml(x.struttura || 'Sede')}${x.id === s.sedeDefault && s.sedi.length > 1 ? ' <span class="ck-pill ck-p-blue">predefinita</span>' : ''}</div>
+      ${x.indirizzo ? `<div class="ck-mut">${escHtml(x.indirizzo)}</div>` : ''}
+      <div class="ck-sede-l">${x.tel ? `<a href="tel:${escHtml(String(x.tel).replace(/[^\d+]/g, ''))}">📞 ${escHtml(x.tel)}</a>` : ''}${x.email ? `<a href="mailto:${escHtml(x.email)}">✉ ${escHtml(x.email)}</a>` : ''}${u ? `<a href="${escHtml(u)}" target="_blank" rel="noopener">Sito ↗</a>` : ''}</div>
+      ${x.note ? `<div class="ck-note">${escHtml(x.note)}</div>` : ''}</div>`;
+    }).join('');
+    const usati = checkups.filter(c => c.specialistaId === s.id).map(c => c.persona + ' · ' + c.tipo);
+    return `<div class="ck-sp"><div class="ck-sp-h"><span class="ck-av">${escHtml(ini)}</span><div><b>${escHtml(s.nome)}</b><div class="ck-mut">${escHtml(s.specialita || '')}</div></div></div>${sedi || '<div class="ck-mut">Nessuna sede inserita.</div>'}
+      ${s.note ? `<div class="ck-note">${escHtml(s.note)}</div>` : ''}${usati.length ? `<div class="ck-mut" style="font-size:12px">Usato per: ${escHtml(usati.join('; '))}</div>` : ''}
+      <div class="ck-sp-a"><button type="button" class="btn small" data-ck="spbook" data-id="${s.id}">Prenota</button><button type="button" class="btn small ghost" data-ck="editsp" data-id="${s.id}">Modifica</button></div></div>`;
+  }).join('');
+  return `<div class="ck-sph"><button type="button" class="ck-back" data-ck="view" data-v="cal">‹ Check-up e visite</button></div>
+    <div class="ck-sptools"><input type="search" id="ck-search" class="ck-in" placeholder="Cerca specialista o struttura…" value="${escHtml(ckSearch)}"><button type="button" class="btn" data-ck="newsp">+ Nuovo specialista</button></div>
+    <div class="ck-spgrid">${cards || '<div class="ck-card ck-empty">Nessuno specialista: aggiungi i medici di riferimento della famiglia (con le loro sedi) e li ritroverai nella prenotazione.</div>'}</div>`;
+}
+
+// ---------- Pannello ----------
+function renderCheckup(){
+  const root = document.getElementById('ck-root'); if(!root) return;
+  if(!root.contains(document.activeElement) || ckView !== 'spec'){
+    root.innerHTML = ckView === 'spec' ? ckSpecHtml() : `<div class="ck-head"><div><h2 class="ck-h2">Check-up e visite specialistiche</h2><p class="ck-mut">Controlli ricorrenti e visite specialistiche della famiglia, con promemoria e prenotazione.</p></div>
+      <div class="ck-head-a"><button type="button" class="btn" data-ck="view" data-v="spec">Specialisti</button><button type="button" class="btn primary" data-ck="newck">+ Nuovo controllo</button></div></div>${ckTodoHtml()}${ckCalHtml()}`;
+  }
+  // contatore nel menu e bozze in Sanità
+  const btn = document.querySelector('.tab-btn[data-tab="checkup"]');
+  if(btn){ let nc = btn.querySelector('.navcount'); const nv = ckTodo().filter(i => i.k !== 'prenotata').length; if(nv){ if(!nc){ nc = document.createElement('span'); nc.className = 'navcount'; btn.appendChild(nc); } nc.textContent = nv; } else if(nc) nc.remove(); }
+  const fb = document.querySelector('#panel-medical .filter-bar'); let note = document.getElementById('bozze-note');
+  const nb = medical.filter(m => m.bozza).length;
+  if(fb){
+    if(nb){ if(!note){ note = document.createElement('div'); note.id = 'bozze-note'; note.className = 'ck-bznote'; fb.insertAdjacentElement('afterend', note); }
+      note.innerHTML = `<b>${nb} ${nb === 1 ? 'visita prenotata da completare' : 'visite prenotate da completare'}</b> · le bozze non entrano in totali, residuo e report finché non inserisci importo e fattura. <button type="button" class="btn small ghost" data-ck="showbozze">Mostra solo le bozze</button>`; }
+    else if(note) note.remove();
+  }
+}
+
+// ---------- Modale ----------
+const ckBd = document.createElement('div'); ckBd.className = 'md-bd';
+const ckBox = document.createElement('div'); ckBox.className = 'md-modal ck-modal'; ckBox.setAttribute('role', 'dialog');
+function ckShow(html){ if(!ckBox.isConnected) document.body.append(ckBd, ckBox); ckBox.innerHTML = html; ckBox.classList.add('on'); ckBd.classList.add('on'); }
+function ckClose(){ ckCtx = null; ckSpDraft = null; ckBox.classList.remove('on'); ckBd.classList.remove('on'); }
+ckBd.addEventListener('click', ckClose);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && ckBox.classList.contains('on')) ckClose(); });
+const ckHead = (t, s) => `<div class="md-head"><div><h3>${t}</h3>${s ? `<div class="md-sub">${s}</div>` : ''}</div><button type="button" class="ef-x" data-ck="close" aria-label="Chiudi">✕</button></div>`;
+const ckFld = (l, inner, cls) => `<div class="ck-fld ${cls || ''}"><label>${l}</label>${inner}</div>`;
+
+// ----- Scheda controllo
+function ckDetail(id){
+  const c = checkups.find(x => x.id === id); if(!c) return ckClose();
+  ckCtx = {t: 'detail', id, del: ckCtx && ckCtx.id === id && ckCtx.del};
+  const s = ckState(c), sp = ckSp(c.specialistaId), sede = ckSede(sp, c.sedeId), p = c.prenotazione, due = ckDue(c);
+  const kv = (k, v) => v ? `<div><span>${k}</span><b>${v}</b></div>` : '';
+  const contatti = sede ? [sede.tel ? `<a href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">${escHtml(sede.tel)}</a>` : '', sede.email ? `<a href="mailto:${escHtml(sede.email)}">${escHtml(sede.email)}</a>` : ''].filter(Boolean).join(' · ') : '';
+  const med = p && p.medId ? medical.find(m => m.id === p.medId) : null;
+  const imp = p && ckSafeUrl(p.impegnativa) ? `<a href="${escHtml(ckSafeUrl(p.impegnativa))}" target="_blank" rel="noopener">Apri impegnativa ↗</a>` : '<span class="ck-pill ck-p-outred">Manca impegnativa</span>';
+  const storico = (c.storico || []).slice().reverse().map(h => `<li>${ckFmt(h.data)}${h.struttura ? ' · ' + escHtml(h.struttura) : ''}</li>`).join('');
+  let acts;
+  if(ckCtx.del) acts = `<span style="color:var(--stamp);font-weight:700">Eliminare questo controllo?</span><button type="button" class="btn small danger" data-ck="delyes" data-id="${c.id}">Sì, elimina</button><button type="button" class="btn small ghost" data-ck="delno" data-id="${c.id}">Annulla</button>`;
+  else {
+    acts = '';
+    if(s.k === 'prenotata') acts += `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Modifica prenotazione</button><button type="button" class="btn small ghost" data-ck="ics" data-id="${c.id}">Aggiungi al calendario (.ics)</button>`;
+    else if(s.k === 'conferma') acts += `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Cambia data</button>`;
+    else if(s.k !== 'chiuso') acts += `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>` + (due ? `<button type="button" class="btn small ghost" data-ck="icsdue" data-id="${c.id}">Promemoria scadenza (.ics)</button>` : '');
+    if(med && med.bozza) acts += `<button type="button" class="btn small ghost" data-ck="medcomplete" data-id="${med.id}">Completa la spesa</button>`;
+    acts += `<button type="button" class="btn small ghost" data-ck="editck" data-id="${c.id}">Modifica</button><button type="button" class="btn small ghost danger" data-ck="delck" data-id="${c.id}">Elimina</button>`;
+  }
+  ckShow(`${ckHead(escHtml(c.tipo) + ' <span class="md-who">' + escHtml(c.persona) + '</span>', ckPill(s.k) + (s.data ? ' · ' + (s.k === 'prenotata' || s.k === 'conferma' ? ckFmtLong(s.data, p && p.ora) : (s.k === 'scaduto' ? 'scaduto il ' : 'entro il ') + ckFmt(s.data)) : ''))}
+    <div class="md-body"><div class="md-top">${kv('Cadenza', ckCadLabel(c))}${kv('Ultima visita', c.ultima ? ckFmt(c.ultima) : '')}${kv('Prossima scadenza', due && !p ? ckFmt(due) : '')}${kv('Preavviso', (c.preavviso == null ? 30 : c.preavviso) + ' giorni')}</div>
+    ${sp ? `<h4 class="md-h">Specialista</h4><div class="md-top">${kv('Nome', escHtml(sp.nome) + (sp.specialita ? ' · ' + escHtml(sp.specialita) : ''))}${kv('Struttura', sede ? escHtml(sede.struttura || '') : '')}${kv('Indirizzo', sede ? escHtml(sede.indirizzo || '') : '')}${kv('Contatti', contatti)}</div>${sede && sede.note ? `<p class="md-note">${escHtml(sede.note)}</p>` : ''}` : ''}
+    ${p ? `<h4 class="md-h">Prenotazione</h4><div class="md-top">${kv('Quando', ckFmtLong(p.data, p.ora))}${kv('Struttura', escHtml(p.struttura || ''))}${kv('Impegnativa', imp)}${kv('Spesa in Sanità', med ? (med.bozza ? 'Bozza, da completare' : 'Registrata') : '')}</div>` : ''}
+    ${c.note ? `<h4 class="md-h">Note</h4><p class="md-note">${escHtml(c.note)}</p>` : ''}
+    ${storico ? `<h4 class="md-h">Storico visite</h4><ul class="ck-hist">${storico}</ul>` : ''}</div>
+    <div class="md-foot">${acts}</div>`);
+}
+
+// ----- Form controllo
+function ckSpOpts(sel){ return '<option value="">— nessuno —</option>' + specialists.map(s => `<option value="${s.id}"${s.id === sel ? ' selected' : ''}>${escHtml(s.nome)}${s.specialita ? ' (' + escHtml(s.specialita) + ')' : ''}</option>`).join(''); }
+function ckSedeOpts(spId, sel){ const sp = ckSp(spId); if(!sp || !sp.sedi || !sp.sedi.length) return '<option value="">—</option>'; const cur = ckSede(sp, sel); return sp.sedi.map(x => `<option value="${x.id}"${cur && x.id === cur.id ? ' selected' : ''}>${escHtml(x.struttura || 'Sede')}</option>`).join(''); }
+function ckForm(id, pre){
+  const c = id ? checkups.find(x => x.id === id) : null; pre = pre || {};
+  ckCtx = {t: 'form', id};
+  const cad = c ? +c.cadenza : 12, std = [0, 6, 12, 24, 36, 60].includes(cad);
+  ckShow(`${ckHead(c ? 'Modifica controllo' : 'Nuovo controllo o visita')}
+    <div class="md-body"><div class="ck-form">
+    ${ckFld('Per chi', `<input class="ck-in" id="ck-persona" list="preset-richiedente" value="${escHtml(c ? c.persona : pre.persona || '')}" placeholder="es. Stefano">`)}
+    ${ckFld('Tipo di controllo', `<input class="ck-in" id="ck-tipo" value="${escHtml(c ? c.tipo : pre.tipo || '')}" placeholder="es. Visita dermatologica, Check-up cardiologico">`)}
+    ${ckFld('Cadenza', `<select class="ck-in" id="ck-cad">${[[0, 'Una tantum (visita singola)'], [6, 'Ogni 6 mesi'], [12, 'Ogni anno'], [24, 'Ogni 2 anni'], [36, 'Ogni 3 anni'], [60, 'Ogni 5 anni'], ['x', 'Personalizzata (mesi)…']].map(([v, l]) => `<option value="${v}"${(std ? cad === v : v === 'x') ? ' selected' : ''}>${l}</option>`).join('')}</select><input class="ck-in" id="ck-cadx" type="number" min="1" max="240" placeholder="mesi" value="${!std ? cad : ''}" style="margin-top:6px;${std ? 'display:none' : ''}">`)}
+    ${ckFld('Avvisami prima di', `<select class="ck-in" id="ck-pre">${[7, 15, 30, 45, 60, 90].map(v => `<option value="${v}"${(c && c.preavviso != null ? +c.preavviso : 30) === v ? ' selected' : ''}>${v} giorni</option>`).join('')}</select>`)}
+    ${ckFld('Ultima visita', `<input class="ck-in" id="ck-ult" type="date" value="${escHtml(c ? c.ultima || '' : '')}">`)}
+    ${ckFld('Prossima scadenza <span class="ck-mut">· se vuota la calcolo dall\'ultima visita</span>', `<input class="ck-in" id="ck-scad" type="date" value="${escHtml(c ? c.scad || '' : pre.scad || '')}">`)}
+    ${ckFld('Specialista', `<select class="ck-in" id="ck-sp">${ckSpOpts(c ? c.specialistaId : pre.specialistaId)}</select>`)}
+    ${ckFld('Sede / struttura', `<select class="ck-in" id="ck-sede">${ckSedeOpts(c ? c.specialistaId : pre.specialistaId, c ? c.sedeId : pre.sedeId)}</select>`)}
+    ${ckFld('Note', `<textarea class="ck-in" id="ck-note" rows="2">${escHtml(c ? c.note || '' : '')}</textarea>`, 'ck-span')}
+    </div><p class="ck-mut" style="margin:8px 0 0">Non hai ancora lo specialista in rubrica? Salva e aggiungilo da «Specialisti».</p></div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small" data-ck="savechk" data-id="${id || ''}">Salva</button><button type="button" class="btn small primary" data-ck="savechkbook" data-id="${id || ''}">Salva e prenota</button></div>`);
+}
+async function ckSaveForm(id, thenBook){
+  const persona = $ck('persona').value.trim(), tipo = $ck('tipo').value.trim();
+  let cad = $ck('cad').value; cad = cad === 'x' ? parseInt($ck('cadx').value, 10) : parseInt(cad, 10);
+  const ult = $ck('ult').value, scad = $ck('scad').value;
+  if(!persona){ showFormError('Indica per chi è il controllo.'); return; }
+  if(!tipo){ showFormError('Indica il tipo di controllo.'); return; }
+  if(isNaN(cad) || cad < 0){ showFormError('Indica la cadenza in mesi.'); return; }
+  if(!(ult && cad > 0) && !scad){ showFormError('Indica l\'ultima visita (con una cadenza) oppure la data di scadenza.'); return; }
+  if((ult && normDate(ult) !== ult) || (scad && normDate(scad) !== scad)){ showFormError('Controlla le date inserite.'); return; }
+  const base = {persona, tipo, cadenza: cad, preavviso: parseInt($ck('pre').value, 10) || 30, ultima: ult, scad: scad, specialistaId: $ck('sp').value, sedeId: $ck('sede').value, note: $ck('note').value.trim()};
+  let cid = id;
+  if(id) checkups = checkups.map(c => c.id === id ? {...c, ...base} : c);
+  else { cid = uid(); checkups.push({id: cid, attivo: true, storico: [], prenotazione: null, ...base}); }
+  await saveCheckups(); ckClose(); renderAll();
+  if(thenBook) ckBook(cid);
+}
+
+// ----- Prenotazione
+function ckBook(id){
+  const c = checkups.find(x => x.id === id); if(!c) return;
+  const p = c.prenotazione || {}, spId = p.specialistaId || c.specialistaId || '', sp = ckSp(spId), sede = ckSede(sp, p.sedeId || c.sedeId);
+  ckCtx = {t: 'book', id};
+  const s = ckState(c);
+  ckShow(`${ckHead((c.prenotazione ? 'Modifica prenotazione' : 'Prenota') + ': ' + escHtml(c.tipo), escHtml(c.persona) + ' · ' + ckCadLabel(c).toLowerCase() + (ckDue(c) && !c.prenotazione ? ' · scadenza prevista ' + ckFmt(ckDue(c)) : ''))}
+    <div class="md-body"><div id="ck-spbox">${ckSpBox(spId, sede && sede.id)}</div>
+    <div class="ck-form" style="margin-top:12px">
+    ${ckFld('Data', `<input class="ck-in" id="ck-data" type="date" value="${escHtml(p.data || '')}">`)}
+    ${ckFld('Ora', `<input class="ck-in" id="ck-ora" type="time" value="${escHtml(p.ora || '')}">`)}
+    ${ckFld('Struttura <span class="ck-mut">· precompilata dallo specialista</span>', `<input class="ck-in" id="ck-strut" value="${escHtml(p.struttura || (sede && sede.struttura) || '')}">`, 'ck-span')}
+    ${ckFld('Impegnativa del medico <span class="ck-mut">· link al documento (puoi aggiungerlo dopo)</span>', `<input class="ck-in" id="ck-imp" type="url" placeholder="https://drive.google.com/…" value="${escHtml(p.impegnativa || '')}">`, 'ck-span')}
+    </div>
+    <label class="ck-chk"><input type="checkbox" id="ck-ics"${c.prenotazione ? '' : ' checked'}> Scarica il file per il calendario (.ics) con promemoria
+      <select class="ck-in ck-in-s" id="ck-icsrem"><option value="-P1D">1 giorno prima</option><option value="-P2D">2 giorni prima</option><option value="-P7D">1 settimana prima</option><option value="-PT2H">2 ore prima</option></select></label>
+    <div class="ck-info"><b>Cosa succede quando salvi</b><br>1. In Sanità integrativa nasce la riga «${escHtml(c.tipo)} · ${escHtml(c.persona)}» in bozza: importo e fattura li inserisci dopo la visita.<br>2. Il controllo passa a «Prenotata» e compare nel calendario.<br>3. Dopo la visita ti chiedo di confermarla e il prossimo controllo parte dalla data in cui l'hai fatta davvero.</div></div>
+    <div class="md-foot">${c.prenotazione ? `<button type="button" class="btn small ghost danger" data-ck="cancelbook" data-id="${c.id}" style="margin-right:auto">Annulla prenotazione</button>` : ''}<button type="button" class="btn small ghost" data-ck="close">Chiudi</button><button type="button" class="btn small primary" data-ck="savebook" data-id="${c.id}">Salva prenotazione</button></div>`);
+}
+function ckSpBox(spId, sedeId){
+  const sp = ckSp(spId), sede = ckSede(sp, sedeId), u = sede ? ckSafeUrl(sede.sito) : '';
+  return `<div class="ck-fld"><label>Specialista</label><div class="ck-row2"><select class="ck-in" id="ck-bsp">${ckSpOpts(spId)}</select><select class="ck-in" id="ck-bsede">${ckSedeOpts(spId, sede && sede.id)}</select></div></div>
+  ${sede ? `<div class="ck-contacts"><div><span>Telefono</span><b>${escHtml(sede.tel || '—')}</b>${sede.tel ? `<a class="btn small ghost" href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">Chiama</a>` : ''}</div><div><span>Email</span><b>${escHtml(sede.email || '—')}</b>${sede.email ? `<a class="btn small ghost" href="mailto:${escHtml(sede.email)}?subject=${encodeURIComponent('Richiesta prenotazione')}">Scrivi email</a>` : ''}</div><div><span>Sito</span><b>${escHtml(sede.sito || '—')}</b>${u ? `<a class="btn small ghost" href="${escHtml(u)}" target="_blank" rel="noopener">Apri sito</a>` : ''}</div></div>${sede.note ? `<div class="ck-note">Nota: ${escHtml(sede.note)}</div>` : ''}` : (spId ? '' : '<p class="ck-mut" style="margin:6px 0 0">Scegli lo specialista per vedere telefono ed email, oppure indica solo la struttura.</p>')}`;
+}
+async function ckSaveBook(id){
+  const c = checkups.find(x => x.id === id); if(!c) return;
+  const data = $ck('data').value, ora = $ck('ora').value, imp = $ck('imp').value.trim();
+  if(!data || normDate(data) !== data){ showFormError('Inserisci la data della visita.'); return; }
+  if(imp && !ckSafeUrl(imp)){ showFormError('Il link dell\'impegnativa deve iniziare con http:// o https://'); return; }
+  const spId = $ck('bsp').value, sedeId = $ck('bsede').value, strut = $ck('strut').value.trim();
+  const prev = c.prenotazione, docs = imp ? [{id: uid(), nome: 'Impegnativa', url: imp}] : [];
+  let med = prev && prev.medId ? medical.find(m => m.id === prev.medId) : null, medId = med ? med.id : '';
+  if(med && med.bozza){
+    const keep = (med.documenti || []).filter(d => d.nome !== 'Impegnativa');
+    medical = medical.map(m => m.id === med.id ? {...m, richiedente: c.persona, descrizione: c.tipo, dataDocumento: data, struttura: strut, documenti: keep.concat(docs)} : m);
+  } else if(!med){
+    medId = uid();
+    medical.push({id: medId, richiedente: c.persona, tipoDocumento: 'Fattura', numeroDocumento: '', dataDocumento: data, descrizione: c.tipo, note: '', modalita: 'Indiretta', totale: '', rimborsi: {}, nomi: undefined, bloccata: false, documenti: docs, bozza: true, checkupId: c.id, struttura: strut});
+  }
+  const pren = {data, ora, specialistaId: spId, sedeId, struttura: strut, impegnativa: imp, medId};
+  checkups = checkups.map(x => x.id === id ? {...x, prenotazione: pren, specialistaId: x.specialistaId || spId, sedeId: x.sedeId || sedeId} : x);
+  const wantIcs = $ck('ics').checked, rem = $ck('icsrem').value;
+  await saveMedical(); await saveCheckups(); ckClose(); renderAll();
+  if(wantIcs) ckDownloadIcs(checkups.find(x => x.id === id), rem);
+  showNotice(med ? 'Prenotazione aggiornata.' : 'Prenotazione salvata. In Sanità integrativa trovi la riga in bozza da completare dopo la visita.', 'success');
+}
+async function ckCancelBook(id){
+  const c = checkups.find(x => x.id === id); if(!c || !c.prenotazione) return;
+  const medId = c.prenotazione.medId, med = medId ? medical.find(m => m.id === medId) : null;
+  if(med && med.bozza) medical = medical.filter(m => m.id !== medId);
+  checkups = checkups.map(x => x.id === id ? {...x, prenotazione: null} : x);
+  await saveMedical(); await saveCheckups(); ckClose(); renderAll();
+  showNotice('Prenotazione annullata.' + (med && med.bozza ? ' La bozza in Sanità è stata rimossa.' : ''), 'success');
+}
+// ----- Eseguita
+function ckDoneAsk(id){
+  const c = checkups.find(x => x.id === id); if(!c || !c.prenotazione) return;
+  ckCtx = {t: 'done', id};
+  const next = +c.cadenza > 0 ? 'Il prossimo controllo sarà programmato ' + ckCadLabel(c).toLowerCase().replace('ogni ', 'dopo ') + ' da questa data.' : 'È una visita singola: verrà segnata come completata.';
+  ckShow(`${ckHead('Visita eseguita', escHtml(c.tipo) + ' · ' + escHtml(c.persona))}<div class="md-body"><div class="ck-form">${ckFld('Data in cui è stata fatta', `<input class="ck-in" id="ck-ddata" type="date" value="${escHtml(c.prenotazione.data)}">`)}</div><p class="ck-mut" style="margin-top:10px">${escHtml(next)} La riga in Sanità resta «Da completare» finché non inserisci importo e fattura.</p></div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small primary" data-ck="doneyes" data-id="${c.id}">Conferma</button></div>`);
+}
+async function ckDoneSave(id){
+  const c = checkups.find(x => x.id === id); if(!c || !c.prenotazione) return;
+  const d = $ck('ddata').value; if(!d || normDate(d) !== d){ showFormError('Inserisci la data della visita.'); return; }
+  const p = c.prenotazione;
+  if(p.medId) medical = medical.map(m => m.id === p.medId && m.bozza ? {...m, dataDocumento: d} : m);
+  checkups = checkups.map(x => x.id !== id ? x : {...x, ultima: d, scad: '', prenotazione: null, attivo: +x.cadenza > 0, storico: (x.storico || []).concat([{data: d, medId: p.medId || '', struttura: p.struttura || ''}])});
+  await saveMedical(); await saveCheckups(); ckClose(); renderAll();
+  const n = checkups.find(x => x.id === id), nx = ckDue(n);
+  showNotice(+c.cadenza > 0 && nx ? 'Fatto. Prossimo controllo: ' + ckFmt(nx) + '. Completa la spesa in Sanità integrativa.' : 'Visita completata. Completa la spesa in Sanità integrativa.', 'success');
+}
+// ----- .ics
+function ckIcs(ev){
+  const esc = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  const d8 = (iso) => iso.replace(/-/g, '');
+  const st = new Date(); const stamp = st.getUTCFullYear() + ck2(st.getUTCMonth() + 1) + ck2(st.getUTCDate()) + 'T' + ck2(st.getUTCHours()) + ck2(st.getUTCMinutes()) + ck2(st.getUTCSeconds()) + 'Z';
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Casa e Famiglia//Check-up//IT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT', 'UID:' + ev.uid + '@casa-e-famiglia', 'DTSTAMP:' + stamp];
+  if(ev.ora){
+    const p = ev.data.split('-').map(Number), h = ev.ora.split(':').map(Number), a = new Date(p[0], p[1] - 1, p[2], h[0], h[1]), b = new Date(a.getTime() + 3600000);
+    const f = (x) => x.getFullYear() + ck2(x.getMonth() + 1) + ck2(x.getDate()) + 'T' + ck2(x.getHours()) + ck2(x.getMinutes()) + '00';
+    L.push('DTSTART:' + f(a), 'DTEND:' + f(b));
+  } else {
+    const p = ev.data.split('-').map(Number), nx = new Date(p[0], p[1] - 1, p[2] + 1);
+    L.push('DTSTART;VALUE=DATE:' + d8(ev.data), 'DTEND;VALUE=DATE:' + d8(ckIso(nx)));
+  }
+  L.push('SUMMARY:' + esc(ev.titolo));
+  if(ev.loc) L.push('LOCATION:' + esc(ev.loc));
+  if(ev.desc) L.push('DESCRIPTION:' + esc(ev.desc));
+  L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(ev.titolo), 'TRIGGER:' + (ev.trigger || '-P1D'), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR');
+  return L.join('\r\n') + '\r\n';
+}
+function ckSaveFile(name, txt){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], {type: 'text/calendar;charset=utf-8'})); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function ckDownloadIcs(c, rem){
+  if(!c || !c.prenotazione) return; const p = c.prenotazione, sp = ckSp(p.specialistaId || c.specialistaId), sede = ckSede(sp, p.sedeId || c.sedeId);
+  const txt = ckIcs({uid: 'ck-' + c.id + '-' + p.data, titolo: c.tipo + ' · ' + c.persona, data: p.data, ora: p.ora, loc: [p.struttura, sede && sede.indirizzo].filter(Boolean).join(', '), desc: [sp ? sp.nome : '', sede && sede.tel ? 'Tel. ' + sede.tel : '', p.impegnativa ? 'Impegnativa: ' + p.impegnativa : 'Ricorda l\'impegnativa del medico'].filter(Boolean).join('\n'), trigger: rem || '-P1D'});
+  ckSaveFile('visita-' + p.data + '.ics', txt);
+}
+function ckDownloadDue(c){
+  const due = ckDue(c); if(!due) return;
+  ckSaveFile('scadenza-' + due + '.ics', ckIcs({uid: 'ckdue-' + c.id + '-' + due, titolo: 'Prenotare: ' + c.tipo + ' · ' + c.persona, data: due, desc: 'Scadenza del controllo ' + c.tipo + ' per ' + c.persona + '.', trigger: '-P7D'}));
+}
+
+// ----- Specialisti
+function ckSpForm(id){
+  const s = id ? ckSp(id) : null;
+  ckSpDraft = s ? JSON.parse(JSON.stringify(s)) : {id: '', nome: '', specialita: '', note: '', sedi: [{id: uid(), struttura: '', indirizzo: '', tel: '', email: '', sito: '', note: ''}], sedeDefault: ''};
+  if(!ckSpDraft.sedeDefault && ckSpDraft.sedi[0]) ckSpDraft.sedeDefault = ckSpDraft.sedi[0].id;
+  ckCtx = {t: 'sp', id}; ckSpDraw();
+}
+function ckSpRead(){
+  if(!ckSpDraft || !$ck('spn')) return;
+  ckSpDraft.nome = $ck('spn').value; ckSpDraft.specialita = $ck('sps').value; ckSpDraft.note = $ck('spnote').value;
+  ckBox.querySelectorAll('.ck-sedef').forEach((el, i) => { const x = ckSpDraft.sedi[i]; if(!x) return; el.querySelectorAll('[data-f]').forEach(inp => { x[inp.dataset.f] = inp.value; }); });
+  const r = ckBox.querySelector('input[name="ck-sdef"]:checked'); if(r && ckSpDraft.sedi[+r.value]) ckSpDraft.sedeDefault = ckSpDraft.sedi[+r.value].id;
+}
+function ckSpDraw(){
+  const d = ckSpDraft;
+  const sedi = d.sedi.map((x, i) => `<div class="ck-sedef"><div class="ck-sedef-h"><b>Sede ${i + 1}</b><label class="ck-rad"><input type="radio" name="ck-sdef" value="${i}"${x.id === d.sedeDefault ? ' checked' : ''}> predefinita</label>${d.sedi.length > 1 ? `<button type="button" class="btn small ghost danger" data-ck="rmsede" data-i="${i}">Rimuovi</button>` : ''}</div>
+    <div class="ck-form">${ckFld('Struttura', `<input class="ck-in" data-f="struttura" value="${escHtml(x.struttura)}" placeholder="es. Casa di Cura Toniolo">`, 'ck-span')}${ckFld('Indirizzo', `<input class="ck-in" data-f="indirizzo" value="${escHtml(x.indirizzo)}">`, 'ck-span')}
+    ${ckFld('Telefono', `<input class="ck-in" data-f="tel" value="${escHtml(x.tel)}">`)}${ckFld('Email', `<input class="ck-in" data-f="email" type="email" value="${escHtml(x.email)}">`)}${ckFld('Sito / prenotazione online', `<input class="ck-in" data-f="sito" value="${escHtml(x.sito)}" placeholder="https://…">`, 'ck-span')}${ckFld('Note (es. si prenota il martedì)', `<input class="ck-in" data-f="note" value="${escHtml(x.note)}">`, 'ck-span')}</div></div>`).join('');
+  ckShow(`${ckHead(ckCtx.id ? 'Modifica specialista' : 'Nuovo specialista')}<div class="md-body"><div class="ck-form">${ckFld('Nome', `<input class="ck-in" id="ck-spn" value="${escHtml(d.nome)}" placeholder="es. Dott. Ricci">`)}${ckFld('Specialità', `<input class="ck-in" id="ck-sps" value="${escHtml(d.specialita)}" placeholder="es. Cardiologo">`)}</div>
+    <h4 class="md-h">Sedi dove riceve</h4>${sedi}<button type="button" class="btn small ghost" data-ck="addsede">+ Aggiungi un'altra sede</button>
+    <div class="ck-form" style="margin-top:12px">${ckFld('Note sullo specialista', `<textarea class="ck-in" id="ck-spnote" rows="2">${escHtml(d.note)}</textarea>`, 'ck-span')}</div></div>
+    <div class="md-foot">${ckCtx.id ? `<button type="button" class="btn small ghost danger" data-ck="delsp" data-id="${ckCtx.id}" style="margin-right:auto">${ckCtx.del ? 'Confermi l\'eliminazione?' : 'Elimina'}</button>` : ''}<button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small primary" data-ck="savesp">Salva</button></div>`);
+}
+async function ckSpSave(){
+  ckSpRead(); const d = ckSpDraft;
+  if(!d.nome.trim()){ showFormError('Inserisci il nome dello specialista.'); return; }
+  const sedi = d.sedi.filter(x => x.struttura.trim() || x.indirizzo.trim() || x.tel.trim() || x.email.trim() || x.sito.trim());
+  for(const x of sedi){ if(x.sito.trim() && !ckSafeUrl(x.sito)){ showFormError('Il sito deve iniziare con http:// o https://'); return; } }
+  const out = {id: ckCtx.id || uid(), nome: d.nome.trim(), specialita: d.specialita.trim(), note: d.note.trim(), sedi: sedi.map(x => ({...x, struttura: x.struttura.trim(), tel: x.tel.trim(), email: x.email.trim(), sito: x.sito.trim()})), sedeDefault: ''};
+  out.sedeDefault = (sedi.find(x => x.id === d.sedeDefault) || sedi[0] || {}).id || '';
+  if(ckCtx.id) specialists = specialists.map(s => s.id === ckCtx.id ? out : s); else specialists.push(out);
+  await saveSpecialists(); ckClose(); renderAll();
+}
+
+// ----- Eventi
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-ck]'); if(!b) return;
+  const a = b.dataset.ck, id = b.dataset.id;
+  if(a === 'close') return ckClose();
+  if(a === 'prev' || a === 'next'){ const k = a === 'next' ? 1 : -1; if(ckMode === 'anno') ckY += k; else { ckM += k; if(ckM < 0){ ckM = 11; ckY--; } if(ckM > 11){ ckM = 0; ckY++; } } return renderCheckup(); }
+  if(a === 'today'){ ckY = new Date().getFullYear(); ckM = new Date().getMonth(); return renderCheckup(); }
+  if(a === 'mode'){ ckMode = b.dataset.v; return renderCheckup(); }
+  if(a === 'gomonth'){ ckMode = 'mese'; ckM = +b.dataset.m; return renderCheckup(); }
+  if(a === 'view'){ ckView = b.dataset.v; return renderCheckup(); }
+  if(a === 'open') return ckDetail(id);
+  if(a === 'newck') return ckForm('');
+  if(a === 'editck') return ckForm(id);
+  if(a === 'savechk') return ckSaveForm(id, false);
+  if(a === 'savechkbook') return ckSaveForm(id, true);
+  if(a === 'book' || a === 'ebook') return ckBook(id);
+  if(a === 'savebook') return ckSaveBook(id);
+  if(a === 'cancelbook') return ckCancelBook(id);
+  if(a === 'done') return ckDoneAsk(id);
+  if(a === 'doneyes') return ckDoneSave(id);
+  if(a === 'ics'){ const c = checkups.find(x => x.id === id); return ckDownloadIcs(c, '-P1D'); }
+  if(a === 'icsdue'){ const c = checkups.find(x => x.id === id); return ckDownloadDue(c); }
+  if(a === 'delck'){ ckCtx = {t: 'detail', id, del: true}; return ckDetail(id); }
+  if(a === 'delno'){ ckCtx = {t: 'detail', id, del: false}; return ckDetail(id); }
+  if(a === 'delyes'){ const c = checkups.find(x => x.id === id); if(c && c.prenotazione && c.prenotazione.medId){ const mid = c.prenotazione.medId; const mm = medical.find(m => m.id === mid); if(mm && mm.bozza){ medical = medical.filter(m => m.id !== mid); await saveMedical(); } } checkups = checkups.filter(x => x.id !== id); await saveCheckups(); ckClose(); return renderAll(); }
+  if(a === 'medcomplete'){ ckClose(); jumpToTab('medical'); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); return; }
+  if(a === 'showbozze'){ const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); return; }
+  if(a === 'newsp') return ckSpForm('');
+  if(a === 'editsp') return ckSpForm(id);
+  if(a === 'addsede'){ ckSpRead(); ckSpDraft.sedi.push({id: uid(), struttura: '', indirizzo: '', tel: '', email: '', sito: '', note: ''}); return ckSpDraw(); }
+  if(a === 'rmsede'){ ckSpRead(); const i = +b.dataset.i, x = ckSpDraft.sedi[i]; ckSpDraft.sedi.splice(i, 1); if(x && x.id === ckSpDraft.sedeDefault) ckSpDraft.sedeDefault = ckSpDraft.sedi[0].id; return ckSpDraw(); }
+  if(a === 'savesp') return ckSpSave();
+  if(a === 'delsp'){
+    if(!ckCtx.del){ ckSpRead(); ckCtx.del = true; return ckSpDraw(); }
+    const sid = ckCtx.id; specialists = specialists.filter(s => s.id !== sid); checkups = checkups.map(c => c.specialistaId === sid ? {...c, specialistaId: '', sedeId: ''} : c);
+    await saveSpecialists(); await saveCheckups(); ckClose(); return renderAll();
+  }
+  if(a === 'spbook'){ const s = ckSp(id); return ckForm('', {specialistaId: id, sedeId: s && s.sedeDefault, tipo: s && s.specialita ? 'Visita ' + s.specialita.toLowerCase() : '', scad: ckToday()}); }
+});
+document.addEventListener('change', (e) => {
+  const t = e.target;
+  if(t.id === 'ck-cad'){ $ck('cadx').style.display = t.value === 'x' ? '' : 'none'; }
+  else if(t.id === 'ck-sp'){ $ck('sede').innerHTML = ckSedeOpts(t.value, ''); }
+  else if(t.id === 'ck-bsp' || t.id === 'ck-bsede'){
+    const spId = $ck('bsp').value, sedeId = t.id === 'ck-bsp' ? '' : $ck('bsede').value, sede = ckSede(ckSp(spId), sedeId);
+    const imp = $ck('imp').value, data = $ck('data').value, ora = $ck('ora').value;
+    $ck('spbox').innerHTML = ckSpBox(spId, sede && sede.id); $ck('strut').value = sede ? sede.struttura || '' : $ck('strut').value; $ck('imp').value = imp; $ck('data').value = data; $ck('ora').value = ora;
+  }
+});
+document.addEventListener('input', (e) => { if(e.target.id === 'ck-search'){ ckSearch = e.target.value; const pos = e.target.selectionStart; renderCheckupSearch(pos); } });
+function renderCheckupSearch(pos){
+  const root = document.getElementById('ck-root'); if(!root || ckView !== 'spec') return;
+  root.innerHTML = ckSpecHtml(); const i = document.getElementById('ck-search'); if(i){ i.focus(); try{ i.setSelectionRange(pos, pos); }catch(e){} }
+}
+document.querySelector('.tab-btn[data-tab="checkup"]').addEventListener('click', () => { ckView = 'cal'; renderCheckup(); });
+
+// ---------- Avvisi in Panoramica ----------
+function ckUrgent(items){
+  const t = ckToday();
+  checkups.forEach(c => {
+    const s = ckState(c); if(!s.k || !s.data) return;
+    if(s.k === 'scaduto' || s.k === 'prenotare') items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — da prenotare`, giorni: s.g, tab: 'checkup'});
+    else if(s.k === 'conferma') items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — conferma la visita`, giorni: s.g, tab: 'checkup'});
+    else if(s.k === 'prenotata' && s.g <= 14) items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — visita${c.prenotazione.impegnativa ? '' : ' (manca impegnativa)'}`, giorni: s.g, tab: 'checkup'});
+  });
+  medical.forEach(m => { if(m.bozza && m.dataDocumento && m.dataDocumento <= t && !checkups.some(c => c.prenotazione && c.prenotazione.medId === m.id)) items.push({icona: ICONA_MEDICAL, label: `${m.descrizione} · ${m.richiedente} — completa la spesa`, giorni: ckGiorni(m.dataDocumento), tab: 'medical'}); });
 }
 
 // Tabs
@@ -3566,6 +4151,7 @@ document.getElementById('mf-save').addEventListener('click', async (e) => {
     bloccata: vuoleBloccare,
     documenti: formDocumenti
   };
+  { const _p = editingMedicalId ? medical.find(x => x.id === editingMedicalId) : null; if(_p && _p.checkupId){ entry.checkupId = _p.checkupId; if(_p.struttura) entry.struttura = _p.struttura; } }
   if(editingMedicalId){
     medical = medical.map(m => m.id===editingMedicalId ? entry : m);
   } else {
@@ -4011,6 +4597,7 @@ document.getElementById('backup-import-btn').addEventListener('click', async () 
   }
   settings.configurato = true;
   medical = fixMedDates(parsed.medical.map(m => migrateMedicalRecord(m, settings.pagatori)));
+  ckRestore(parsed);
   await saveSettings(); applySettings();
   await saveRecurring();
   await saveMedical();
@@ -4018,6 +4605,7 @@ document.getElementById('backup-import-btn').addEventListener('click', async () 
   await saveContratti();
   await saveDocumenti();
   await saveDetrazioni();
+  if(parsed.checkup){ await saveCheckups(); await saveSpecialists(); }
   renderAll();
   showNotice(`Backup importato: ${recurring.length} pagamenti, ${medical.length} voci di sanità integrativa, ${bilancio.length} bilanci, ${contratti.length} contratti, ${documenti.length} documenti, ${detrazioni.length} detrazioni.`, 'success');
   feedback.textContent = 'Importazione completata.';
@@ -4487,7 +5075,7 @@ function applyTabVisibility(){
   const tabButtons = document.querySelectorAll('.tab-btn');
   tabButtons.forEach(btn => {
     const tab = btn.dataset.tab;
-    const consentita = tab === 'panoramica' || tab === 'impostazioni' || !visibleTabs || visibleTabs.includes(tab) || (tab === 'report' && (visibleTabs.includes('medical') || visibleTabs.includes('bilancio')));
+    const consentita = tab === 'panoramica' || tab === 'impostazioni' || !visibleTabs || visibleTabs.includes(tab) || (tab === 'checkup' && visibleTabs.includes('medical')) || (tab === 'report' && (visibleTabs.includes('medical') || visibleTabs.includes('bilancio')));
     btn.style.display = consentita ? '' : 'none';
   });
   const attivo = document.querySelector('.tab-btn.active');
@@ -4663,7 +5251,7 @@ try{ payEmailRefresh(); }catch(e){}
 
 // ---- Scheda Report: grafici sui dati (spese mediche, bilancio) ----
 function rpPayers(){ return settings.pagatori.map(p => ({id:p.id, nome:p.nome})); }
-function rpMedRows(){ return medical.map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:normDate(m.dataDocumento), who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', mod:m.modalita || '', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo}; }); }
+function rpMedRows(){ return medical.filter(m => !m.bozza).map(m => { const n = medicalRowNumbers(m); return {id:m.id, date:normDate(m.dataDocumento), who:(m.richiedente || '').trim() || '—', prest:(m.descrizione || '').trim() || '—', mod:m.modalita || '', tot:n.totale, pay:n.pagati, rb:n.totPagato, res:n.residuo}; }); }
 function rpBilRows(){ return bilancio.map(b => ({id:b.id, anno:String(b.anno), conto:(b.conto || '').trim() || '—', e:Number(b.entrate) || 0, u:Number(b.uscite) || 0})); }
 const RP_MES = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const RP_COL = ['#2F5BEA','#1C8A5A','#B96A00','#7A4FD6','#0F8B8D','#C2410C','#6B7B8C'];
@@ -4927,7 +5515,7 @@ const dtEl = (id) => document.getElementById(id);
 function dtLevels(m){
   return settings.pagatori.filter(p => payerApplies(m, p)).map(p => { const r = rimborsoDi(m, p.id); return {id:p.id, nome:pnome(m, p), a:r.inviata, c:r.chiusa, pill:payerPill0(m, p)}; });
 }
-function payerPill(m, p){ if(!payerApplies(m, p)) return '<span class="doc-ref">—</span>'; const r = rimborsoDi(m, p.id); return dtWrap({a:r.inviata, c:r.chiusa}, payerPill0(m, p)) + pnomeTag(m, p); }
+function payerPill(m, p){ if(m.bozza) return '<span class="doc-ref">—</span>'; if(!payerApplies(m, p)) return '<span class="doc-ref">—</span>'; const r = rimborsoDi(m, p.id); return dtWrap({a:r.inviata, c:r.chiusa}, payerPill0(m, p)) + pnomeTag(m, p); }
 function dtValidateForm(){
   for(const p of settings.pagatori){
     const a = dtEl('mf-rb-inv-' + p.id), c = dtEl('mf-rb-chi-' + p.id);
@@ -4989,7 +5577,7 @@ function dtTimeline(m){
 // campioni per il Report: giorni tra invio e chiusura
 function dtSamples(){
   const out = [];
-  medical.forEach(m => dtLevels(m).forEach(lv => {
+  medical.filter(m => !m.bozza).forEach(m => dtLevels(m).forEach(lv => {
     if(!lv.pill) return;
     const cl = dtClassOf(lv.pill), g = dtDays(lv.a, lv.c);
     if((cl === 'ok' || cl === 'no') && g != null && g >= 0) out.push({id:m.id, pn:lv.nome, g, es:cl});
