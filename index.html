@@ -1564,7 +1564,7 @@ function defaultPagatori(){ return [{id:'p1', nome:'Assicurazione'}]; }
 function defaultSettings(){
   const moduli = {}; MODULI_IDS.forEach(id => { moduli[id] = {on:true, nome:MODULI_DEFAULT_NOMI[id]}; });
   const elenchi = {}; Object.keys(ELENCHI_DEF).forEach(k => { elenchi[k] = ELENCHI_DEF[k].default.slice(); });
-  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', app:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}, ultimoBackup:'', backupDa:''};
+  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', app:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}, ultimoBackup:'', backupDa:'', nomiCompleti:{}};
 }
 function normalizeSettings(raw){
   const d = defaultSettings();
@@ -1623,6 +1623,9 @@ function normalizeSettings(raw){
   if(raw.report && Array.isArray(raw.report.charts)){
     d.report.charts = raw.report.charts.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && ['med', 'bil'].includes(x.src) && ['bar', 'hbar', 'line', 'pie'].includes(x.type) && ['tot', 'rimb', 'resid', 'n', 'multi', 'giorni', 'e', 'u', 'r'].includes(x.meas) && ['mese', 'anno', 'persona', 'prestazione', 'pagatore', 'conto'].includes(x.grp))
       .slice(0, 40).map(x => ({id:x.id.slice(0, 30), t:String(x.t || '').slice(0, 60), src:x.src, meas:x.meas, grp:x.grp, stk:x.stk === 'persona' ? 'persona' : '', mod:x.mod === 'Diretta' || x.mod === 'Indiretta' ? x.mod : '', es:x.es === 'ok' || x.es === 'no' ? x.es : '', type:x.type, wide:x.wide === true}));
+  }
+  if(raw.nomiCompleti && typeof raw.nomiCompleti === 'object' && !Array.isArray(raw.nomiCompleti)){
+    Object.keys(raw.nomiCompleti).slice(0, 60).forEach(k => { const v = String(raw.nomiCompleti[k] || '').trim().slice(0, 60); if(v && k.length <= 60) d.nomiCompleti[k] = v; });
   }
   Object.keys(ELENCHI_DEF).forEach(k => {
     const v = raw.elenchi && raw.elenchi[k];
@@ -3050,6 +3053,27 @@ function profiloCardHtml(){
     <div style="margin-top:14px;"><button type="button" class="btn" id="prof-save">Salva profilo</button></div>
   </div>`;
 }
+function ncPersone(){
+  const s = new Set((settings.elenchi.persone || []).filter(Boolean));
+  try{ checkups.forEach(c => c.persona && s.add(c.persona)); }catch(e){}
+  medical.forEach(m => m.richiedente && s.add(m.richiedente));
+  return [...s].sort((a, b) => a.localeCompare(b));
+}
+function nomiCompletiHtml(){
+  const l = ncPersone();
+  return `<div class="set-card">
+      <h3>Nomi completi</h3>
+      <p class="hint">Il nome per esteso di ogni persona, usato nei messaggi (per esempio la richiesta di impegnativa su WhatsApp). Le etichette brevi nell'app non cambiano. Per la firma dei messaggi si usa il nome del Profilo.</p>
+      ${l.length ? l.map(p => `<div class="set-row"><span style="min-width:90px;font-weight:600">${escHtml(p)}</span><input type="text" data-nc="${escHtml(p)}" value="${escHtml((settings.nomiCompleti || {})[p] || '')}" placeholder="es. ${escHtml(p)} Cognome" maxlength="60"></div>`).join('') : '<p class="doc-ref" style="margin:0">Nessuna persona ancora inserita.</p>'}
+    </div>`;
+}
+document.addEventListener('change', async (e) => {
+  const t = e.target; if(!t.dataset || t.dataset.nc === undefined) return;
+  if(!settings.nomiCompleti) settings.nomiCompleti = {};
+  const v = t.value.trim().slice(0, 60);
+  if(v) settings.nomiCompleti[t.dataset.nc] = v; else delete settings.nomiCompleti[t.dataset.nc];
+  await saveSettings(); showNotice('Nome completo salvato.', 'success');
+});
 function renderImpostazioni(){
   const el = document.getElementById('panel-impostazioni');
   accStash();
@@ -3117,6 +3141,7 @@ function renderImpostazioni(){
       </div>`).join('') : '<p class="doc-ref" style="margin:0 0 8px;">Nessun massimale impostato.</p>'}
       <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
+    ${nomiCompletiHtml()}
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -3324,6 +3349,17 @@ function ckFmtLong(iso, ora){ if(!iso) return '—'; const p = iso.split('-').ma
 function ckSafeUrl(u){ u = String(u || '').trim(); return /^https?:\/\//i.test(u) ? u : ''; }
 function ckTel(n){ return String(n || '').replace(/[^\d+]/g, ''); }
 function ckWa(n){ let d = ckTel(n).replace(/^\+/, ''); if(/^3\d{8,9}$/.test(d)) d = '39' + d; else if(/^0039/.test(d)) d = d.slice(2); return d.length >= 8 ? 'https://wa.me/' + d : ''; }
+function ckMedBase(){
+  const ok = (x) => x && ckWa(x.cellulare);
+  return specialists.find(x => x.prescrive === true && ok(x)) || specialists.find(x => /medico di base|medico di famiglia/i.test(x.specialita || '') && ok(x)) || null;
+}
+function ckFull(n){ return (typeof settings !== 'undefined' && settings.nomiCompleti && settings.nomiCompleti[n]) || n; }
+function ckImpMsg(c, mb){
+  const sp = ckSp(c.specialistaId), p = c.prenotazione || {}, str = p.struttura || c.struttura || (ckSede(sp, c.sedeId) || {}).struttura || '';
+  const da = (typeof settings !== 'undefined' && settings.profilo && settings.profilo.nome) || '';
+  return 'Buongiorno ' + mb.nome + ',\navrei bisogno dell\'impegnativa per ' + ckFull(c.persona) + ': ' + c.tipo + (sp ? ' (' + sp.nome + (str ? ', ' + str : '') + ')' : (str ? ' presso ' + str : '')) + (p.data ? ', visita prevista il ' + ckFmt(p.data) : '') + '.\nGrazie mille' + (da ? ',\n' + da : '') + '.';
+}
+function ckImpBtn(c, cls){ const mb = ckMedBase(); return mb ? `<button type="button" class="btn small ${cls || 'ghost'}" data-ck="impreq" data-id="${c.id}">💬 Richiedi impegnativa</button>` : ''; }
 function ckCell(sp, cls){ if(!sp || !sp.cellulare) return ''; const w = ckWa(sp.cellulare); return `<span class="${cls || ''}">📱 <a href="tel:${escHtml(ckTel(sp.cellulare))}">${escHtml(sp.cellulare)}</a>${w ? ` · <a href="${escHtml(w)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</span>`; }
 function ckStrutture(){ const set = new Map(); ckSediNote().forEach(x => set.set(x.struttura.trim().toLowerCase(), x.struttura.trim())); checkups.forEach(c => { if(c.struttura && !set.has(c.struttura.trim().toLowerCase())) set.set(c.struttura.trim().toLowerCase(), c.struttura.trim()); }); return [...set.values()].sort((a, b) => a.localeCompare(b)); }
 function ckStrInfo(name){ name = String(name || '').trim(); if(!name) return null; return ckSediNote().find(x => x.struttura.trim().toLowerCase() === name.toLowerCase()) || {struttura: name}; }
@@ -3410,7 +3446,7 @@ function ckTodoHtml(){
     let sub = '', acts = '';
     if(s.k === 'scaduto' || s.k === 'prenotare'){
       sub = (s.k === 'scaduto' ? 'Scaduto il ' : 'Entro il ') + ckFmt(s.data) + (c.ultima ? ' · ultima il ' + ckFmt(c.ultima) : '');
-      acts = `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>`;
+      acts = `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>` + ckImpBtn(c);
       if(sede && sede.tel) acts += `<a class="btn small ghost" href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">Chiama ${escHtml(sp ? sp.nome : sede.struttura)}</a>`;
     } else if(s.k === 'conferma'){
       sub = 'Visita del ' + ckFmtLong(s.data, c.prenotazione.ora) + ': è stata eseguita?';
@@ -3526,7 +3562,7 @@ function renderCheckup(){
   const ae = document.activeElement;
   if(!(ckView === 'spec' && ae && ae.id === 'ck-search')){
     root.innerHTML = ckView === 'spec' ? ckSpecHtml() : `<div class="ck-head"><div><h2 class="ck-h2">${escHtml((settings.moduli.checkup && settings.moduli.checkup.nome) || 'Check-up e visite')}</h2><p class="ck-mut">Controlli ricorrenti e visite specialistiche della famiglia, con promemoria e prenotazione.</p></div>
-      <div class="ck-head-a"><button type="button" class="btn ghost" data-ck="list">Elenco (${checkups.length})</button><button type="button" class="btn" data-ck="view" data-v="spec">Specialisti</button><button type="button" class="btn primary" data-ck="newck">+ Nuovo controllo</button></div></div>${ckTodoHtml()}${ckCalHtml()}`;
+      <div class="ck-head-a"><button type="button" class="btn ghost" data-ck="list">Elenco (${checkups.length})</button><button type="button" class="btn ghost" data-ck="impmed">Importa da Sanità</button><button type="button" class="btn" data-ck="view" data-v="spec">Specialisti</button><button type="button" class="btn primary" data-ck="newck">+ Nuovo controllo</button></div></div>${ckTodoHtml()}${ckCalHtml()}`;
   }
   // contatore nel menu e bozze in Sanità
   const btn = document.querySelector('.tab-btn[data-tab="checkup"]');
@@ -3551,19 +3587,34 @@ const ckHead = (t, s) => `<div class="md-head"><div><h3>${t}</h3>${s ? `<div cla
 const ckFld = (l, inner, cls) => `<div class="ck-fld ${cls || ''}"><label>${l}</label>${inner}</div>`;
 
 // ----- Scheda controllo
+function ckRefMeds(c){
+  const seen = new Set(), out = [];
+  const add = (mid, data, struttura, manual) => { const m = mid && medical.find(x => x.id === mid); if(!m || seen.has(mid)) return; seen.add(mid); out.push({m, data: data || m.dataDocumento || '', struttura: struttura || m.struttura || '', manual}); };
+  (c.storico || []).forEach(h => add(h.medId, h.data, h.struttura, false));
+  (c.refMedIds || []).forEach(mid => add(mid, '', '', true));
+  return out;
+}
+const ckIsRef = (d) => d && ckSafeUrl(d.url) && /^referto/i.test(String(d.nome || '').trim());
 function ckRefs(c){
   const out = [];
-  (c.storico || []).forEach(h => { const m = h.medId && medical.find(x => x.id === h.medId); if(!m) return;
-    (m.documenti || []).forEach(d => { const u = d && ckSafeUrl(d.url); if(u && /^referto/i.test(String(d.nome || '').trim())) out.push({data: h.data, struttura: h.struttura || m.struttura || '', nome: d.nome, url: u}); }); });
+  ckRefMeds(c).forEach(r => (r.m.documenti || []).forEach(d => { if(ckIsRef(d)) out.push({data: r.data, struttura: r.struttura, nome: d.nome, url: ckSafeUrl(d.url), manual: r.manual, mid: r.m.id}); }));
   return out.sort((a, b) => String(b.data).localeCompare(String(a.data)));
+}
+function ckRefCand(c){
+  const have = new Set(ckRefMeds(c).map(r => r.m.id));
+  return medical.filter(m => !m.bozza && !have.has(m.id) && m.richiedente === c.persona && (m.documenti || []).some(ckIsRef))
+    .sort((a, b) => String(b.dataDocumento).localeCompare(String(a.dataDocumento)));
 }
 function ckRefShow(id){
   const c = checkups.find(x => x.id === id); if(!c) return ckClose();
   ckCtx = {t: 'refs', id};
-  const r = ckRefs(c);
+  const r = ckRefs(c), cand = ckRefCand(c);
   ckShow(`${ckHead('Referti · ' + c.tipo, c.persona + ' · ' + r.length + (r.length === 1 ? ' referto' : ' referti'))}<div class="md-body">
-    ${r.length ? `<ul class="ck-hist">${r.map(x => `<li>${ckFmt(x.data)}${x.struttura ? ' · ' + escHtml(x.struttura) : ''} · <a href="${escHtml(x.url)}" target="_blank" rel="noopener">📄 ${escHtml(x.nome)} ↗</a></li>`).join('')}</ul>
-    <p class="ck-mut" style="margin:10px 0 0">Raccolgo i documenti chiamati «Referto…» nelle spese collegate in Sanità. I file restano dove li hai salvati (es. Google Drive).</p>` : '<div class="ck-empty">Nessun referto trovato. Nella spesa collegata in Sanità aggiungi un documento il cui nome inizia per «Referto».</div>'}</div>
+    ${r.length ? `<ul class="ck-hist">${r.map(x => `<li>${ckFmt(x.data)}${x.struttura ? ' · ' + escHtml(x.struttura) : ''} · <a href="${escHtml(x.url)}" target="_blank" rel="noopener">📄 ${escHtml(x.nome)} ↗</a>${x.manual ? ` <button type="button" class="btn small ghost" data-ck="refunlink" data-id="${c.id}" data-mid="${x.mid}" title="Scollega questa spesa">✕</button>` : ''}</li>`).join('')}</ul>` : '<div class="ck-empty">Nessun referto collegato a questo controllo.</div>'}
+    <h4 class="md-h">Collega una spesa di Sanità</h4>
+    ${cand.length ? `<p class="ck-mut" style="margin:0 0 8px">Spese di ${escHtml(c.persona)} con un documento «Referto…» non ancora collegate a questo controllo.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><select class="ck-in" id="ck-refsel" style="flex:1;min-width:220px">${cand.map(m => `<option value="${m.id}">${ckFmt(m.dataDocumento)} · ${escHtml(m.descrizione || '')}</option>`).join('')}</select><button type="button" class="btn small primary" data-ck="reflink" data-id="${c.id}">Collega</button></div>`
+    : `<p class="ck-mut" style="margin:0">Nessuna spesa di ${escHtml(c.persona)} da collegare. In Sanità aggiungi alla spesa un documento il cui nome inizia per «Referto».</p>`}</div>
     <div class="md-foot"><button type="button" class="btn small ghost" data-ck="open" data-id="${c.id}">← Torna al controllo</button>${r.length ? `<button type="button" class="btn small ghost" data-ck="refcopy" data-id="${c.id}">Copia i link</button><button type="button" class="btn small ghost" data-ck="reftxt" data-id="${c.id}">Scarica elenco</button><button type="button" class="btn small primary" data-ck="refopen" data-id="${c.id}">Apri tutti</button>` : ''}</div>`);
 }
 function ckRefText(c){ return c.tipo + ' · ' + c.persona + '\n' + ckRefs(c).map(x => ckFmt(x.data) + (x.struttura ? ' · ' + x.struttura : '') + '\n' + x.url).join('\n\n') + '\n'; }
@@ -3583,7 +3634,7 @@ function ckDetail(id){
     acts = '';
     if(s.k === 'prenotata') acts += `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Modifica prenotazione</button><button type="button" class="btn small ghost" data-ck="gcal" data-id="${c.id}">Google Calendar</button><button type="button" class="btn small ghost" data-ck="ics" data-id="${c.id}">File .ics</button>`;
     else if(s.k === 'conferma') acts += `<button type="button" class="btn small" data-ck="done" data-id="${c.id}">Eseguita</button><button type="button" class="btn small ghost" data-ck="ebook" data-id="${c.id}">Cambia data</button>`;
-    else if(s.k !== 'chiuso') acts += `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>` + (due ? `<button type="button" class="btn small ghost" data-ck="gcaldue" data-id="${c.id}">Promemoria su Google Calendar</button><button type="button" class="btn small ghost" data-ck="icsdue" data-id="${c.id}">Scadenza .ics</button>` : '');
+    else if(s.k !== 'chiuso') acts += ckImpBtn(c) + `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>` + (due ? `<button type="button" class="btn small ghost" data-ck="gcaldue" data-id="${c.id}">Promemoria su Google Calendar</button><button type="button" class="btn small ghost" data-ck="icsdue" data-id="${c.id}">Scadenza .ics</button>` : '');
     if(med && med.bozza) acts += `<button type="button" class="btn small ghost" data-ck="medcomplete" data-id="${med.id}">Completa la spesa</button>`;
     acts += `<button type="button" class="btn small ghost" data-ck="editck" data-id="${c.id}">Modifica</button><button type="button" class="btn small ghost danger" data-ck="delck" data-id="${c.id}">Elimina</button>`;
   }
@@ -3592,7 +3643,7 @@ function ckDetail(id){
     ${(sp || sede) ? `<h4 class="md-h">${sp ? 'Specialista' : 'Struttura'}</h4><div class="md-top">${sp ? kv('Nome', escHtml(sp.nome) + (sp.specialita ? ' · ' + escHtml(sp.specialita) : '')) : ''}${kv('Struttura', sede ? escHtml(sede.struttura || '') : '')}${kv('Indirizzo', sede ? escHtml(sede.indirizzo || '') : '')}${kv('Contatti', contatti)}</div>${sede && sede.note ? `<p class="md-note">${escHtml(sede.note)}</p>` : ''}` : ''}
     ${p ? `<h4 class="md-h">Prenotazione</h4><div class="md-top">${kv('Quando', ckFmtLong(p.data, p.ora))}${kv('Struttura', escHtml(p.struttura || ''))}${kv('Impegnativa', imp)}${kv('Spesa in Sanità', med ? (med.bozza ? 'Bozza, da completare' : 'Registrata') : '')}</div>` : ''}
     ${c.note ? `<h4 class="md-h">Note</h4><p class="md-note">${escHtml(c.note)}</p>` : ''}
-    ${storico ? `<h4 class="md-h">Storico visite${ckRefs(c).length ? ` <button type="button" class="btn small ghost" data-ck="refs" data-id="${c.id}" style="margin-left:8px">📄 Tutti i referti (${ckRefs(c).length})</button>` : ''}</h4><ul class="ck-hist">${storico}</ul>` : ''}</div>
+    ${true ? `<h4 class="md-h">Storico visite<button type="button" class="btn small ghost" data-ck="refs" data-id="${c.id}" style="margin-left:8px">📄 Referti (${ckRefs(c).length})</button></h4><ul class="ck-hist">${storico}</ul>` : ''}</div>
     <div class="md-foot">${acts}</div>`);
 }
 
@@ -3647,7 +3698,7 @@ function ckBook(id){
     ${ckFld('Data', `<input class="ck-in" id="ck-data" type="date" value="${escHtml(p.data || '')}">`)}
     ${ckFld('Ora', `<input class="ck-in" id="ck-ora" type="time" value="${escHtml(p.ora || '')}">`)}
     ${ckFld('Struttura <span class="ck-mut">· precompilata dallo specialista</span>', `<input class="ck-in" id="ck-strut" value="${escHtml(p.struttura || (sede && sede.struttura) || '')}">`, 'ck-span')}
-    ${ckFld('Impegnativa del medico <span class="ck-mut">· link al documento (puoi aggiungerlo dopo)</span>', `<input class="ck-in" id="ck-imp" type="url" placeholder="https://drive.google.com/…" value="${escHtml(p.impegnativa || '')}">`, 'ck-span')}
+    ${ckFld('Impegnativa del medico <span class="ck-mut">· link al documento (puoi aggiungerlo dopo)</span>', `<input class="ck-in" id="ck-imp" type="url" placeholder="https://drive.google.com/…" value="${escHtml(p.impegnativa || '')}">${ckImpBtn(c, 'ghost') ? `<div style="margin-top:6px">${ckImpBtn(c, 'ghost')}</div>` : ''}`, 'ck-span')}
     </div>
     <label class="ck-chk"><input type="checkbox" id="ck-ics"${c.prenotazione ? '' : ' checked'}> Scarica il file per il calendario (.ics) con promemoria <span class="ck-mut">· per Google Calendar usa il pulsante nella scheda</span>
       <select class="ck-in ck-in-s" id="ck-icsrem"><option value="-P1D">1 giorno prima</option><option value="-P2D">2 giorni prima</option><option value="-P7D">1 settimana prima</option><option value="-PT2H">2 ore prima</option></select></label>
@@ -3765,7 +3816,7 @@ function ckSpForm(id){
 }
 function ckSpRead(){
   if(!ckSpDraft || !$ck('spn')) return;
-  ckSpDraft.nome = $ck('spn').value; ckSpDraft.specialita = $ck('sps').value; ckSpDraft.cellulare = $ck('spc').value; ckSpDraft.note = $ck('spnote').value;
+  ckSpDraft.nome = $ck('spn').value; ckSpDraft.specialita = $ck('sps').value; ckSpDraft.cellulare = $ck('spc').value; if($ck('spp')) ckSpDraft.prescrive = $ck('spp').checked; ckSpDraft.note = $ck('spnote').value;
   ckBox.querySelectorAll('.ck-sedef').forEach((el, i) => { const x = ckSpDraft.sedi[i]; if(!x) return; el.querySelectorAll('[data-f]').forEach(inp => { x[inp.dataset.f] = inp.value; }); });
   const r = ckBox.querySelector('input[name="ck-sdef"]:checked'); if(r && ckSpDraft.sedi[+r.value]) ckSpDraft.sedeDefault = ckSpDraft.sedi[+r.value].id;
 }
@@ -3778,7 +3829,7 @@ function ckSpDraw(){
   const sedi = d.sedi.map((x, i) => `<div class="ck-sedef"><div class="ck-sedef-h"><b>Sede ${i + 1}</b><label class="ck-rad"><input type="radio" name="ck-sdef" value="${i}"${x.id === d.sedeDefault ? ' checked' : ''}> predefinita</label>${d.sedi.length > 1 ? `<button type="button" class="btn small ghost danger" data-ck="rmsede" data-i="${i}">Rimuovi</button>` : ''}</div>
     ${note.length ? `<div class="ck-fld" style="margin-bottom:10px"><label>Usa una sede già in rubrica</label><select class="ck-in" data-pick="${i}"><option value="">— scegli per compilare i campi —</option>${note.map((x, j) => `<option value="${j}">${escHtml(x.struttura)}${x.indirizzo ? ' · ' + escHtml(x.indirizzo) : ''}</option>`).join('')}</select></div>` : ''}<div class="ck-form">${ckFld('Struttura', `<input class="ck-in" data-f="struttura" value="${escHtml(x.struttura)}" placeholder="es. Casa di Cura Toniolo">`, 'ck-span')}${ckFld('Indirizzo', `<input class="ck-in" data-f="indirizzo" value="${escHtml(x.indirizzo)}">`, 'ck-span')}
     ${ckFld('Telefono', `<input class="ck-in" data-f="tel" value="${escHtml(x.tel)}">`)}${ckFld('Email', `<input class="ck-in" data-f="email" type="email" value="${escHtml(x.email)}">`)}${ckFld('Sito / prenotazione online', `<input class="ck-in" data-f="sito" value="${escHtml(x.sito)}" placeholder="https://…">`, 'ck-span')}${ckFld('Note (es. si prenota il martedì)', `<input class="ck-in" data-f="note" value="${escHtml(x.note)}">`, 'ck-span')}</div></div>`).join('');
-  ckShow(`${ckHead(ckCtx.id ? 'Modifica specialista' : 'Nuovo specialista')}<div class="md-body"><div class="ck-form">${ckFld('Nome', `<input class="ck-in" id="ck-spn" value="${escHtml(d.nome)}" placeholder="es. Dott. Ricci">`)}${ckFld('Specialità', `<input class="ck-in" id="ck-sps" value="${escHtml(d.specialita)}" placeholder="es. Cardiologo">`)}${ckFld('Cellulare', `<input class="ck-in" id="ck-spc" type="tel" value="${escHtml(d.cellulare || '')}" placeholder="es. 333 1234567">`)}</div>
+  ckShow(`${ckHead(ckCtx.id ? 'Modifica specialista' : 'Nuovo specialista')}<div class="md-body"><div class="ck-form">${ckFld('Nome', `<input class="ck-in" id="ck-spn" value="${escHtml(d.nome)}" placeholder="es. Dott. Ricci">`)}${ckFld('Specialità', `<input class="ck-in" id="ck-sps" value="${escHtml(d.specialita)}" placeholder="es. Cardiologo">`)}${ckFld('Cellulare', `<input class="ck-in" id="ck-spc" type="tel" value="${escHtml(d.cellulare || '')}" placeholder="es. 333 1234567">`)}${ckFld('Impegnative', `<label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="ck-spp"${d.prescrive ? ' checked' : ''}> È il medico che prescrive le impegnative (WhatsApp)</label>`, 'ck-span')}</div>
     <h4 class="md-h">Sedi dove riceve</h4>${sedi}<button type="button" class="btn small ghost" data-ck="addsede">+ Aggiungi un'altra sede</button>
     <div class="ck-form" style="margin-top:12px">${ckFld('Note sullo specialista', `<textarea class="ck-in" id="ck-spnote" rows="2">${escHtml(d.note)}</textarea>`, 'ck-span')}</div></div>
     <div class="md-foot">${ckCtx.id ? `<button type="button" class="btn small ghost danger" data-ck="delsp" data-id="${ckCtx.id}" style="margin-right:auto">${ckCtx.del ? 'Confermi l\'eliminazione?' : 'Elimina'}</button>` : ''}<button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small primary" data-ck="savesp">Salva</button></div>`);
@@ -3823,6 +3874,27 @@ async function ckImpGo(){
 
 // ----- Elenco di tutti i controlli
 let ckListPers = '';
+let ckImpPers = '', ckImpSel = new Set();
+function ckImpMedCand(){
+  const used = new Set();
+  checkups.forEach(c => { (c.storico || []).forEach(h => h.medId && used.add(h.medId)); (c.refMedIds || []).forEach(m => used.add(m)); if(c.prenotazione && c.prenotazione.medId) used.add(c.prenotazione.medId); });
+  return medical.filter(m => !m.bozza && !used.has(m.id) && m.dataDocumento && String(m.descrizione || '').trim()).sort((a, b) => String(b.dataDocumento).localeCompare(String(a.dataDocumento)));
+}
+function ckImpMedShow(){
+  ckCtx = {t: 'impmed'};
+  const all = ckImpMedCand(), pers = [...new Set(all.map(m => m.richiedente).filter(Boolean))].sort();
+  const rows = all.filter(m => !ckImpPers || m.richiedente === ckImpPers);
+  ckShow(`${ckHead('Importa da Sanità', 'Spese già fatte → visite singole chiuse')}<div class="md-body">
+    <p class="ck-mut" style="margin:0 0 10px">Spunta le visite già eseguite: le aggiungo al calendario come visite singole chiuse, collegate alla spesa (così ritrovi anche i referti).</p>
+    ${pers.length > 1 ? `<div class="ck-fld" style="margin-bottom:10px;max-width:240px"><select class="ck-in" id="ck-mpers"><option value="">Tutta la famiglia</option>${pers.map(x => `<option${x === ckImpPers ? ' selected' : ''}>${escHtml(x)}</option>`).join('')}</select></div>` : ''}
+    ${rows.length ? rows.map(m => `<label class="ck-lr" style="cursor:pointer"><input type="checkbox" data-ckm="${m.id}"${ckImpSel.has(m.id) ? ' checked' : ''} style="margin-right:8px"><span class="ck-lr-m"><b>${escHtml(m.descrizione)}</b><span class="ck-mut">${escHtml(m.richiedente || '')}</span></span><span class="ck-lr-d"><span>${ckFmt(m.dataDocumento)}</span></span></label>`).join('') : '<div class="ck-empty">Nessuna spesa da importare: sono già tutte collegate a un controllo.</div>'}</div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Chiudi</button><button type="button" class="btn small primary" data-ck="impmedgo">Importa selezionate (${ckImpSel.size})</button></div>`);
+}
+async function ckImpMedGo(){
+  const sel = ckImpMedCand().filter(m => ckImpSel.has(m.id)); if(!sel.length) return;
+  sel.forEach(m => checkups.push({id: uid(), persona: m.richiedente || '', tipo: String(m.descrizione).trim(), cadenza: 0, preavviso: 30, ultima: m.dataDocumento, scad: '', specialistaId: '', sedeId: '', struttura: m.struttura || '', note: '', attivo: false, storico: [{data: m.dataDocumento, medId: m.id, struttura: m.struttura || ''}], prenotazione: null}));
+  ckImpSel = new Set(); await saveCheckups(); ckClose(); renderAll(); showNotice(sel.length + (sel.length === 1 ? ' visita importata.' : ' visite importate.'), 'success');
+}
 function ckListShow(){
   ckCtx = {t: 'list'};
   const pers = [...new Set(checkups.map(c => c.persona).filter(Boolean))].sort();
@@ -3871,11 +3943,16 @@ document.addEventListener('click', async (e) => {
   if(a === 'delyes'){ const c = checkups.find(x => x.id === id); if(c && c.prenotazione && c.prenotazione.medId){ const mid = c.prenotazione.medId; const mm = medical.find(m => m.id === mid); if(mm && mm.bozza){ medical = medical.filter(m => m.id !== mid); await saveMedical(); } } checkups = checkups.filter(x => x.id !== id); await saveCheckups(); ckClose(); return renderAll(); }
   if(a === 'medcomplete'){ ckClose(); jumpToTab('medical'); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); return; }
   if(a === 'showbozze'){ const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); return; }
+  if(a === 'impreq'){ const c = checkups.find(x => x.id === id), mb = ckMedBase(); if(c && mb) window.open(ckWa(mb.cellulare) + '?text=' + encodeURIComponent(ckImpMsg(c, mb)), '_blank', 'noopener'); return; }
+  if(a === 'impmed'){ ckImpPers = ''; ckImpSel = new Set(); return ckImpMedShow(); }
+  if(a === 'impmedgo') return ckImpMedGo();
   if(a === 'refs') return ckRefShow(id);
+  if(a === 'reflink'){ const sel = document.getElementById('ck-refsel'); if(!sel || !sel.value) return; checkups = checkups.map(x => x.id !== id ? x : {...x, refMedIds: [...(x.refMedIds || []), sel.value]}); await saveCheckups(); return ckRefShow(id); }
+  if(a === 'refunlink'){ checkups = checkups.map(x => x.id !== id ? x : {...x, refMedIds: (x.refMedIds || []).filter(m => m !== b.dataset.mid)}); await saveCheckups(); return ckRefShow(id); }
   if(a === 'refcopy'){ const c = checkups.find(x => x.id === id); if(!c) return; const txt = ckRefs(c).map(x => x.url).join('\n'); const done = () => showNotice('Link copiati negli appunti.', 'success'); const fb = () => { const ta = document.createElement('textarea'); ta.value = txt; document.body.append(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ showNotice('Copia non riuscita: usa «Scarica elenco».'); } ta.remove(); }; if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fb); else fb(); return; }
   if(a === 'reftxt'){ const c = checkups.find(x => x.id === id); if(c) ckSaveFile('referti-' + c.tipo.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.txt', ckRefText(c)); return; }
   if(a === 'refopen'){ const c = checkups.find(x => x.id === id); if(c) ckRefs(c).forEach(x => window.open(x.url, '_blank', 'noopener')); return; }
-  if(a === 'list') return ckListShow();
+  if(a === 'list'){ ckListPers = ''; return ckListShow(); }
   if(a === 'impsp') return ckImpAsk();
   if(a === 'impgo') return ckImpGo();
   if(a === 'newsp') return ckSpForm('');
@@ -3893,6 +3970,8 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('change', (e) => {
   const t = e.target;
   if(t.id === 'ck-lpers'){ ckListPers = t.value; return ckListShow(); }
+  if(t.id === 'ck-mpers'){ ckImpPers = t.value; return ckImpMedShow(); }
+  if(t.dataset && t.dataset.ckm){ if(t.checked) ckImpSel.add(t.dataset.ckm); else ckImpSel.delete(t.dataset.ckm); const b = document.querySelector('[data-ck=impmedgo]'); if(b) b.textContent = 'Importa selezionate (' + ckImpSel.size + ')'; return; }
   if(t.dataset && t.dataset.pick !== undefined){
     const x = ckSediNote()[+t.value], i = +t.dataset.pick; if(!x || !ckSpDraft) return;
     ckSpRead(); const dst = ckSpDraft.sedi[i]; ['struttura', 'indirizzo', 'tel', 'email', 'sito', 'note'].forEach(f => { dst[f] = x[f] || ''; }); return ckSpDraw();
