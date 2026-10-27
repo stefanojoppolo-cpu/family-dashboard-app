@@ -5729,6 +5729,11 @@ function dtValidateForm(){
   for(const p of settings.pagatori){
     const a = dtEl('mf-rb-inv-' + p.id), c = dtEl('mf-rb-chi-' + p.id);
     if(a && c && a.value && c.value && c.value < a.value) return p.nome + ': la data di chiusura non può essere precedente alla data di invio.';
+    const st = dtEl('mf-rb-stato-' + p.id), im = dtEl('mf-rb-pagato-' + p.id);
+    if(st && (st.value === 'attesa' || st.value === 'da_inviare')){
+      const euro = im ? parseFloat(im.value) || 0 : 0, nomeSt = st.value === 'attesa' ? 'In attesa di risposta' : 'Da inviare';
+      if(euro > 0.004 || (c && c.value)) return p.nome + ': hai indicato ' + (euro > 0.004 && c && c.value ? 'un importo rimborsato e la data di risposta' : euro > 0.004 ? 'un importo rimborsato' : 'la data di risposta') + ' ma lo stato è «' + nomeSt + '». Imposta lo stato su «Chiusa» (o «Rifiutata»), oppure togli importo e data.';
+    }
   }
   return '';
 }
