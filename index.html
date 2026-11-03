@@ -3359,7 +3359,9 @@ function ckFull(n){ return (typeof settings !== 'undefined' && settings.nomiComp
 function ckImpMsg(c, mb){
   return 'Buongiorno Dottore,\navrei bisogno dell\'impegnativa per ' + c.tipo + '.\nLe ricordo che occorre inserire il quesito diagnostico, necessario per poter chiedere il rimborso all\'assicurazione.\nGrazie mille,\n' + ckFull(c.persona);
 }
-function ckImpBtn(c, cls){ const mb = ckMedBase(); return mb ? `<button type="button" class="btn small ${cls || 'ghost'}" data-ck="impreq" data-id="${c.id}">💬 Richiedi impegnativa</button>` : ''; }
+const CK_NOIMP_RE = /\bdent|odontoiatr|igiene orale|ortodon/i;
+function ckNoImp(c){ if(!c) return false; if(c.senzaImp === true) return true; if(c.senzaImp === false) return false; const sp = ckSp(c.specialistaId); return CK_NOIMP_RE.test((c.tipo || '') + ' ' + (sp ? sp.specialita || '' : '')); }
+function ckImpBtn(c, cls){ const mb = ckNoImp(c) ? null : ckMedBase(); return mb ? `<button type="button" class="btn small ${cls || 'ghost'}" data-ck="impreq" data-id="${c.id}">💬 Richiedi impegnativa</button>` : ''; }
 function ckCell(sp, cls){ if(!sp || !sp.cellulare) return ''; const w = ckWa(sp.cellulare); return `<span class="${cls || ''}">📱 <a href="tel:${escHtml(ckTel(sp.cellulare))}">${escHtml(sp.cellulare)}</a>${w ? ` · <a href="${escHtml(w)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</span>`; }
 function ckStrutture(){ const set = new Map(); ckSediNote().forEach(x => set.set(x.struttura.trim().toLowerCase(), x.struttura.trim())); checkups.forEach(c => { if(c.struttura && !set.has(c.struttura.trim().toLowerCase())) set.set(c.struttura.trim().toLowerCase(), c.struttura.trim()); }); return [...set.values()].sort((a, b) => a.localeCompare(b)); }
 function ckStrInfo(name){ name = String(name || '').trim(); if(!name) return null; return ckSediNote().find(x => x.struttura.trim().toLowerCase() === name.toLowerCase()) || {struttura: name}; }
@@ -3423,7 +3425,7 @@ function ckTodo(){
   checkups.forEach(c => {
     const s = ckState(c);
     if(s.k === 'scaduto' || s.k === 'prenotare' || s.k === 'conferma') out.push({k: s.k, c, s, ord: s.data});
-    else if(s.k === 'prenotata' && (!c.prenotazione.impegnativa || s.g <= 7)) out.push({k: 'prenotata', c, s, ord: s.data});
+    else if(s.k === 'prenotata' && ((!c.prenotazione.impegnativa && !ckNoImp(c)) || s.g <= 7)) out.push({k: 'prenotata', c, s, ord: s.data});
   });
   medical.forEach(m => {
     if(!m.bozza || !m.dataDocumento || m.dataDocumento > t) return;
@@ -3455,7 +3457,7 @@ function ckTodoHtml(){
       sub = ckFmtLong(s.data, c.prenotazione.ora) + (sp ? ' · ' + sp.nome : '') + (c.prenotazione.struttura ? ' · ' + c.prenotazione.struttura : '');
       acts = `<button type="button" class="btn small ghost" data-ck="open" data-id="${c.id}">Dettagli</button><button type="button" class="btn small ghost" data-ck="gcal" data-id="${c.id}">Aggiungi a Google Calendar</button>`;
     }
-    const miss = s.k === 'prenotata' && !c.prenotazione.impegnativa ? '<span class="ck-pill ck-p-outred">Manca impegnativa</span>' : ckPill(s.k);
+    const miss = s.k === 'prenotata' && !c.prenotazione.impegnativa && !ckNoImp(c) ? '<span class="ck-pill ck-p-outred">Manca impegnativa</span>' : ckPill(s.k);
     return `<div class="ck-it"><div class="ck-it-h"><span class="ck-dot" style="background:${ckColor(c.persona)}"></span><b class="ck-it-t">${escHtml(c.tipo)} · ${escHtml(c.persona)}</b>${miss}</div>
       <div class="ck-it-s">${escHtml(sub)}</div><div class="ck-it-a">${acts}</div></div>`;
   }).join('');
@@ -3625,7 +3627,7 @@ function ckDetail(id){
   const kv = (k, v) => v ? `<div><span>${k}</span><b>${v}</b></div>` : '';
   const contatti = sede ? [sede.tel ? `<a href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">${escHtml(sede.tel)}</a>` : '', sede.email ? `<a href="mailto:${escHtml(sede.email)}">${escHtml(sede.email)}</a>` : ''].filter(Boolean).join(' · ') : '';
   const med = p && p.medId ? medical.find(m => m.id === p.medId) : null;
-  const imp = p && ckSafeUrl(p.impegnativa) ? `<a href="${escHtml(ckSafeUrl(p.impegnativa))}" target="_blank" rel="noopener">Apri impegnativa ↗</a>` : '<span class="ck-pill ck-p-outred">Manca impegnativa</span>';
+  const imp = p && ckSafeUrl(p.impegnativa) ? `<a href="${escHtml(ckSafeUrl(p.impegnativa))}" target="_blank" rel="noopener">Apri impegnativa ↗</a>` : (ckNoImp(c) ? '<span class="ck-mut">Non necessaria</span>' : '<span class="ck-pill ck-p-outred">Manca impegnativa</span>');
   const ckRef = (h) => { const m = h.medId && medical.find(x => x.id === h.medId); return m ? (m.documenti || []).filter(d => d && d.url && /^referto/i.test(String(d.nome || '').trim())) : []; };
   const storico = (c.storico || []).slice().reverse().map(h => `<li>${ckFmt(h.data)}${h.struttura ? ' · ' + escHtml(h.struttura) : ''}${ckRef(h).map(d => ` · <a href="${escHtml(d.url)}" target="_blank" rel="noopener">📄 ${escHtml(d.nome)}</a>`).join('')}</li>`).join('');
   let acts;
@@ -3665,6 +3667,7 @@ function ckForm(id, pre){
     ${ckFld('Specialista', `<select class="ck-in" id="ck-sp">${ckSpOpts(c ? c.specialistaId : pre.specialistaId)}</select>`)}
     ${ckFld('Sede / struttura', `<select class="ck-in" id="ck-sede">${ckSedeOpts(c ? c.specialistaId : pre.specialistaId, c ? c.sedeId : pre.sedeId)}</select>`)}
     ${ckFld('Struttura <span class="ck-mut">· anche senza specialista (es. risonanza, esami)</span>', `<select class="ck-in" id="ck-str">${ckStrOpts(c ? c.struttura : pre.struttura)}</select><input class="ck-in" id="ck-strx" placeholder="Nome della struttura" value="${escHtml(c && c.struttura && !ckStrutture().some(x => x.toLowerCase() === c.struttura.toLowerCase()) ? c.struttura : '')}" style="margin-top:6px;${(c && c.struttura && !ckStrutture().some(x => x.toLowerCase() === c.struttura.toLowerCase())) ? '' : 'display:none'}">`, 'ck-span')}
+    ${ckFld('Impegnativa', `<label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="ck-noimp"${ckNoImp(c || {tipo: pre.tipo || '', specialistaId: pre.specialistaId || ''}) ? ' checked' : ''}> Non serve l'impegnativa (es. dentista, visite private)</label>`, 'ck-span')}
     ${ckFld('Note', `<textarea class="ck-in" id="ck-note" rows="2">${escHtml(c ? c.note || '' : '')}</textarea>`, 'ck-span')}
     </div><p class="ck-mut" style="margin:8px 0 0">Non hai ancora lo specialista in rubrica? Salva e aggiungilo da «Specialisti». La struttura si può scegliere anche senza specialista.</p></div>
     <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small" data-ck="savechk" data-id="${id || ''}">Salva</button><button type="button" class="btn small primary" data-ck="savechkbook" data-id="${id || ''}">Salva e prenota</button></div>`);
@@ -3678,7 +3681,7 @@ async function ckSaveForm(id, thenBook){
   if(isNaN(cad) || cad < 0){ showFormError('Indica la cadenza in mesi.'); return; }
   if(!(ult && cad > 0) && !scad){ showFormError('Indica l\'ultima visita (con una cadenza) oppure la data di scadenza.'); return; }
   if((ult && normDate(ult) !== ult) || (scad && normDate(scad) !== scad)){ showFormError('Controlla le date inserite.'); return; }
-  const base = {persona, tipo, cadenza: cad, preavviso: parseInt($ck('pre').value, 10) || 30, ultima: ult, scad: scad, specialistaId: $ck('sp').value, sedeId: $ck('sede').value, struttura: ($ck('str').value === '__altra' ? $ck('strx').value.trim() : $ck('str').value), note: $ck('note').value.trim()};
+  const base = {persona, tipo, cadenza: cad, preavviso: parseInt($ck('pre').value, 10) || 30, ultima: ult, scad: scad, specialistaId: $ck('sp').value, sedeId: $ck('sede').value, struttura: ($ck('str').value === '__altra' ? $ck('strx').value.trim() : $ck('str').value), senzaImp: $ck('noimp').checked, note: $ck('note').value.trim()};
   let cid = id;
   if(id) checkups = checkups.map(c => c.id === id ? {...c, ...base} : c);
   else { cid = uid(); checkups.push({id: cid, attivo: true, storico: [], prenotazione: null, ...base}); }
@@ -3698,7 +3701,7 @@ function ckBook(id){
     ${ckFld('Data', `<input class="ck-in" id="ck-data" type="date" value="${escHtml(p.data || '')}">`)}
     ${ckFld('Ora', `<input class="ck-in" id="ck-ora" type="time" value="${escHtml(p.ora || '')}">`)}
     ${ckFld('Struttura <span class="ck-mut">· precompilata dallo specialista</span>', `<input class="ck-in" id="ck-strut" value="${escHtml(p.struttura || (sede && sede.struttura) || '')}">`, 'ck-span')}
-    ${ckFld('Impegnativa del medico <span class="ck-mut">· link al documento (puoi aggiungerlo dopo)</span>', `<input class="ck-in" id="ck-imp" type="url" placeholder="https://drive.google.com/…" value="${escHtml(p.impegnativa || '')}">${ckImpBtn(c, 'ghost') ? `<div style="margin-top:6px">${ckImpBtn(c, 'ghost')}</div>` : ''}`, 'ck-span')}
+    ${ckFld(ckNoImp(c) ? 'Impegnativa <span class="ck-mut">· non necessaria per questo controllo (facoltativa)</span>' : 'Impegnativa del medico <span class="ck-mut">· link al documento (puoi aggiungerlo dopo)</span>', `<input class="ck-in" id="ck-imp" type="url" placeholder="https://drive.google.com/…" value="${escHtml(p.impegnativa || '')}">${ckImpBtn(c, 'ghost') ? `<div style="margin-top:6px">${ckImpBtn(c, 'ghost')}</div>` : ''}`, 'ck-span')}
     </div>
     <label class="ck-chk"><input type="checkbox" id="ck-ics"${c.prenotazione ? '' : ' checked'}> Scarica il file per il calendario (.ics) con promemoria <span class="ck-mut">· per Google Calendar usa il pulsante nella scheda</span>
       <select class="ck-in ck-in-s" id="ck-icsrem"><option value="-P1D">1 giorno prima</option><option value="-P2D">2 giorni prima</option><option value="-P7D">1 settimana prima</option><option value="-PT2H">2 ore prima</option></select></label>
@@ -3969,6 +3972,7 @@ document.addEventListener('click', async (e) => {
 });
 document.addEventListener('change', (e) => {
   const t = e.target;
+  if(t.id === 'ck-noimp'){ t.dataset.t = '1'; return; }
   if(t.id === 'ck-lpers'){ ckListPers = t.value; return ckListShow(); }
   if(t.id === 'ck-mpers'){ ckImpPers = t.value; return ckImpMedShow(); }
   if(t.dataset && t.dataset.ckm){ if(t.checked) ckImpSel.add(t.dataset.ckm); else ckImpSel.delete(t.dataset.ckm); const b = document.querySelector('[data-ck=impmedgo]'); if(b) b.textContent = 'Importa selezionate (' + ckImpSel.size + ')'; return; }
@@ -3989,7 +3993,7 @@ document.addEventListener('change', (e) => {
     $ck('spbox').innerHTML = ckSpBox(spId, sede && sede.id, fb); $ck('strut').value = sede ? sede.struttura || '' : (fb ? fb.struttura : $ck('strut').value); $ck('imp').value = imp; $ck('data').value = data; $ck('ora').value = ora;
   }
 });
-document.addEventListener('input', (e) => { if(e.target.id === 'ck-search'){ ckSearch = e.target.value; const pos = e.target.selectionStart; renderCheckupSearch(pos); } });
+document.addEventListener('input', (e) => { if(e.target.id === 'ck-tipo'){ const nb = document.getElementById('ck-noimp'); if(nb && !nb.dataset.t) nb.checked = CK_NOIMP_RE.test(e.target.value); } if(e.target.id === 'ck-search'){ ckSearch = e.target.value; const pos = e.target.selectionStart; renderCheckupSearch(pos); } });
 function renderCheckupSearch(pos){
   const root = document.getElementById('ck-root'); if(!root || ckView !== 'spec') return;
   root.innerHTML = ckSpecHtml(); const i = document.getElementById('ck-search'); if(i){ i.focus(); try{ i.setSelectionRange(pos, pos); }catch(e){} }
@@ -4003,7 +4007,7 @@ function ckUrgent(items){
     const s = ckState(c); if(!s.k || !s.data) return;
     if(s.k === 'scaduto' || s.k === 'prenotare') items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — da prenotare`, giorni: s.g, tab: 'checkup'});
     else if(s.k === 'conferma') items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — conferma la visita`, giorni: s.g, tab: 'checkup'});
-    else if(s.k === 'prenotata' && s.g <= 14) items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — visita${c.prenotazione.impegnativa ? '' : ' (manca impegnativa)'}`, giorni: s.g, tab: 'checkup'});
+    else if(s.k === 'prenotata' && s.g <= 14) items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — visita${c.prenotazione.impegnativa || ckNoImp(c) ? '' : ' (manca impegnativa)'}`, giorni: s.g, tab: 'checkup'});
   });
   medical.forEach(m => { if(m.bozza && m.dataDocumento && m.dataDocumento <= t && !checkups.some(c => c.prenotazione && c.prenotazione.medId === m.id)) items.push({icona: ICONA_MEDICAL, label: `${m.descrizione} · ${m.richiedente} — completa la spesa`, giorni: ckGiorni(m.dataDocumento), tab: 'medical'}); });
 }
