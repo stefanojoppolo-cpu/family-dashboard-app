@@ -2585,6 +2585,7 @@ function renderDocumenti(){
             <button class="btn small" data-action="confirm-delete-documento" data-id="${d.id}">Sì, elimina</button>
             <button class="btn small ghost" data-action="cancel-delete-documento" data-id="${d.id}">Annulla</button>
           ` : `
+            <button class="btn small" data-action="share-documento" data-id="${d.id}">📤 Invia su WhatsApp</button>
             <button class="btn small" data-action="toggle-renew-documento" data-id="${d.id}">Rinnova</button>
             <button class="btn small ghost" data-action="edit-documento" data-id="${d.id}">Modifica</button>
             <button class="btn small ghost danger" data-action="delete-documento" data-id="${d.id}">Elimina</button>
@@ -4012,6 +4013,31 @@ function ckUrgent(items){
   medical.forEach(m => { if(m.bozza && m.dataDocumento && m.dataDocumento <= t && !checkups.some(c => c.prenotazione && c.prenotazione.medId === m.id)) items.push({icona: ICONA_MEDICAL, label: `${m.descrizione} · ${m.richiedente} — completa la spesa`, giorni: ckGiorni(m.dataDocumento), tab: 'medical'}); });
 }
 
+// Documenti personali: condivisione file (Web Share)
+let dshDoc = null, dshFiles = [];
+function dshStart(item){
+  dshDoc = item; dshFiles = [];
+  let inp = document.getElementById('dsh-file');
+  if(inp) inp.remove();
+  inp = document.createElement('input'); inp.type = 'file'; inp.id = 'dsh-file'; inp.accept = 'image/*,application/pdf'; inp.multiple = true; inp.hidden = true;
+  inp.addEventListener('change', () => { dshFiles = [...inp.files]; if(dshFiles.length) dshAsk(); });
+  document.body.append(inp); inp.click();
+}
+function dshAsk(){
+  const d = dshDoc, can = !!(navigator.canShare && navigator.canShare({files: dshFiles}));
+  ckShow(`${ckHead('Invia su WhatsApp', escHtml(d.tipo) + ' · ' + escHtml(ckFull(d.intestatario)))}<div class="md-body">
+    <p style="margin:0 0 8px"><b>${dshFiles.length === 1 ? '1 file pronto' : dshFiles.length + ' file pronti'}:</b></p>
+    <ul class="ck-hist">${dshFiles.map(f => `<li>${escHtml(f.name)} <span class="ck-mut">· ${Math.max(1, Math.round(f.size / 1024))} KB</span></li>`).join('')}</ul>
+    ${can ? '<p class="ck-mut" style="margin:10px 0 0">Premi «Condividi»: si apre la lista delle app del telefono. Scegli WhatsApp e poi il contatto.</p>' : '<p class="ck-mut" style="margin:10px 0 0;color:var(--red,#b42318)">Questo dispositivo o browser non permette di condividere file da qui. Prova dal telefono (Chrome su Android o Safari su iPhone), oppure usa «Invia il link».</p>'}</div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button>${d.link ? '<button type="button" class="btn small ghost" data-dsh="link">Invia il link</button>' : ''}${can ? '<button type="button" class="btn small primary" data-dsh="go">Condividi</button>' : ''}</div>`);
+}
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest && e.target.closest('[data-dsh]'); if(!b || !dshDoc) return;
+  const d = dshDoc, testo = d.tipo + ' · ' + ckFull(d.intestatario);
+  if(b.dataset.dsh === 'link'){ window.open('https://wa.me/?text=' + encodeURIComponent(testo + '\n' + d.link), '_blank', 'noopener'); return; }
+  try{ await navigator.share({files: dshFiles, text: testo}); ckClose(); }
+  catch(err){ if(err && err.name !== 'AbortError') showNotice('Condivisione non riuscita: ' + (err.message || err.name)); }
+});
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -5138,6 +5164,8 @@ document.getElementById('documenti-body').addEventListener('click', async (e) =>
   } else if(action==='cancel-delete-documento'){
     confirmingDocumentoDeleteId = null;
     renderDocumenti();
+  } else if(action==='share-documento'){
+    dshStart(item);
   } else if(action==='edit-documento'){
     editingDocumentoId = id;
     document.getElementById('df-tipo').value = item.tipo;
