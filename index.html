@@ -662,6 +662,16 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+/* Mobile: ogni riga di tabella diventa una scheda */
+@media (max-width:640px){
+  .table-scroll tbody > tr:not(.subtotal-row):not(.xrow){background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:14px;padding:8px 14px;margin:0 0 12px;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+  .table-scroll tbody > tr:not(.subtotal-row):not(.xrow) > td{padding:7px 0;border-bottom:1px dashed var(--line)}
+  .table-scroll tbody > tr:not(.subtotal-row):not(.xrow) > td:last-child{border-bottom:none}
+  .table-scroll td[data-label]::before{font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;font-weight:700;color:var(--ink-soft)}
+  .table-scroll tbody > tr:has(+ tr.xrow.open){border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0;border-bottom-color:transparent}
+  .table-scroll tbody > tr.xrow.open{background:var(--paper-raised,#fff);border:1px solid var(--line);border-top:none;border-radius:0 0 14px 14px;margin:0 0 12px;padding:0}
+}
+
 #auth-gate.lg{background:radial-gradient(1200px 600px at 10% -10%,#dbe6ff 0,transparent 60%),radial-gradient(900px 500px at 100% 110%,#d3f3ec 0,transparent 55%),var(--page-bg);padding:20px}
 .lg-wrap{display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:900px;background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(16,36,58,.18);overflow:hidden}
 .lg-brand{background:linear-gradient(160deg,#10243a 0%,#17406b 55%,#0f7f77 120%);color:#fff;padding:40px 34px;display:flex;flex-direction:column;justify-content:center}
@@ -3221,7 +3231,7 @@ function renderImpostazioni(){
     ${nomiCompletiHtml()}
     ${driveSettingsHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 22:15</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 22:23</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
