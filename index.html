@@ -662,6 +662,37 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+.ic-col{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;font-size:15px;line-height:1;flex:none;background:color-mix(in srgb, var(--c) 16%, transparent);font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-style:normal}
+.tab-btn .ic-col{width:28px;height:28px}
+@media (max-width:760px){.tab-btn .ic-col{width:26px;height:26px;font-size:14px}}
+.pano-box h3 .ic-col,.pano-head .ic-col{margin-right:2px}
+/* ---- Configurazione guidata ---- */
+#welcome .box{max-width:540px;border-radius:18px;padding:22px;}
+#welcome h2{font-size:21px;line-height:1.25;}
+.wz-prog{display:flex;gap:6px;margin-bottom:6px}.wz-prog i{flex:1;height:5px;border-radius:5px;background:var(--line)}.wz-prog i.on{background:var(--accent)}
+.wz-cnt{font-size:12px;color:var(--ink-soft);margin-bottom:14px;display:flex;justify-content:space-between}
+.wz-grid{display:grid;gap:9px}
+.wz-card{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;min-width:0}
+.wz-card.sel{border-color:var(--accent);background:var(--accent-soft,#e8eefe)}.wz-card.dis{opacity:.55;cursor:default}
+.wz-card .ic{font-size:22px}.wz-card b{display:block;font-size:14.5px}.wz-card span{font-size:12.5px;color:var(--ink-soft)}
+.wz-card .chk{margin-left:auto;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;color:#fff;font-size:13px;font-style:normal}
+.wz-card.sel .chk{background:var(--accent);border-color:var(--accent)}
+.wz-chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.wz-chip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft,#e8eefe);color:var(--accent);border-radius:20px;padding:6px 12px;font-weight:600;font-size:13.5px;border:0;font-family:inherit}
+.wz-chip button{border:0;background:none;color:inherit;cursor:pointer;padding:0 0 0 2px;font-size:12px}
+.wz-chip.sug{background:transparent;border:1.5px solid var(--line);color:var(--ink);font-weight:500;cursor:pointer}
+.wz-add{display:flex;gap:8px}.wz-add input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit}
+.wz-lbl{font-size:12px;font-weight:700;color:var(--ink-soft);margin:12px 0 2px;text-transform:uppercase;letter-spacing:.03em}
+.wz-sect{margin-bottom:6px}
+.wz-note{background:var(--accent-soft,#e8eefe);border-radius:12px;padding:10px 12px;font-size:13px;margin-top:12px}
+.wz-imp{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.wz-imp label{flex:1 1 110px;font-size:12px;color:var(--ink-soft);display:block}.wz-imp input{width:100%;margin-top:3px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit}
+.wz-err{color:var(--stamp);font-weight:700;font-size:13px;min-height:18px;margin-top:10px}
+.wz-acts{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.wz-ok{text-align:center}.wz-ok .big{font-size:44px}
+.wz-todo{display:grid;gap:8px;margin-top:12px}.wz-todo button{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;background:transparent;font:inherit;font-weight:600;cursor:pointer;color:inherit;text-align:left}.wz-todo em{font-style:normal;color:var(--accent)}
+@media (max-width:480px){#welcome{padding:10px 8px}#welcome .box{padding:16px}.wz-acts .btn{flex:1 1 auto}}
+.wz-card .ic-col{width:38px;height:38px;font-size:20px;border-radius:12px}
+
 /* ---- Acquisti e garanzie ---- */
 .aq-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
 .aq-kpi>div{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
@@ -873,16 +904,16 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
 
   <nav class="tabs">
     <div class="side-brand"><div class="logo-c" id="side-logo"></div><div class="sb-t"><span id="side-name">Casa e Famiglia</span><small id="side-fam"></small></div></div>
-    <button class="tab-btn active" data-tab="panoramica"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Panoramica</button>
-    <button class="tab-btn" data-tab="recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>Pagamenti ricorrenti</button>
-    <button class="tab-btn" data-tab="medical"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Sanità integrativa</button>
-    <button class="tab-btn" data-tab="checkup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><path d="M9 15.5l2 2 4-4"/></svg>Check-up e visite</button>
-    <button class="tab-btn" data-tab="acquisti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisti e garanzie</button><button class="tab-btn" data-tab="bilancio"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="17" y1="20" x2="17" y2="15"/></svg>Bilancio annuale</button>
-    <button class="tab-btn" data-tab="contratti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Contratti a scadenza</button>
-    <button class="tab-btn" data-tab="documenti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.3"/><path d="M8 17c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>Documenti personali</button>
-    <button class="tab-btn" data-tab="detrazioni"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="9" cy="9" r="0.6" fill="currentColor"/><circle cx="15" cy="15" r="0.6" fill="currentColor"/></svg>Detrazioni fiscali</button>
-    <button class="tab-btn" data-tab="report"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>Report</button>
-    <button class="tab-btn" data-tab="impostazioni"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Impostazioni</button>
+    <button class="tab-btn active" data-tab="panoramica"><span class="ic-col" style="--c:#64748B">🏠</span>Panoramica</button>
+    <button class="tab-btn" data-tab="recurring"><span class="ic-col" style="--c:#2F5BEA">💳</span>Pagamenti ricorrenti</button>
+    <button class="tab-btn" data-tab="medical"><span class="ic-col" style="--c:#E5484D">🩺</span>Sanità integrativa</button>
+    <button class="tab-btn" data-tab="checkup"><span class="ic-col" style="--c:#12A594">🗓️</span>Check-up e visite</button>
+    <button class="tab-btn" data-tab="acquisti"><span class="ic-col" style="--c:#F76B15">🛍️</span>Acquisti e garanzie</button><button class="tab-btn" data-tab="bilancio"><span class="ic-col" style="--c:#F5A524">📊</span>Bilancio annuale</button>
+    <button class="tab-btn" data-tab="contratti"><span class="ic-col" style="--c:#3E63DD">📑</span>Contratti a scadenza</button>
+    <button class="tab-btn" data-tab="documenti"><span class="ic-col" style="--c:#8E4EC6">📄</span>Documenti personali</button>
+    <button class="tab-btn" data-tab="detrazioni"><span class="ic-col" style="--c:#30A46C">🧾</span>Detrazioni fiscali</button>
+    <button class="tab-btn" data-tab="report"><span class="ic-col" style="--c:#0EA5E9">📈</span>Report</button>
+    <button class="tab-btn" data-tab="impostazioni"><span class="ic-col" style="--c:#7D8590">⚙️</span>Impostazioni</button>
   </nav>
 
   <section class="panel active" id="panel-panoramica">
@@ -2743,12 +2774,12 @@ function renderDetrazioni(){
   updateSortIndicators('#panel-detrazioni', detrazioniSortKey, detrazioniSortDir);
 }
 
-const ICONA_RECURRING = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>`;
-const ICONA_MEDICAL = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`;
-const ICONA_BILANCIO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="17" y1="20" x2="17" y2="15"/></svg>`;
-const ICONA_CONTRATTI = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>`;
-const ICONA_DOCUMENTI = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.3"/><path d="M8 17c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>`;
-const ICONA_DETRAZIONI = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="9" cy="9" r="0.6" fill="currentColor"/><circle cx="15" cy="15" r="0.6" fill="currentColor"/></svg>`;
+const ICONA_RECURRING = `<span class="ic-col" style="--c:#2F5BEA">💳</span>`;
+const ICONA_MEDICAL = `<span class="ic-col" style="--c:#E5484D">🩺</span>`;
+const ICONA_BILANCIO = `<span class="ic-col" style="--c:#F5A524">📊</span>`;
+const ICONA_CONTRATTI = `<span class="ic-col" style="--c:#3E63DD">📑</span>`;
+const ICONA_DOCUMENTI = `<span class="ic-col" style="--c:#8E4EC6">📄</span>`;
+const ICONA_DETRAZIONI = `<span class="ic-col" style="--c:#30A46C">🧾</span>`;
 
 function scadenzaLabel(giorni){
   if(giorni < 0) return `scaduto da ${Math.abs(giorni)} giorn${Math.abs(giorni)===1?'o':'i'}`;
@@ -3177,7 +3208,8 @@ function renderImpostazioni(){
       <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
     ${nomiCompletiHtml()}
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:12</b></p>
+    <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:28</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -3444,7 +3476,7 @@ function ckRestore(parsed){
 }
 
 function ckMedOn(){ return !visibleTabs || visibleTabs.includes('medical'); }
-const ICONA_CHECKUP = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><path d="M9 15.5l2 2 4-4"/></svg>';
+const ICONA_CHECKUP = '<span class="ic-col" style="--c:#12A594">🗓️</span>';
 function metricsCheckup(){
   const st = checkups.map(ckState), n = (k) => st.filter(x => x.k === k).length;
   const dp = n('scaduto') + n('prenotare'), pr = n('prenotata'), cf = n('conferma'), bz = medical.filter(m => m.bozza).length;
@@ -4077,7 +4109,7 @@ const KEY_ACQUISTI = 'acquisti';
 let acquisti = [], aqQ = '', aqCat = '', aqSt = '', aqShareDoc = null, aqShareFiles = [];
 const AQ_CATS = ['Elettrodomestici', 'Elettronica', 'Telefonia', 'Casa e arredo', 'Utensili e giardino', 'Auto e moto', 'Altro'];
 const AQ_DOCS = ['Scontrino', 'Fattura', 'Certificato di garanzia', 'Libretto istruzioni', 'Estensione di garanzia'];
-const ICONA_ACQUISTI = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
+const ICONA_ACQUISTI = '<span class="ic-col" style="--c:#F76B15">🛍️</span>';
 async function saveAcquisti(){
   try{ await storageAdapter.set(KEY_ACQUISTI, JSON.stringify(acquisti), false); }
   catch(e){ console.error(e); showSaveWarning('Il salvataggio degli acquisti non è riuscito. Riprova o ricarica la pagina.'); }
@@ -4267,6 +4299,139 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('keydown', (e) => { if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('aq-card')){ e.preventDefault(); aqDetail(e.target.dataset.id); } });
 document.addEventListener('input', (e) => { if(e.target && e.target.id === 'aq-search'){ aqQ = e.target.value; const pos = e.target.selectionStart; const ae = document.activeElement; ae.blur(); renderAcquisti(); const i = document.getElementById('aq-search'); if(i){ i.focus(); try{ i.setSelectionRange(pos, pos); }catch(x){} } } });
 document.addEventListener('change', (e) => { if(!e.target) return; if(e.target.id === 'aq-cat'){ aqCat = e.target.value; renderAcquisti(); } else if(e.target.id === 'aq-st'){ aqSt = e.target.value; renderAcquisti(); } });
+
+// ===== Configurazione guidata =====
+const WZ_MODS = {
+  recurring: ['💳', 'Scadenze e pagamenti ricorrenti', 'Abbonamenti, bollette e rate con scadenza'],
+  medical: ['🩺', 'Spese mediche e rimborsi', 'Sanità integrativa: stato di ogni richiesta'],
+  checkup: ['🗓️', 'Check-up e visite', 'Controlli ricorrenti, prenotazioni, referti'],
+  acquisti: ['🛍️', 'Acquisti e garanzie', 'Scontrini e scadenza della garanzia'],
+  documenti: ['📄', 'Documenti personali', "Carta d'identità, patente… con scadenza"],
+  contratti: ['📑', 'Contratti a scadenza', 'Luce, gas, assicurazioni, telefonia'],
+  detrazioni: ['🧾', 'Detrazioni fiscali', 'Spese da portare in dichiarazione'],
+  bilancio: ['📊', 'Bilancio annuale', "Entrate e uscite dell'anno"]
+};
+const WZ_PAG_SUG = ['Fondo sanitario', 'Assicurazione', 'UniSalute', 'Datore di lavoro'];
+const WZ_MX = [
+  {id: 'pulizia', nome: 'Pulizia denti', parole: 'pulizia denti, igiene dentale', ambito: 'persona', tipo: 'quantita', descr: 'Quante volte all\'anno, per ogni persona', unit: 'volte'},
+  {id: 'psico', nome: 'Psicologia', parole: 'psicolog, psicoterap', ambito: 'nucleo', tipo: 'importo', descr: 'Importo massimo all\'anno per tutta la famiglia', unit: '€'},
+  {id: 'fisio', nome: 'Fisioterapia', parole: 'fisioterap', ambito: 'nucleo', tipo: 'importo', descr: 'Importo massimo all\'anno per tutta la famiglia', unit: '€'}
+];
+const WZ_LISTE = {
+  medical: ['prestazioni'], recurring: ['voci'], contratti: ['tipiContratto'], documenti: ['tipiDocumento'], detrazioni: ['categorieDetrazione'], bilancio: ['conti']
+};
+const WZ_COL = {recurring:'#2F5BEA', medical:'#E5484D', checkup:'#12A594', acquisti:'#F76B15', bilancio:'#F5A524', contratti:'#3E63DD', documenti:'#8E4EC6', detrazioni:'#30A46C'};
+const wzIc = (e, col) => `<span class="ic-col" style="--c:${col}">${e}</span>`;
+let wz = null;
+const wzEsc = (s) => escHtml(String(s == null ? '' : s));
+function wzInit(rerun){
+  wz = {step: 0, rerun, mods: new Set(MODULI_IDS.filter(id => rerun ? settings.moduli[id].on : id !== 'bilancio')),
+    persone: settings.elenchi.persone.slice(), pagatori: rerun ? [] : ['Assicurazione'], mx: {}, liste: {}, avvio: 'zero'};
+  Object.keys(ELENCHI_DEF).forEach(k => { wz.liste[k] = (settings.elenchi[k] || []).slice(); });
+  WZ_MX.forEach(m => { wz.mx[m.id] = {on: false, importi: {}}; });
+}
+function wzSteps(){
+  const s = ['mods', 'persone'];
+  if(wz.mods.has('medical')){ if(!wz.rerun) s.push('pagatori'); s.push('tetti'); }
+  if(MODULI_IDS.some(id => wz.mods.has(id) && WZ_LISTE[id])) s.push('etichette');
+  if(!wz.rerun) s.push('avvio');
+  s.push('fine');
+  return s;
+}
+function wzChips(key, arr, sug){
+  return `<div class="wz-chips">${arr.map((v, i) => `<span class="wz-chip">${key === 'pagatori' ? (i + 1) + ' · ' : ''}${wzEsc(v)} <button type="button" data-wz="rm" data-k="${key}" data-i="${i}" aria-label="Rimuovi">✕</button></span>`).join('')}</div>
+  <div class="wz-add"><input type="text" id="wz-in-${key}" placeholder="Scrivi e premi Invio" autocomplete="off"><button type="button" class="btn small" data-wz="add" data-k="${key}">Aggiungi</button></div>
+  ${sug && sug.filter(x => !arr.includes(x)).length ? `<div class="wz-lbl">Suggeriti</div><div class="wz-chips">${sug.filter(x => !arr.includes(x)).map(x => `<button type="button" class="wz-chip sug" data-wz="sug" data-k="${key}" data-v="${wzEsc(x)}">+ ${wzEsc(x)}</button>`).join('')}</div>` : ''}`;
+}
+function wzBody(st){
+  if(st === 'mods') return `<h2>${wz.rerun ? 'Cosa vuoi tenere sotto controllo?' : 'Benvenuto! Cosa vuoi tenere sotto controllo?'}</h2><p class="sub">Scegli quello che ti serve. Potrai cambiare idea quando vuoi dalle Impostazioni.</p>
+    <div class="wz-grid">${MODULI_IDS.map(id => { const m = WZ_MODS[id], on = wz.mods.has(id); return `<div class="wz-card ${on ? 'sel' : ''}" data-wz="mod" data-id="${id}" role="checkbox" aria-checked="${on}" tabindex="0">${wzIc(m[0], WZ_COL[id])}<div><b>${wzEsc(m[1])}</b><span>${wzEsc(m[2])}</span></div><i class="chk">${on ? '✓' : ''}</i></div>`; }).join('')}</div>`;
+  if(st === 'persone') return `<h2>Chi fa parte della famiglia?</h2><p class="sub">Compariranno come scelte rapide quando inserisci spese, documenti e visite. Scrivi il nome con cui li chiami, te compreso.</p>${wzChips('persone', wz.persone)}`;
+  if(st === 'pagatori') return `<h2>Chi ti rimborsa le spese mediche?</h2><p class="sub">Ogni nome diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta. Mettili nell'ordine in cui di solito invii le pratiche.</p>${wzChips('pagatori', wz.pagatori, WZ_PAG_SUG)}<div class="wz-note">Non ricevi rimborsi? Lascia un nome generico, ad esempio «Assicurazione»: potrai cambiarlo dalle Impostazioni.</div>`;
+  if(st === 'tetti'){
+    const pg = wz.rerun ? settings.pagatori.map(p => p.nome) : wz.pagatori;
+    const esiste = (m) => wz.rerun && settings.massimali.some(x => (x.nome || '').toLowerCase() === m.nome.toLowerCase());
+    return `<h2>Hai dei tetti di rimborso?</h2><p class="sub">Li terrai d'occhio in Panoramica con una barra che si riempie. Facoltativo: puoi aggiungerli anche dopo, da Impostazioni.</p>
+    ${pg.length ? WZ_MX.map(m => { const c = wz.mx[m.id], ex = esiste(m); return `<div class="wz-card ${c.on ? 'sel' : ''} ${ex ? 'dis' : ''}" ${ex ? '' : `data-wz="mx" data-id="${m.id}" role="checkbox" aria-checked="${c.on}" tabindex="0"`}><div style="flex:1;min-width:0"><b>${wzEsc(m.nome)}</b><span>${ex ? 'Già presente' : wzEsc(m.descr)}</span>
+      ${c.on ? `<div class="wz-imp">${pg.map((n, i) => `<label>${wzEsc(n)}<input type="number" min="0" step="${m.unit === '€' ? 10 : 1}" inputmode="decimal" data-wz-imp="${m.id}" data-pi="${i}" value="${wzEsc(c.importi[i] || '')}" placeholder="${m.unit}"></label>`).join('')}</div>` : ''}</div><i class="chk">${c.on ? '✓' : ''}</i></div>`; }).join('') : '<div class="wz-note">Aggiungi prima almeno un pagatore.</div>'}`;
+  }
+  if(st === 'etichette'){
+    const ks = []; MODULI_IDS.forEach(id => { if(wz.mods.has(id) && WZ_LISTE[id]) WZ_LISTE[id].forEach(k => { if(!ks.includes(k)) ks.push(k); }); });
+    return `<h2>Etichette di suggerimento</h2><p class="sub">Sono le voci che ti proporremo mentre scrivi. Togli quelle che non ti servono e aggiungi le tue: nei campi potrai sempre scrivere altro.</p>
+    ${ks.map(k => `<div class="wz-sect"><div class="wz-lbl">${wzEsc(ELENCHI_DEF[k].titolo)}</div>${wzChips('l:' + k, wz.liste[k])}</div>`).join('')}`;
+  }
+  if(st === 'avvio') return `<h2>Come vuoi partire?</h2><p class="sub">Puoi cominciare da zero o portare dati che hai già.</p><div class="wz-grid">
+    ${[['zero', '✨', 'Parto da zero', 'Aggiungerai i dati un po\' alla volta'], ['backup', '📥', 'Ho un backup da importare', 'Alla fine ti porto in Impostazioni, dove incollare il testo']].map(o => `<div class="wz-card ${wz.avvio === o[0] ? 'sel' : ''}" data-wz="avvio" data-id="${o[0]}" role="radio" aria-checked="${wz.avvio === o[0]}" tabindex="0">${wzIc(o[1], '#2F5BEA')}<div><b>${o[2]}</b><span>${o[3]}</span></div><i class="chk">${wz.avvio === o[0] ? '✓' : ''}</i></div>`).join('')}</div>`;
+  const vai = MODULI_IDS.filter(id => wz.mods.has(id)).slice(0, 4);
+  return `<div class="wz-ok"><div class="big">🎉</div><h2>Tutto pronto!</h2><p class="sub">${wz.avvio === 'backup' && !wz.rerun ? 'Ora ti porto in Impostazioni per importare il backup.' : 'Ecco da dove puoi partire. Puoi rifare questa configurazione da Impostazioni → «Configurazione guidata».'}</p></div>
+    ${wz.avvio === 'backup' && !wz.rerun ? '' : `<div class="wz-todo">${vai.map(id => `<button type="button" data-wz="go" data-id="${id}"><span>${WZ_MODS[id][0]} ${wzEsc(settings.moduli[id].nome)}</span><em>Vai →</em></button>`).join('')}</div>`}`;
+}
+function wzRender(){
+  const box = document.querySelector('#welcome .box'), steps = wzSteps(), st = steps[wz.step], tot = steps.length - 1, last = st === 'fine';
+  box.innerHTML = `<div class="wz-prog">${steps.map((_, i) => `<i class="${i <= wz.step ? 'on' : ''}"></i>`).join('')}</div><div class="wz-cnt"><span>${last ? 'Fatto' : 'Passo ' + (wz.step + 1) + ' di ' + tot}</span><span>${wz.step === 0 ? 'circa 2 minuti' : ''}</span></div>
+    <div class="wz-step" id="wz-step">${wzBody(st)}</div><div class="wz-err" id="wz-err"></div>
+    <div class="wz-acts">${wz.step > 0 && !last ? '<button type="button" class="btn ghost" data-wz="back">← Indietro</button>' : '<span></span>'}<span style="flex:1"></span>${wz.rerun && !last ? '<button type="button" class="btn ghost" data-wz="skipall">Annulla</button>' : ''}${wz.step === 0 && !wz.rerun ? '<button type="button" class="btn ghost" data-wz="skipall">Salta, userò le impostazioni di base</button>' : (!last && ['tetti', 'etichette'].includes(st) ? '<button type="button" class="btn ghost" data-wz="next">Salta</button>' : '')}<button type="button" class="btn" data-wz="${last ? 'close' : 'next'}">${last ? "Inizia a usare l'app" : (steps[wz.step + 1] === 'fine' ? 'Termina' : 'Avanti')}</button></div>`;
+  const f = box.querySelector('.wz-add input'); if(f && st !== 'mods') try{ f.focus({preventScroll: true}); }catch(e){}
+}
+function wzAddVal(key){
+  const inp = document.getElementById('wz-in-' + key); if(!inp) return;
+  const v = inp.value.trim(); if(!v) return;
+  const arr = key.startsWith('l:') ? wz.liste[key.slice(2)] : wz[key];
+  if(!arr.some(x => x.toLowerCase() === v.toLowerCase())) arr.push(v);
+  wzRender();
+}
+function wzValida(st){
+  if(st === 'mods' && !wz.mods.size) return 'Seleziona almeno una scheda.';
+  if(st === 'pagatori' && !wz.pagatori.length) return 'Inserisci almeno un nome, ad esempio «Assicurazione».';
+  return '';
+}
+async function wzApplica(){
+  MODULI_IDS.forEach(id => { settings.moduli[id].on = wz.mods.has(id); });
+  settings.elenchi.persone = wz.persone.slice();
+  Object.keys(wz.liste).forEach(k => { if(k !== 'persone') settings.elenchi[k] = wz.liste[k].slice(); });
+  if(wz.mods.has('medical')){
+    if(!wz.rerun && wz.pagatori.length) settings.pagatori = wz.pagatori.map((n, i) => ({id: 'p' + (i + 1), nome: n}));
+    WZ_MX.forEach(m => {
+      const c = wz.mx[m.id]; if(!c.on) return;
+      if(settings.massimali.some(x => (x.nome || '').toLowerCase() === m.nome.toLowerCase())) return;
+      const importi = {}; settings.pagatori.forEach((p, i) => { const v = parseFloat(c.importi[i]); if(v > 0) importi[p.id] = v; });
+      if(Object.keys(importi).length) settings.massimali.push({id: uid(), nome: m.nome, parole: m.parole, ambito: m.ambito, tipo: m.tipo, importi});
+    });
+  }
+  settings.configurato = true;
+  applySettings(); renderAll();
+  await saveSettings();
+}
+function wzClose(){ document.getElementById('welcome').style.display = 'none'; document.body.classList.remove('wz-open'); wz = null; }
+showWelcome = function(rerun){ wzInit(!!rerun === true); document.getElementById('welcome').style.display = 'flex'; document.body.classList.add('wz-open'); wzRender(); };
+(function(){
+  const w = document.getElementById('welcome'); if(!w) return;
+  w.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-wz]'); if(!b || !wz) return;
+    const a = b.dataset.wz, steps = wzSteps(), st = steps[wz.step];
+    if(a === 'mod'){ const id = b.dataset.id; wz.mods.has(id) ? wz.mods.delete(id) : wz.mods.add(id); return wzRender(); }
+    if(a === 'avvio'){ wz.avvio = b.dataset.id; return wzRender(); }
+    if(a === 'mx'){ const c = wz.mx[b.dataset.id]; c.on = !c.on; return wzRender(); }
+    if(a === 'add') return wzAddVal(b.dataset.k);
+    if(a === 'sug'){ const arr = wz[b.dataset.k]; if(arr && !arr.includes(b.dataset.v)) arr.push(b.dataset.v); return wzRender(); }
+    if(a === 'rm'){ const k = b.dataset.k, arr = k.startsWith('l:') ? wz.liste[k.slice(2)] : wz[k]; arr.splice(+b.dataset.i, 1); return wzRender(); }
+    if(a === 'back'){ if(wz.step > 0) wz.step--; return wzRender(); }
+    if(a === 'skipall'){ if(wz.rerun){ return wzClose(); } settings.configurato = true; wzClose(); applySettings(); renderAll(); await saveSettings(); return; }
+    if(a === 'next'){
+      if(b.textContent.trim() !== 'Salta'){ const er = wzValida(st); if(er){ document.getElementById('wz-err').textContent = er; return; } }
+      if(steps[wz.step + 1] === 'fine'){ await wzApplica(); }
+      wz.step++; return wzRender();
+    }
+    if(a === 'go'){ const id = b.dataset.id; wzClose(); const t = document.querySelector('.tab-btn[data-tab="' + id + '"]'); if(t) t.click(); return; }
+    if(a === 'close'){ const bk = wz.avvio === 'backup' && !wz.rerun; wzClose(); if(bk){ const t = document.querySelector('.tab-btn[data-tab="impostazioni"]'); if(t) t.click(); setTimeout(() => { const x = document.getElementById('backup-import-text'); if(x){ x.scrollIntoView({block: 'center'}); try{ x.focus(); }catch(err){} } }, 150); } }
+  });
+  w.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && e.target.matches && e.target.matches('.wz-add input')){ e.preventDefault(); wzAddVal(e.target.id.slice(6)); }
+    else if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('wz-card') && e.target.dataset.wz){ e.preventDefault(); e.target.click(); }
+  });
+  w.addEventListener('input', (e) => { const t = e.target; if(wz && t.dataset && t.dataset.wzImp){ wz.mx[t.dataset.wzImp].importi[t.dataset.pi] = t.value; } });
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-wz-rerun]'); if(b) showWelcome(true); });
+})();
 
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
