@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Casa e Famiglia</title>
+<title>Duewell</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%232F5BEA'/%3E%3Cg transform='translate(3 3.2) scale(.75)' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 11l9-7 9 7'/%3E%3Cpath d='M5 10v10h14V10'/%3E%3Cpath d='M9 14.5l2.2 2.2L15.5 12.5'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Casa e Famiglia">
+<meta name="apple-mobile-web-app-title" content="Duewell">
 <style>
   :root{
     --paper:#F3F3F6;
@@ -819,11 +819,11 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
 <div id="auth-gate" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--page-bg);">
   <div style="width:100%;max-width:360px;padding:2rem;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
-      <div style="width:44px;height:44px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 14.5l2.2 2.2L15.5 12.5"/></svg>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#12A594);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.3 9.5"/></svg>
       </div>
       <div>
-        <p id="auth-app-name" style="font-size:18px;font-weight:700;margin:0;">Casa e Famiglia</p>
+        <p id="auth-app-name" style="font-size:18px;font-weight:700;margin:0;">Duewell</p>
         <p style="font-size:12.5px;color:var(--ink-soft);margin:2px 0 0;">Accedi al registro di famiglia</p>
       </div>
     </div>
@@ -870,10 +870,10 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
     <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:20px;">
       <div style="display:flex;align-items:center;gap:16px;">
         <div class="hdr-logo" style="width:52px;height:52px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 14.5l2.2 2.2L15.5 12.5"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.3 9.5"/></svg>
         </div>
         <div>
-          <h1 style="margin:0;" id="app-title">Family Dashboard</h1>
+          <h1 style="margin:0;" id="app-title">Duewell</h1>
           <p style="margin:4px 0 0;">Scadenze, rimborsi, contratti e documenti di famiglia in un unico posto.</p>
         </div>
       </div>
@@ -904,7 +904,7 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
   <div class="summary" id="summary"></div>
 
   <nav class="tabs">
-    <div class="side-brand"><div class="logo-c" id="side-logo"></div><div class="sb-t"><span id="side-name">Casa e Famiglia</span><small id="side-fam"></small></div></div>
+    <div class="side-brand"><div class="logo-c" id="side-logo"></div><div class="sb-t"><span id="side-name">Duewell</span><small id="side-fam"></small></div></div>
     <button class="tab-btn active" data-tab="panoramica"><span class="ic-col" style="--c:#64748B">🏠</span>Panoramica</button>
     <button class="tab-btn" data-tab="recurring"><span class="ic-col" style="--c:#2F5BEA">💳</span>Pagamenti ricorrenti</button>
     <button class="tab-btn" data-tab="medical"><span class="ic-col" style="--c:#E5484D">🩺</span>Sanità integrativa</button>
@@ -3045,8 +3045,8 @@ function applyProfilo(){
   const p = settings.profilo || {nome:'', foto:'', colore:'#2F5BEA'};
   const nome = p.nome || 'Famiglia';
   const ini = (nome.trim()[0] || 'F').toUpperCase();
-  const logo = document.getElementById('side-logo'), appN = p.app || 'Casa e Famiglia';
-  if(logo){ logo.style.backgroundImage = p.foto ? 'url(' + p.foto + ')' : ''; logo.innerHTML = p.foto ? '' : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 14.5l2.2 2.2L15.5 12.5"/></svg>'; logo.classList.toggle('ph', !!p.foto); }
+  const logo = document.getElementById('side-logo'), appN = (p.app && p.app !== 'Casa e Famiglia' && p.app !== 'Family Dashboard') ? p.app : 'Duewell';
+  if(logo){ logo.style.backgroundImage = p.foto ? 'url(' + p.foto + ')' : ''; logo.innerHTML = p.foto ? '' : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.3 9.5"/></svg>'; logo.classList.toggle('ph', !!p.foto); }
   const sn = document.getElementById('side-name'); if(sn) sn.textContent = appN;
   const sf = document.getElementById('side-fam'); if(sf) sf.textContent = p.nome || '';
   document.title = appN; try{ localStorage.setItem('appNome', appN); }catch(e){}
@@ -3114,7 +3114,7 @@ function profiloCardHtml(){
     </div>
     <div class="set-row"><input type="text" id="prof-nome" value="${escHtml(p.nome)}" maxlength="40" placeholder="es. Famiglia Rossi"></div>
     <p class="hint" style="margin:10px 0 6px;">Nome dell'app (menu, scheda del browser, accesso)</p>
-    <div class="set-row"><input type="text" id="prof-app" value="${escHtml(p.app || '')}" maxlength="30" placeholder="Casa e Famiglia"></div>
+    <div class="set-row"><input type="text" id="prof-app" value="${escHtml(p.app || '')}" maxlength="30" placeholder="Duewell"></div>
     <p class="hint" style="margin:10px 0 6px;">Colore principale</p>
     <div class="prof-sw" id="prof-sw">${PROF_COLORI.map(col => `<button type="button" data-prof-col="${col}" class="${col === p.colore ? 'on' : ''}" style="background:${col}" aria-label="Colore ${col}"></button>`).join('')}</div>
     <div style="margin-top:14px;"><button type="button" class="btn" id="prof-save">Salva profilo</button></div>
@@ -3210,7 +3210,7 @@ function renderImpostazioni(){
     </div>
     ${nomiCompletiHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:36</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:43</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -3836,7 +3836,7 @@ function ckIcs(ev){
   const esc = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
   const d8 = (iso) => iso.replace(/-/g, '');
   const st = new Date(); const stamp = st.getUTCFullYear() + ck2(st.getUTCMonth() + 1) + ck2(st.getUTCDate()) + 'T' + ck2(st.getUTCHours()) + ck2(st.getUTCMinutes()) + ck2(st.getUTCSeconds()) + 'Z';
-  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Casa e Famiglia//Check-up//IT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT', 'UID:' + ev.uid + '@casa-e-famiglia', 'DTSTAMP:' + stamp];
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Duewell//Check-up//IT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT', 'UID:' + ev.uid + '@casa-e-famiglia', 'DTSTAMP:' + stamp];
   if(ev.ora){
     const p = ev.data.split('-').map(Number), h = ev.ora.split(':').map(Number), a = new Date(p[0], p[1] - 1, p[2], h[0], h[1]), b = new Date(a.getTime() + 3600000);
     const f = (x) => x.getFullYear() + ck2(x.getMonth() + 1) + ck2(x.getDate()) + 'T' + ck2(x.getHours()) + ck2(x.getMinutes()) + '00';
@@ -4346,7 +4346,7 @@ function wzChips(key, arr, sug){
   ${sug && sug.filter(x => !arr.includes(x)).length ? `<div class="wz-lbl">Suggeriti</div><div class="wz-chips">${sug.filter(x => !arr.includes(x)).map(x => `<button type="button" class="wz-chip sug" data-wz="sug" data-k="${key}" data-v="${wzEsc(x)}">+ ${wzEsc(x)}</button>`).join('')}</div>` : ''}`;
 }
 function wzBody(st){
-  if(st === 'mods') return `<h2>${wz.rerun ? 'Cosa vuoi tenere sotto controllo?' : 'Benvenuto! Cosa vuoi tenere sotto controllo?'}</h2><p class="sub">Scegli quello che ti serve. Potrai cambiare idea quando vuoi dalle Impostazioni.</p>
+  if(st === 'mods') return `<h2>${wz.rerun ? 'Cosa vuoi tenere sotto controllo?' : 'Benvenuto in Duewell! Cosa vuoi tenere sotto controllo?'}</h2><p class="sub">Scegli quello che ti serve. Potrai cambiare idea quando vuoi dalle Impostazioni.</p>
     <div class="wz-grid">${MODULI_IDS.map(id => { const m = WZ_MODS[id], on = wz.mods.has(id); return `<div class="wz-card ${on ? 'sel' : ''}" data-wz="mod" data-id="${id}" role="checkbox" aria-checked="${on}" tabindex="0">${wzIc(m[0], WZ_COL[id], id)}<div><b>${wzEsc(m[1])}</b><span>${wzEsc(m[2])}</span></div><i class="chk">${on ? '✓' : ''}</i></div>`; }).join('')}</div>`;
   if(st === 'persone') return `<h2>Chi fa parte della famiglia?</h2><p class="sub">Compariranno come scelte rapide quando inserisci spese, documenti e visite. Scrivi il nome con cui li chiami, te compreso.</p>${wzChips('persone', wz.persone)}`;
   if(st === 'pagatori') return `<h2>Chi ti rimborsa le spese mediche?</h2><p class="sub">Ogni nome diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta. Mettili nell'ordine in cui di solito invii le pratiche.</p>${wzChips('pagatori', wz.pagatori, WZ_PAG_SUG)}<div class="wz-note">Non ricevi rimborsi? Lascia un nome generico, ad esempio «Assicurazione»: potrai cambiarlo dalle Impostazioni.</div>`;
