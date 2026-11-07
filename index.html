@@ -662,6 +662,8 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+#panel-impostazioni .hint a{color:var(--accent);font-weight:600;text-decoration:none;font-size:13px}#panel-impostazioni .hint a:hover{text-decoration:underline}
+.acc-ic{background:transparent !important;width:auto;height:auto}.acc-ic .ic-col{width:36px;height:36px;font-size:19px;border-radius:11px;background:color-mix(in srgb,var(--c) 18%,#fff);box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 22%,transparent)}.acc-ic .ic-col.dk{background:var(--c);box-shadow:none}
 nav.tabs{background:linear-gradient(170deg,#10243a 0%,#17406b 62%,#0f7f77 135%)}
 #logout-bar{background:transparent !important}
 @media (max-width:760px){nav.tabs{background:linear-gradient(100deg,#10243a 0%,#17406b 70%,#0f7f77 140%)}#logout-bar{background:var(--bg) !important}}
@@ -3237,7 +3239,7 @@ function renderImpostazioni(){
     ${driveSettingsHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
     <p class="hint" style="margin:14px 2px 0"><a href="privacy.html" target="_blank" rel="opener">Informativa sulla privacy</a> · <a href="termini.html" target="_blank" rel="opener">Termini di servizio</a></p>
-    <p class="hint" style="margin:6px 2px 0">Versione app: <b>07/11/2026 22:36</b></p>
+    <p class="hint" style="margin:6px 2px 0">Versione app: <b>07/11/2026 22:38</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -6467,7 +6469,8 @@ function dtTimelineFor(id){ const m = medical.find(x => x.id === id); return m ?
 // ---- Impostazioni: schede espandibili, una alla volta; backup nelle impostazioni ----
 let accOpen = null;
 const ACC_GROUPS = [['Famiglia', ['profilo', 'moduli']], ['Sanità', ['rimborsi', 'sanita']], ['Dati', ['elenchi', 'backup']]];
-const ACC_ICON = {profilo:'☺', moduli:'▦', rimborsi:'✚', sanita:'%', elenchi:'☰', backup:'⤓'};
+const _accIc = (e, c, dk) => '<span class="ic-col' + (dk ? ' dk' : '') + '" style="--c:' + c + '">' + e + '</span>';
+const ACC_ICON = {profilo:_accIc('👨‍👩‍👧','#F76B15'), moduli:_accIc('🧩','#7C3AED'), rimborsi:_accIc('💶','#1C8A5A'), sanita:_accIc('🩺','#E5484D'), elenchi:_accIc('📋','#0EA5E9',true), backup:_accIc('💾','#475569',true)};
 function accToday(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function accDaysAgo(iso){ if(!iso) return null; const a = Date.parse(iso + 'T00:00:00Z'), b = Date.parse(accToday() + 'T00:00:00Z'); return isNaN(a) ? null : Math.round((b - a) / 86400000); }
 function accAgo(g){ return g <= 0 ? 'oggi' : g === 1 ? 'ieri' : g + ' giorni fa'; }
