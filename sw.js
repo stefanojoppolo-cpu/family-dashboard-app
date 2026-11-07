@@ -1,4 +1,4 @@
-const CACHE_NAME = 'casa-famiglia-v2';
+const CACHE_NAME = 'duewell-v1';
 const urlsToCache = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
