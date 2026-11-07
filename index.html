@@ -449,6 +449,10 @@
   .pano-bar .pb-track{height:8px;border-radius:8px;background:var(--line);overflow:hidden;margin:8px 0 2px;}
   .pano-bar .pb-track i{display:block;height:100%;border-radius:8px;background:var(--accent);}
   .pano-bar .pb-track i.hot{background:var(--gold);}
+  .pano-bar .pb-parts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .pano-bar .pb-part{flex:1 1 110px;min-width:0;border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:12px;color:var(--ink-soft);}
+  .pano-bar .pb-part b{display:block;color:var(--ink);font-size:12.5px;}
+  .pano-bar .pb-track.sm{height:5px;margin:5px 0 0;}
   .pano-bar .pb-track i.full{background:var(--stamp);}
   .pano-open{margin-left:auto;}
   @media (max-width:1000px){#panoramica-cards{grid-template-columns:1fr;}}
@@ -1817,16 +1821,22 @@ function massimaliMetrics(){
     } else {
       gruppi.push({n:'', suff:'', righe});
     }
-    gruppi.forEach(g => {
+    const q = mx.tipo === 'quantita';
+    const cella = (g, p) => { const importo = mx.importi && mx.importi[p.id]; if(!(importo > 0)) return null; const usato = q ? g.righe.length : g.righe.reduce((s, m) => s + rimborsoDi(m, p.id).pagato, 0); return {importo, usato, residuo: Math.max(0, importo - usato)}; };
+    const somma = (parti) => parti.reduce((a, x) => ({usato: a.usato + x.usato, importo: a.importo + x.importo, residuo: a.residuo + x.residuo}), {usato: 0, importo: 0, residuo: 0});
+    const push = (k, titolo, parti, nPrest) => { const t = somma(parti); out.push({k, bar:{usato: t.usato, importo: t.importo, residuo: t.residuo, q, titolo, parti: parti.length > 1 ? parti : null}, valore: q ? qtaTxt(t.residuo) : euro(t.residuo), label: `Massimale ${escHtml(titolo)} residuo (${anno}) · ${nPrest} prest.`, cls: t.residuo <= 0.004 ? 'warn' : ''}); };
+    if(mx.ambito === 'persona' && gruppi.length > 1){
       pags.forEach(p => {
-        const importo = mx.importi && mx.importi[p.id];
-        if(!(importo > 0)) return;
-        const q = mx.tipo === 'quantita';
-        const usato = q ? g.righe.length : g.righe.reduce((s, m) => s + rimborsoDi(m, p.id).pagato, 0);
-        const residuo = Math.max(0, importo - usato);
-        out.push({k:`mx_${mx.id}_${p.id}_${g.n}`, bar:{usato, importo, residuo, q, titolo:`${mx.nome}${pags.length > 1 ? ' — ' + p.nome : ''}${g.suff}`}, valore: q ? qtaTxt(residuo) : euro(residuo), label: `Massimale ${escHtml(mx.nome)}${pags.length > 1 ? ' — ' + escHtml(p.nome) : ''}${escHtml(g.suff)} residuo (${anno}) · ${g.righe.length} prest.`, cls: residuo <= 0.004 ? 'warn' : ''});
+        const parti = gruppi.map(g => { const c = cella(g, p); return c && {...c, nome: g.n}; }).filter(Boolean);
+        if(parti.length) push(`mx_${mx.id}_${p.id}`, `${mx.nome}${pags.length > 1 ? ' — ' + p.nome : ''}`, parti, righe.length);
       });
-    });
+    } else if(gruppi.length === 1){
+      const parti = pags.map(p => { const c = cella(gruppi[0], p); return c && {...c, nome: p.nome}; }).filter(Boolean);
+      if(parti.length === 1) push(`mx_${mx.id}_${pags.find(p => p.nome === parti[0].nome).id}_${gruppi[0].n}`, `${mx.nome}${pags.length > 1 ? ' — ' + parti[0].nome : ''}${gruppi[0].suff}`, parti, righe.length);
+      else if(parti.length) push(`mx_${mx.id}`, mx.nome, parti, righe.length);
+    } else {
+      gruppi.forEach(g => pags.forEach(p => { const c = cella(g, p); if(c) push(`mx_${mx.id}_${p.id}_${g.n}`, `${mx.nome}${pags.length > 1 ? ' — ' + p.nome : ''}${g.suff}`, [c], g.righe.length); }));
+    }
   });
   return out;
 }
@@ -2846,7 +2856,7 @@ function panoBarHtml(b, secId){
   return `<div class="pano-box pano-bar ${b.on ? '' : 'off'}" data-jump-tab="${secId}">
     <span class="pano-tools"><button type="button" data-act="box-left" data-sec="${secId}" data-k="${m.k}">←</button><button type="button" data-act="box-right" data-sec="${secId}" data-k="${m.k}">→</button><button type="button" data-act="box-eye" data-sec="${secId}" data-k="${m.k}">👁</button></span>
     <div class="pb-head"><strong>Massimale ${escHtml(x.titolo)}</strong><span>${x.q ? `<strong>${x.usato} su ${x.importo}</strong> ${x.importo === 1 ? 'usata' : 'usate'} · residuo ${qtaTxt(x.residuo)}` : `residuo <strong>${euro(x.residuo)}</strong> su ${euro(x.importo)}`}</span></div>
-    <div class="pb-track"><i class="${cl}" style="width:${pct}%"></i></div>
+    <div class="pb-track"><i class="${cl}" style="width:${pct}%"></i></div>${x.parti ? `<div class="pb-parts">${x.parti.map(pt => { const pp = pt.importo > 0 ? Math.min(100, Math.round(pt.usato / pt.importo * 100)) : 0; return `<div class="pb-part"><b>${escHtml(pt.nome || '—')}</b><span>${x.q ? pt.usato + ' su ' + pt.importo : 'residuo ' + euro(pt.residuo) + ' su ' + euro(pt.importo)}</span><div class="pb-track sm"><i class="${pp >= 100 ? 'full' : (pp >= 70 ? 'hot' : '')}" style="width:${pp}%"></i></div></div>`; }).join('')}</div>` : ''}
   </div>`;
 }
 function paintRibbon(rb){
@@ -3167,7 +3177,7 @@ function renderImpostazioni(){
       <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
     ${nomiCompletiHtml()}
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 12:59</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:12</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
