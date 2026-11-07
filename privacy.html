@@ -20,7 +20,7 @@ a{color:var(--accent);font-weight:600}
 .foot a{color:var(--soft)}
 @media(max-width:600px){.card{padding:22px 18px;border-radius:14px}h1{font-size:24px}.top-in .back{padding:7px 11px}}
 </style></head><body>
-<header class="top"><div class="top-in"><span class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.3 9.5"/></svg></span><a class="brand" href="./">Duewell</a><a class="back" href="./">Torna all'app</a></div></header>
+<header class="top"><div class="top-in"><span class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.3 9.5"/></svg></span><a class="brand" href="./" data-back>Duewell</a><a class="back" href="./" data-back>Torna all'app</a></div></header>
 <main><article class="card"><h1>Informativa sulla privacy</h1><p class="upd">Ultimo aggiornamento: 7 novembre 2026</p>
 <p>Duewell è un'app web per tenere in un unico posto scadenze, rimborsi sanitari, contratti, acquisti e documenti della famiglia. Questa pagina spiega quali dati usa e come.</p>
 <h2>Chi è il titolare</h2><p>Stefano Joppolo, contatto: <a href="mailto:stefano.joppolo@gmail.com">stefano.joppolo@gmail.com</a>.</p>
@@ -37,4 +37,5 @@ a{color:var(--accent);font-weight:600}
 <h2>Condivisione con terzi</h2><p>I dati non vengono venduti né ceduti a terzi, e non sono usati per pubblicità. Sono trattati solo dai fornitori tecnici necessari al servizio (Google Firebase e Google Drive).</p>
 <h2>I tuoi diritti</h2><p>Puoi esportare i tuoi dati dalle Impostazioni (backup) e chiedere la cancellazione dell'account e dei dati scrivendo all'indirizzo di contatto.</p>
 <h2>Modifiche</h2><p>Se questa informativa cambia, la data in alto viene aggiornata.</p></article></main>
+<script>document.querySelectorAll('[data-back]').forEach(function(a){a.addEventListener('click',function(e){try{if(window.opener&&!window.opener.closed){e.preventDefault();try{window.opener.focus()}catch(x){}window.close();setTimeout(function(){location.href=a.getAttribute('href')},250)}}catch(x){}})})</script>
 <div class="foot"><a href="privacy.html">Informativa sulla privacy</a><a href="termini.html">Termini di servizio</a><span>© Duewell</span></div></body></html>
