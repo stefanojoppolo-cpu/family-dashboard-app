@@ -3166,7 +3166,7 @@ function renderImpostazioni(){
       <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
     ${nomiCompletiHtml()}
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 12:38</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 12:54</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -4141,7 +4141,7 @@ function renderAcquisti(){
   const spesa = acquisti.reduce((t, a) => t + (+a.prezzo || 0), 0), list = aqFiltered();
   const cats = AQ_CATS.concat(acquisti.map(a => a.categoria).filter(c => c && !AQ_CATS.includes(c))).filter((c, i, ar) => ar.indexOf(c) === i);
   root.innerHTML = `<div class="ck-head"><div><h2 class="ck-h2">${escHtml((settings.moduli.acquisti && settings.moduli.acquisti.nome) || 'Acquisti e garanzie')}</h2><p class="ck-mut">Elettrodomestici e prodotti con scontrino, garanzia e assistenza a portata di mano.</p></div>
-    <div class="ck-head-a"><button type="button" class="btn primary" data-aq="new">+ Nuovo acquisto</button></div></div>
+    <div class="ck-head-a"><button type="button" class="btn ghost" data-aq="import">Importa da file</button><button type="button" class="btn primary" data-aq="new">+ Nuovo acquisto</button></div></div>
     <div class="aq-kpi"><div><b>${acquisti.length}</b><span>Acquisti</span></div><div><b>${n('attiva') + n('scadenza')}</b><span>In garanzia</span></div><div class="${n('scadenza') ? 'warn' : ''}"><b>${n('scadenza')}</b><span>In scadenza</span></div><div><b>${n('scaduta')}</b><span>Scadute</span></div><div><b>${euro(spesa)}</b><span>Speso</span></div></div>
     <div class="aq-tools"><input class="ck-in" id="aq-search" type="search" placeholder="Cerca prodotto, marca, negozio…" value="${escHtml(aqQ)}">
       <select class="ck-in" id="aq-cat"><option value="">Tutte le categorie</option>${cats.map(c => `<option${c === aqCat ? ' selected' : ''}>${escHtml(c)}</option>`).join('')}</select>
@@ -4224,11 +4224,21 @@ function aqShareAsk(){
     ${can ? '<p class="ck-mut" style="margin:10px 0 0">Premi «Condividi» e scegli WhatsApp dalla lista delle app.</p>' : '<p class="ck-mut" style="margin:10px 0 0;color:var(--stamp)">Questo dispositivo o browser non permette di condividere file da qui. Prova dal telefono (Chrome su Android o Safari su iPhone).</p>'}</div>
     <div class="md-foot"><button type="button" class="btn small ghost" data-aq="open" data-id="${a.id}">Indietro</button>${can ? '<button type="button" class="btn small primary" data-aq="sharego">Condividi</button>' : ''}</div>`);
 }
+async function aqImport(text){
+  let o = null; try{ const m = /###\s*ACQUISTI E GARANZIE\s*\n/.exec(text); o = JSON.parse(m ? text.slice(m.index + m[0].length).trim() : text); }catch(e){ o = null; }
+  const arr = Array.isArray(o) ? o : (o && Array.isArray(o.acquisti) ? o.acquisti : null);
+  if(!arr){ showNotice('File non riconosciuto: servono gli acquisti in formato JSON.'); return; }
+  const have = new Set(acquisti.map(x => x.id)); let n = 0;
+  arr.forEach(x => { if(x && x.prodotto && x.data && !have.has(x.id)){ acquisti.push({...x, id: x.id || uid()}); have.add(x.id); n++; } });
+  await saveAcquisti(); renderAcquisti(); try{ renderPanoramica(); }catch(e){}
+  showNotice(n ? 'Importati ' + n + (n === 1 ? ' acquisto.' : ' acquisti.') : 'Nessun acquisto nuovo: erano già presenti.');
+}
 // ---- eventi
 document.addEventListener('click', async (e) => {
   const b = e.target.closest && e.target.closest('[data-aq]'); if(!b) return;
   const a = b.dataset.aq, id = b.dataset.id;
   if(a === 'new') return aqForm('');
+  if(a === 'import'){ let inp = document.getElementById('aq-imp'); if(inp) inp.remove(); inp = document.createElement('input'); inp.type = 'file'; inp.id = 'aq-imp'; inp.accept = '.json,.txt,application/json,text/plain'; inp.hidden = true; inp.addEventListener('change', async () => { if(inp.files[0]) aqImport(await inp.files[0].text()); }); document.body.append(inp); inp.click(); return; }
   if(a === 'open') return aqDetail(id);
   if(a === 'edit') return aqForm(id);
   if(a === 'save') return aqSave(id);
