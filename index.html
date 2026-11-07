@@ -3221,7 +3221,7 @@ function renderImpostazioni(){
     ${nomiCompletiHtml()}
     ${driveSettingsHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 21:17</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 21:26</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -4555,11 +4555,11 @@ document.addEventListener('click', async (e) => {
   const a = b.dataset.drv;
   if(a === 'settings'){ ckClose(); const t = document.querySelector('.tab-btn[data-tab="impostazioni"]'); if(t) t.click(); return; }
   if(a === 'save'){
-    ['apiKey', 'clientId', 'appId'].forEach(k => { const el = document.getElementById('drv-' + k); if(el) drvCfg[k] = el.value.trim(); });
+    ['apiKey', 'clientId', 'appId'].forEach(k => { const el = document.getElementById('drv-' + k); if(el) drvCfg[k] = el.value.trim() || DRIVE_DEFAULT[k]; });
     await saveDriveCfg(); drvPreload(); showNotice('Configurazione di Google Drive salvata.'); try{ renderImpostazioni(); }catch(err){} return;
   }
   if(a === 'test'){
-    ['apiKey', 'clientId', 'appId'].forEach(k => { const el = document.getElementById('drv-' + k); if(el) drvCfg[k] = el.value.trim(); });
+    ['apiKey', 'clientId', 'appId'].forEach(k => { const el = document.getElementById('drv-' + k); if(el) drvCfg[k] = el.value.trim() || DRIVE_DEFAULT[k]; });
     if(!drvOk()){ showNotice('Inserisci almeno la chiave API e l\'ID client.'); return; }
     try{ await driveToken(); showNotice('Collegamento riuscito: Drive risponde.'); }catch(err){ showNotice('Collegamento non riuscito: ' + (err.message || err)); } return;
   }
@@ -4577,12 +4577,16 @@ document.addEventListener('click', async (e) => {
   }
 });
 function driveSettingsHtml(){
-  const st = drvOk() ? '<span class="hint" style="color:#1f6b45;font-weight:700">Configurato</span>' : '<span class="hint">Non configurato</span>';
-  const f = (k, l, ph) => `<div style="margin-bottom:8px"><label style="font-size:11.5px;color:var(--ink-soft);display:block">${l}</label><input type="text" id="drv-${k}" value="${escHtml(drvCfg[k] || '')}" placeholder="${ph}" style="width:100%" autocomplete="off"></div>`;
+  const st = drvOk() ? '<span class="hint" style="color:#1f6b45;font-weight:700">Collegato</span>' : '<span class="hint">Non configurato</span>';
+  const custom = k => (drvCfg[k] && drvCfg[k] !== DRIVE_DEFAULT[k]) ? drvCfg[k] : '';
+  const f = (k, l, ph) => `<div style="margin-bottom:8px"><label style="font-size:11.5px;color:var(--ink-soft);display:block">${l}</label><input type="text" id="drv-${k}" value="${escHtml(custom(k))}" placeholder="${ph}" style="width:100%" autocomplete="off"></div>`;
+  const aperto = (DRIVE_DEFAULT.apiKey && DRIVE_DEFAULT.clientId) ? '' : ' open';
   return `<p class="form-section-title" style="margin:20px 0 6px;">Google Drive ${st}</p>
-    <p class="hint" style="margin:0 0 10px;font-size:12.5px;color:var(--ink-soft);">Serve per scegliere i file dal tuo Drive e inviarli su WhatsApp. Duewell vede solo i file che scegli tu. I tre codici si trovano nel progetto Google Cloud.</p>
-    ${f('apiKey', 'Chiave API', 'AIza…')}${f('clientId', 'ID client OAuth (applicazione web)', '123456789-abc….apps.googleusercontent.com')}${f('appId', 'Numero del progetto', '123456789')}
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" data-drv="save">Salva</button><button type="button" class="btn small ghost" data-drv="test">Prova il collegamento</button></div>`;
+    <p class="hint" style="margin:0 0 10px;font-size:12.5px;color:var(--ink-soft);">Scegli i file dal tuo Drive e inviali su WhatsApp. Duewell vede solo i file che scegli tu. Il collegamento si attiva la prima volta che usi il pulsante 📁.</p>
+    <details${aperto} style="margin-bottom:6px"><summary class="hint" style="cursor:pointer;font-size:12.5px">Avanzate: usa un progetto Google proprio</summary>
+    <div style="margin-top:10px">${f('apiKey', 'Chiave API', 'Lascia vuoto per usare quella di Duewell')}${f('clientId', 'ID client OAuth (applicazione web)', 'Lascia vuoto per usare quello di Duewell')}${f('appId', 'Numero del progetto', 'Lascia vuoto per usare quello di Duewell')}
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" data-drv="save">Salva</button></div></div></details>
+    <div style="margin-top:8px"><button type="button" class="btn small ghost" data-drv="test">Prova il collegamento</button></div>`;
 }
 
 // Tabs
