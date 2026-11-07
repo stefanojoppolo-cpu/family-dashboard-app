@@ -664,6 +664,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-modal.on{display:flex}
 .ic-col{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;font-size:15px;line-height:1;flex:none;background:color-mix(in srgb, var(--c) 16%, transparent);font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-style:normal}
 .tab-btn .ic-col{width:28px;height:28px;background:color-mix(in srgb, var(--c) 22%, #ffffff);box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.ic-col.dk,.tab-btn .ic-col.dk{background:var(--c);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
 @media (max-width:760px){.tab-btn .ic-col{width:26px;height:26px;font-size:14px}}
 .pano-box h3 .ic-col,.pano-head .ic-col{margin-right:2px}
 /* ---- Configurazione guidata ---- */
@@ -909,11 +910,11 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
     <button class="tab-btn" data-tab="medical"><span class="ic-col" style="--c:#E5484D">🩺</span>Sanità integrativa</button>
     <button class="tab-btn" data-tab="checkup"><span class="ic-col" style="--c:#12A594">🗓️</span>Check-up e visite</button>
     <button class="tab-btn" data-tab="acquisti"><span class="ic-col" style="--c:#F76B15">🛍️</span>Acquisti e garanzie</button><button class="tab-btn" data-tab="bilancio"><span class="ic-col" style="--c:#F5A524">📊</span>Bilancio annuale</button>
-    <button class="tab-btn" data-tab="contratti"><span class="ic-col" style="--c:#3E63DD">📑</span>Contratti a scadenza</button>
-    <button class="tab-btn" data-tab="documenti"><span class="ic-col" style="--c:#8E4EC6">📄</span>Documenti personali</button>
-    <button class="tab-btn" data-tab="detrazioni"><span class="ic-col" style="--c:#30A46C">🧾</span>Detrazioni fiscali</button>
-    <button class="tab-btn" data-tab="report"><span class="ic-col" style="--c:#0EA5E9">📈</span>Report</button>
-    <button class="tab-btn" data-tab="impostazioni"><span class="ic-col" style="--c:#7D8590">⚙️</span>Impostazioni</button>
+    <button class="tab-btn" data-tab="contratti"><span class="ic-col dk" style="--c:#3E63DD">📑</span>Contratti a scadenza</button>
+    <button class="tab-btn" data-tab="documenti"><span class="ic-col dk" style="--c:#7C3AED">📄</span>Documenti personali</button>
+    <button class="tab-btn" data-tab="detrazioni"><span class="ic-col dk" style="--c:#1F8A57">🧾</span>Detrazioni fiscali</button>
+    <button class="tab-btn" data-tab="report"><span class="ic-col dk" style="--c:#0B7FBF">📈</span>Report</button>
+    <button class="tab-btn" data-tab="impostazioni"><span class="ic-col dk" style="--c:#1F2937">⚙️</span>Impostazioni</button>
   </nav>
 
   <section class="panel active" id="panel-panoramica">
@@ -2777,9 +2778,9 @@ function renderDetrazioni(){
 const ICONA_RECURRING = `<span class="ic-col" style="--c:#2F5BEA">💳</span>`;
 const ICONA_MEDICAL = `<span class="ic-col" style="--c:#E5484D">🩺</span>`;
 const ICONA_BILANCIO = `<span class="ic-col" style="--c:#F5A524">📊</span>`;
-const ICONA_CONTRATTI = `<span class="ic-col" style="--c:#3E63DD">📑</span>`;
-const ICONA_DOCUMENTI = `<span class="ic-col" style="--c:#8E4EC6">📄</span>`;
-const ICONA_DETRAZIONI = `<span class="ic-col" style="--c:#30A46C">🧾</span>`;
+const ICONA_CONTRATTI = `<span class="ic-col dk" style="--c:#3E63DD">📑</span>`;
+const ICONA_DOCUMENTI = `<span class="ic-col dk" style="--c:#7C3AED">📄</span>`;
+const ICONA_DETRAZIONI = `<span class="ic-col dk" style="--c:#1F8A57">🧾</span>`;
 
 function scadenzaLabel(giorni){
   if(giorni < 0) return `scaduto da ${Math.abs(giorni)} giorn${Math.abs(giorni)===1?'o':'i'}`;
@@ -3209,7 +3210,7 @@ function renderImpostazioni(){
     </div>
     ${nomiCompletiHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:32</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:36</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -4320,8 +4321,9 @@ const WZ_MX = [
 const WZ_LISTE = {
   medical: ['prestazioni'], recurring: ['voci'], contratti: ['tipiContratto'], documenti: ['tipiDocumento'], detrazioni: ['categorieDetrazione'], bilancio: ['conti']
 };
-const WZ_COL = {recurring:'#2F5BEA', medical:'#E5484D', checkup:'#12A594', acquisti:'#F76B15', bilancio:'#F5A524', contratti:'#3E63DD', documenti:'#8E4EC6', detrazioni:'#30A46C'};
-const wzIc = (e, col) => `<span class="ic-col" style="--c:${col}">${e}</span>`;
+const WZ_COL = {recurring:'#2F5BEA', medical:'#E5484D', checkup:'#12A594', acquisti:'#F76B15', bilancio:'#F5A524', contratti:'#3E63DD', documenti:'#7C3AED', detrazioni:'#1F8A57'};
+const WZ_DK = ['contratti', 'documenti', 'detrazioni'];
+const wzIc = (e, col, id) => `<span class="ic-col${WZ_DK.includes(id) ? ' dk' : ''}" style="--c:${col}">${e}</span>`;
 let wz = null;
 const wzEsc = (s) => escHtml(String(s == null ? '' : s));
 function wzInit(rerun){
@@ -4345,7 +4347,7 @@ function wzChips(key, arr, sug){
 }
 function wzBody(st){
   if(st === 'mods') return `<h2>${wz.rerun ? 'Cosa vuoi tenere sotto controllo?' : 'Benvenuto! Cosa vuoi tenere sotto controllo?'}</h2><p class="sub">Scegli quello che ti serve. Potrai cambiare idea quando vuoi dalle Impostazioni.</p>
-    <div class="wz-grid">${MODULI_IDS.map(id => { const m = WZ_MODS[id], on = wz.mods.has(id); return `<div class="wz-card ${on ? 'sel' : ''}" data-wz="mod" data-id="${id}" role="checkbox" aria-checked="${on}" tabindex="0">${wzIc(m[0], WZ_COL[id])}<div><b>${wzEsc(m[1])}</b><span>${wzEsc(m[2])}</span></div><i class="chk">${on ? '✓' : ''}</i></div>`; }).join('')}</div>`;
+    <div class="wz-grid">${MODULI_IDS.map(id => { const m = WZ_MODS[id], on = wz.mods.has(id); return `<div class="wz-card ${on ? 'sel' : ''}" data-wz="mod" data-id="${id}" role="checkbox" aria-checked="${on}" tabindex="0">${wzIc(m[0], WZ_COL[id], id)}<div><b>${wzEsc(m[1])}</b><span>${wzEsc(m[2])}</span></div><i class="chk">${on ? '✓' : ''}</i></div>`; }).join('')}</div>`;
   if(st === 'persone') return `<h2>Chi fa parte della famiglia?</h2><p class="sub">Compariranno come scelte rapide quando inserisci spese, documenti e visite. Scrivi il nome con cui li chiami, te compreso.</p>${wzChips('persone', wz.persone)}`;
   if(st === 'pagatori') return `<h2>Chi ti rimborsa le spese mediche?</h2><p class="sub">Ogni nome diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta. Mettili nell'ordine in cui di solito invii le pratiche.</p>${wzChips('pagatori', wz.pagatori, WZ_PAG_SUG)}<div class="wz-note">Non ricevi rimborsi? Lascia un nome generico, ad esempio «Assicurazione»: potrai cambiarlo dalle Impostazioni.</div>`;
   if(st === 'tetti'){
