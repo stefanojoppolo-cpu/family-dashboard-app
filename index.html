@@ -662,6 +662,25 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+#auth-gate.lg{background:radial-gradient(1200px 600px at 10% -10%,#dbe6ff 0,transparent 60%),radial-gradient(900px 500px at 100% 110%,#d3f3ec 0,transparent 55%),var(--page-bg);padding:20px}
+.lg-wrap{display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:900px;background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(16,36,58,.18);overflow:hidden}
+.lg-brand{background:linear-gradient(160deg,#10243a 0%,#17406b 55%,#0f7f77 120%);color:#fff;padding:40px 34px;display:flex;flex-direction:column;justify-content:center}
+.lg-logo{width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#2F5BEA,#12A594);display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.3);margin-bottom:18px}
+.lg-name{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:0}
+.lg-tag{margin:6px 0 24px;color:#c4d3e8;font-size:15px;line-height:1.45}
+.lg-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.lg-list li{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:#e6eefb}
+.lg-list .ic-col{background:color-mix(in srgb,var(--c) 24%,#ffffff);box-shadow:0 0 0 1px rgba(255,255,255,.15)}
+.lg-form{padding:40px 36px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.lg-form h2{margin:0;font-size:24px}.lg-sub{margin:4px 0 20px;color:var(--ink-soft);font-size:14px}
+.lg-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-weight:700;font-size:14.5px;cursor:pointer;color:var(--ink)}
+.lg-google:hover{border-color:#b9c2d0;background:#f8fafc}
+.lg-or{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--ink-soft);font-size:12px}.lg-or span{flex:1;height:1px;background:var(--line)}
+.lg-reg{margin:16px 0 0;text-align:center;font-size:13.5px;color:var(--ink-soft)}
+.lg-link{border:0;background:none;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;padding:0}.lg-link:hover{text-decoration:underline}
+@media (max-width:760px){#auth-gate.lg{padding:0;align-items:stretch!important}.lg-wrap{grid-template-columns:1fr;border-radius:0;box-shadow:none;max-width:none}
+.lg-brand{padding:26px 22px;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:0 14px}.lg-logo{width:46px;height:46px;border-radius:14px;margin:0}.lg-name{font-size:26px}.lg-tag{flex-basis:100%;margin:10px 0 0;font-size:13.5px}.lg-list{display:none}
+.lg-form{padding:26px 22px 32px}}
 .ic-col{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;font-size:15px;line-height:1;flex:none;background:color-mix(in srgb, var(--c) 16%, transparent);font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-style:normal}
 .tab-btn .ic-col{width:28px;height:28px;background:color-mix(in srgb, var(--c) 22%, #ffffff);box-shadow:0 0 0 1px rgba(255,255,255,.12)}
 .ic-col.dk,.tab-btn .ic-col.dk{background:var(--c);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
@@ -816,35 +835,25 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
 </head>
 <body>
 
-<div id="auth-gate" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--page-bg);">
-  <div style="width:100%;max-width:360px;padding:2rem;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
-      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#12A594);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.3 9.5"/></svg>
-      </div>
-      <div>
-        <p id="auth-app-name" style="font-size:18px;font-weight:700;margin:0;">Duewell</p>
-        <p style="font-size:12.5px;color:var(--ink-soft);margin:2px 0 0;">Accedi al registro di famiglia</p>
-      </div>
-    </div>
-    <div id="auth-error" style="display:none;background:var(--stamp-soft);color:var(--stamp);padding:10px 12px;border-radius:6px;font-size:13px;margin-bottom:14px;"></div>
-    <div class="field" style="margin-bottom:12px;">
-      <label>Email</label>
-      <input type="email" id="auth-email" placeholder="tuaemail@esempio.it" style="width:100%;">
-    </div>
-    <div class="field" style="margin-bottom:18px;">
-      <label>Password</label>
-      <input type="password" id="auth-password" placeholder="Almeno 6 caratteri" style="width:100%;">
-    </div>
-    <button class="btn" id="auth-login-btn" style="width:100%;margin-bottom:8px;">Accedi</button>
-    <button class="btn ghost" id="auth-register-btn" style="width:100%;margin-bottom:18px;">Crea un nuovo account</button>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;color:var(--ink-soft);font-size:12px;">
-      <div style="flex:1;height:1px;background:var(--line);"></div>oppure<div style="flex:1;height:1px;background:var(--line);"></div>
-    </div>
-    <button class="btn ghost" id="auth-google-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
-      <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-      Accedi con Google
-    </button>
+<div id="auth-gate" class="lg" style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div class="lg-wrap">
+    <aside class="lg-brand">
+      <div class="lg-logo"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.3 9.5"/></svg></div>
+      <p class="lg-name" id="auth-app-name">Duewell</p>
+      <p class="lg-tag">Scadenze, rimborsi e documenti di famiglia. Tutto a posto.</p>
+      <ul class="lg-list"><li><span class="ic-col" style="--c:#2F5BEA">💳</span>Scadenze e pagamenti sempre sotto controllo</li><li><span class="ic-col" style="--c:#E5484D">🩺</span>Rimborsi sanitari seguiti passo passo</li><li><span class="ic-col" style="--c:#F76B15">🛍️</span>Garanzie e scontrini a portata di mano</li><li><span class="ic-col" style="--c:#12A594">🗓️</span>Visite e controlli con promemoria</li></ul>
+    </aside>
+    <main class="lg-form">
+      <h2>Bentornato</h2>
+      <p class="lg-sub">Accedi per continuare.</p>
+      <div id="auth-error" style="display:none;background:var(--stamp-soft);color:var(--stamp);padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:14px;"></div>
+      <button class="lg-google" id="auth-google-btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Continua con Google</button>
+      <div class="lg-or"><span></span>oppure con la tua email<span></span></div>
+      <div class="field" style="margin-bottom:12px;"><label>Email</label><input type="email" id="auth-email" placeholder="tuaemail@esempio.it" autocomplete="email" style="width:100%;"></div>
+      <div class="field" style="margin-bottom:18px;"><label>Password</label><input type="password" id="auth-password" placeholder="Almeno 6 caratteri" autocomplete="current-password" style="width:100%;"></div>
+      <button class="btn" id="auth-login-btn" style="width:100%;padding:12px;font-size:15px;">Accedi</button>
+      <p class="lg-reg">Non hai ancora un account? <button type="button" class="lg-link" id="auth-register-btn">Crea un account</button></p>
+    </main>
   </div>
 </div>
 
@@ -3210,7 +3219,7 @@ function renderImpostazioni(){
     </div>
     ${nomiCompletiHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:47</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:50</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
