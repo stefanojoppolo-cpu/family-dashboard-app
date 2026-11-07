@@ -658,6 +658,24 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+/* ---- Acquisti e garanzie ---- */
+.aq-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.aq-kpi>div{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.aq-kpi b{display:block;font-size:19px;font-weight:800;overflow:hidden;text-overflow:ellipsis}.aq-kpi span{font-size:12px;color:var(--ink-soft);font-weight:700}
+.aq-kpi .warn{border-color:#E6C27A;background:var(--gold-soft)}
+.aq-tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.aq-tools .ck-in{flex:1 1 180px;min-width:0;width:auto}
+.aq-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.aq-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:13px 16px;cursor:pointer;min-width:0}
+.aq-card:hover{border-color:var(--accent)}
+.aq-top{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.aq-t{font-weight:800;font-size:15px;min-width:0;overflow-wrap:anywhere}
+.aq-s{font-size:13px;margin-top:5px}.aq-m{font-size:12.5px;color:var(--ink-soft);margin-top:4px;overflow-wrap:anywhere}
+.aq-r{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--line);font-size:13.5px}.aq-r span{color:var(--ink-soft)}.aq-r b{text-align:right;overflow-wrap:anywhere}
+.aq-box{margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:13.5px}
+.aq-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.aq-links a.btn{text-decoration:none}
+.aq-doc{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--line);margin-top:6px}.aq-docb{display:flex;gap:6px;flex-wrap:wrap}.aq-docb a.btn{text-decoration:none}
+.aq-frow{display:grid;grid-template-columns:1fr 1.6fr auto;gap:8px;margin-bottom:6px}
+@media (max-width:640px){.aq-kpi{grid-template-columns:repeat(2,1fr)}.aq-list{grid-template-columns:1fr}.aq-frow{grid-template-columns:1fr auto}.aq-frow .aq-du{grid-column:1/2}}
+
 /* ---- Check-up e visite ---- */
 #panel-checkup .ck-card:last-child{margin-bottom:0}
 .ck-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}.ck-head>div:first-child{flex:1;min-width:240px}
@@ -854,7 +872,7 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
     <button class="tab-btn" data-tab="recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>Pagamenti ricorrenti</button>
     <button class="tab-btn" data-tab="medical"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Sanità integrativa</button>
     <button class="tab-btn" data-tab="checkup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><path d="M9 15.5l2 2 4-4"/></svg>Check-up e visite</button>
-    <button class="tab-btn" data-tab="bilancio"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="17" y1="20" x2="17" y2="15"/></svg>Bilancio annuale</button>
+    <button class="tab-btn" data-tab="acquisti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisti e garanzie</button><button class="tab-btn" data-tab="bilancio"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="17" y1="20" x2="17" y2="15"/></svg>Bilancio annuale</button>
     <button class="tab-btn" data-tab="contratti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M6 2h9l5 5v15H6z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Contratti a scadenza</button>
     <button class="tab-btn" data-tab="documenti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.3"/><path d="M8 17c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>Documenti personali</button>
     <button class="tab-btn" data-tab="detrazioni"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="9" cy="9" r="0.6" fill="currentColor"/><circle cx="15" cy="15" r="0.6" fill="currentColor"/></svg>Detrazioni fiscali</button>
@@ -1127,6 +1145,8 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
   </section>
 
   <section class="panel" id="panel-checkup"><div id="ck-root"></div></section>
+
+  <section class="panel" id="panel-acquisti"><div id="aq-root"></div></section>
 
   <section class="panel" id="panel-bilancio">
     <div class="filter-bar">
@@ -1529,8 +1549,8 @@ let detrazioni = [];
 
 const KEY_SETTINGS = "settings";
 const KEY_MEDICAL_BACKUP = "medical-expenses-pre-fase2";
-const MODULI_IDS = ['recurring','medical','checkup','bilancio','contratti','documenti','detrazioni'];
-const MODULI_DEFAULT_NOMI = {recurring:'Pagamenti ricorrenti', medical:'Sanità integrativa', checkup:'Check-up e visite', bilancio:'Bilancio annuale', contratti:'Contratti a scadenza', documenti:'Documenti personali', detrazioni:'Detrazioni fiscali'};
+const MODULI_IDS = ['recurring','medical','checkup','acquisti','bilancio','contratti','documenti','detrazioni'];
+const MODULI_DEFAULT_NOMI = {recurring:'Pagamenti ricorrenti', medical:'Sanità integrativa', checkup:'Check-up e visite', acquisti:'Acquisti e garanzie', bilancio:'Bilancio annuale', contratti:'Contratti a scadenza', documenti:'Documenti personali', detrazioni:'Detrazioni fiscali'};
 const ELENCHI_DEF = {
   persone: {titolo:'Persone', hint:'Compaiono come suggerimento in Sanità (richiedente), Documenti (intestatario) e Detrazioni (intestatario).', default:[]},
   prestazioni: {titolo:'Prestazioni sanitarie', hint:'Suggerimenti per il campo Prestazione.', default:['Visita specialistica','Esami del sangue','Visita dentistica','Fisioterapia','Farmaci']},
@@ -1911,7 +1931,7 @@ function extraMetrics(id){
   return [];
 }
 function metricsSezione(id, conMassimali){
-  const fn = {recurring:metricsRecurring, checkup:metricsCheckup, medical:() => metricsMedical(conMassimali !== false), bilancio:metricsBilancio, contratti:metricsContratti, documenti:metricsDocumenti, detrazioni:metricsDetrazioni}[id];
+  const fn = {recurring:metricsRecurring, checkup:metricsCheckup, acquisti:metricsAcquisti, medical:() => metricsMedical(conMassimali !== false), bilancio:metricsBilancio, contratti:metricsContratti, documenti:metricsDocumenti, detrazioni:metricsDetrazioni}[id];
   const items = fn();
   items.forEach((it, i) => { if(it.k === undefined) it.k = 'm' + i; });
   return items.concat(extraMetrics(id));
@@ -2748,6 +2768,7 @@ function buildUrgentItems(){
     if(g <= 90) items.push({icona: ICONA_DOCUMENTI, label: `${d.tipo} di ${d.intestatario}`, giorni: g, tab: 'documenti'});
   });
   try{ ckUrgent(items); }catch(e){ console.error(e); }
+  try{ aqUrgent(items); }catch(e){ console.error(e); }
   items.sort((a,b) => a.giorni - b.giorni);
   const filtrati = visibleTabs ? items.filter(it => visibleTabs.includes(it.tab)) : items;
   return filtrati.slice(0, 8);
@@ -2875,7 +2896,7 @@ function renderPanoramica(){
     `).join('');
   }
 
-  const icone = {recurring:ICONA_RECURRING, medical:ICONA_MEDICAL, checkup:ICONA_CHECKUP, bilancio:ICONA_BILANCIO, contratti:ICONA_CONTRATTI, documenti:ICONA_DOCUMENTI, detrazioni:ICONA_DETRAZIONI};
+  const icone = {recurring:ICONA_RECURRING, medical:ICONA_MEDICAL, checkup:ICONA_CHECKUP, acquisti:ICONA_ACQUISTI, bilancio:ICONA_BILANCIO, contratti:ICONA_CONTRATTI, documenti:ICONA_DOCUMENTI, detrazioni:ICONA_DETRAZIONI};
   const sezioni = dashSezioni().filter(s => !visibleTabs || visibleTabs.includes(s.id));
   const html = sezioni.map((s, si) => {
     if(!s.on && !dashEdit) return '';
@@ -3145,7 +3166,7 @@ function renderImpostazioni(){
       <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
     ${nomiCompletiHtml()}
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>05/11/2026 10:21</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 12:38</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -3316,6 +3337,7 @@ function renderAll(){
   renderDetrazioni();
   renderPanoramica();
   try{ renderCheckup(); }catch(e){ console.error(e); }
+  try{ renderAcquisti(); }catch(e){ console.error(e); }
   try{ renderReport(); }catch(e){ console.error(e); }
   renderImpostazioni();
   applyModalitaVisibility();
@@ -4039,6 +4061,192 @@ document.addEventListener('click', async (e) => {
   try{ await navigator.share({files: dshFiles, text: testo}); ckClose(); }
   catch(err){ if(err && err.name !== 'AbortError') showNotice('Condivisione non riuscita: ' + (err.message || err.name)); }
 });
+// ===== Acquisti e garanzie =====
+const KEY_ACQUISTI = 'acquisti';
+let acquisti = [], aqQ = '', aqCat = '', aqSt = '', aqShareDoc = null, aqShareFiles = [];
+const AQ_CATS = ['Elettrodomestici', 'Elettronica', 'Telefonia', 'Casa e arredo', 'Utensili e giardino', 'Auto e moto', 'Altro'];
+const AQ_DOCS = ['Scontrino', 'Fattura', 'Certificato di garanzia', 'Libretto istruzioni', 'Estensione di garanzia'];
+const ICONA_ACQUISTI = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
+async function saveAcquisti(){
+  try{ await storageAdapter.set(KEY_ACQUISTI, JSON.stringify(acquisti), false); }
+  catch(e){ console.error(e); showSaveWarning('Il salvataggio degli acquisti non è riuscito. Riprova o ricarica la pagina.'); }
+}
+{
+  const _ld = loadData;
+  loadData = async function(){
+    await _ld();
+    try{ const r = await storageAdapter.get(KEY_ACQUISTI, false); const v = r ? JSON.parse(r.value) : []; acquisti = Array.isArray(v) ? v : []; }catch(e){ acquisti = []; }
+  };
+  const _cb = currentBackupCSV;
+  currentBackupCSV = function(){ return _cb() + '\n\n### ACQUISTI E GARANZIE\n' + JSON.stringify({acquisti}) + '\n'; };
+  const _pb = parseBackupCSV;
+  parseBackupCSV = function(text){
+    let aq = null; const mk = /\n*###\s*ACQUISTI E GARANZIE\s*\n/;
+    if(mk.test(text)){ const p = text.split(mk); text = p[0]; try{ aq = JSON.parse((p[1] || '').trim()); }catch(e){ aq = null; } }
+    const o = _pb(text); o.acquisti = aq; return o;
+  };
+}
+function aqRestore(parsed){ const a = parsed && parsed.acquisti; if(a && Array.isArray(a.acquisti)) acquisti = a.acquisti; }
+// ---- stato garanzia
+function aqFine(a){
+  const base = (+a.mesi > 0 && a.data) ? ckAddMonths(a.data, +a.mesi) : '';
+  const ext = a.estesa || '';
+  return (ext && (!base || ext > base)) ? ext : base;
+}
+function aqState(a){
+  const fine = aqFine(a); if(!fine) return {k: 'senza', fine: '', g: null};
+  const g = ckGiorni(fine), pre = a.preavviso != null && a.preavviso !== '' ? +a.preavviso : 30;
+  return {k: g < 0 ? 'scaduta' : g <= pre ? 'scadenza' : 'attiva', fine, g};
+}
+const AQ_PILL = {attiva: ['In garanzia', 'ck-p-grn'], scadenza: ['In scadenza', 'ck-p-amb'], scaduta: ['Scaduta', 'ck-p-red'], senza: ['Senza garanzia', 'ck-p-gray']};
+const aqPill = (k) => `<span class="ck-pill ${AQ_PILL[k][1]}">${AQ_PILL[k][0]}</span>`;
+const aqEuro = (n) => (+n > 0) ? euro(+n) : '';
+function aqLeft(s){
+  if(!s.fine) return 'Nessuna garanzia indicata';
+  const g = s.g;
+  if(g < 0) return 'Scaduta il ' + ckFmt(s.fine) + ' (' + (-g) + (g === -1 ? ' giorno fa)' : ' giorni fa)');
+  if(g === 0) return 'Scade oggi';
+  if(g < 60) return 'Scade il ' + ckFmt(s.fine) + ' · tra ' + g + (g === 1 ? ' giorno' : ' giorni');
+  return 'Fino al ' + ckFmt(s.fine) + ' · ' + Math.round(g / 30.4) + ' mesi';
+}
+function metricsAcquisti(){
+  const st = acquisti.map(aqState), n = (k) => st.filter(x => x.k === k).length;
+  return [{k: 'aqatt', valore: n('attiva') + n('scadenza'), label: 'In garanzia', cls: ''}, {k: 'aqsc', valore: n('scadenza'), label: 'In scadenza', cls: n('scadenza') ? 'warn' : ''}, {k: 'aqsd', valore: n('scaduta'), label: 'Scadute', cls: ''}];
+}
+function aqUrgent(items){
+  acquisti.forEach(a => { const s = aqState(a); if(s.k === 'scadenza') items.push({icona: ICONA_ACQUISTI, label: `${a.prodotto}${a.marca ? ' ' + a.marca : ''} — garanzia in scadenza`, giorni: s.g, tab: 'acquisti'}); });
+}
+const AQ_ORD = {scadenza: 0, attiva: 1, senza: 2, scaduta: 3};
+function aqFiltered(){
+  const q = aqQ.trim().toLowerCase();
+  return acquisti.filter(a => {
+    const s = aqState(a);
+    if(aqCat && a.categoria !== aqCat) return false;
+    if(aqSt && s.k !== aqSt) return false;
+    if(q && ![a.prodotto, a.marca, a.modello, a.seriale, a.negozio, a.persona, a.categoria, a.note].some(x => String(x || '').toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((x, y) => { const sx = aqState(x), sy = aqState(y); return (AQ_ORD[sx.k] - AQ_ORD[sy.k]) || String(sx.fine || '9').localeCompare(String(sy.fine || '9')) || String(y.data).localeCompare(String(x.data)); });
+}
+function aqCard(a){
+  const s = aqState(a), nd = (a.documenti || []).length;
+  return `<div class="aq-card" data-aq="open" data-id="${a.id}" role="button" tabindex="0">
+    <div class="aq-top"><div class="aq-t">${escHtml(a.prodotto)}${a.marca || a.modello ? `<span class="ck-mut"> · ${escHtml([a.marca, a.modello].filter(Boolean).join(' '))}</span>` : ''}</div>${aqPill(s.k)}</div>
+    <div class="aq-s">${escHtml(aqLeft(s))}</div>
+    <div class="aq-m">${[a.categoria, a.data ? 'acquistato il ' + ckFmt(a.data) : '', a.negozio, aqEuro(a.prezzo), a.persona ? ckFull(a.persona) : '', nd ? '📎 ' + nd : ''].filter(Boolean).map(escHtml).join(' · ')}</div></div>`;
+}
+function renderAcquisti(){
+  const root = document.getElementById('aq-root'); if(!root) return;
+  const ae = document.activeElement; if(ae && ae.id === 'aq-search') return;
+  const st = acquisti.map(aqState), n = (k) => st.filter(x => x.k === k).length;
+  const spesa = acquisti.reduce((t, a) => t + (+a.prezzo || 0), 0), list = aqFiltered();
+  const cats = AQ_CATS.concat(acquisti.map(a => a.categoria).filter(c => c && !AQ_CATS.includes(c))).filter((c, i, ar) => ar.indexOf(c) === i);
+  root.innerHTML = `<div class="ck-head"><div><h2 class="ck-h2">${escHtml((settings.moduli.acquisti && settings.moduli.acquisti.nome) || 'Acquisti e garanzie')}</h2><p class="ck-mut">Elettrodomestici e prodotti con scontrino, garanzia e assistenza a portata di mano.</p></div>
+    <div class="ck-head-a"><button type="button" class="btn primary" data-aq="new">+ Nuovo acquisto</button></div></div>
+    <div class="aq-kpi"><div><b>${acquisti.length}</b><span>Acquisti</span></div><div><b>${n('attiva') + n('scadenza')}</b><span>In garanzia</span></div><div class="${n('scadenza') ? 'warn' : ''}"><b>${n('scadenza')}</b><span>In scadenza</span></div><div><b>${n('scaduta')}</b><span>Scadute</span></div><div><b>${euro(spesa)}</b><span>Speso</span></div></div>
+    <div class="aq-tools"><input class="ck-in" id="aq-search" type="search" placeholder="Cerca prodotto, marca, negozio…" value="${escHtml(aqQ)}">
+      <select class="ck-in" id="aq-cat"><option value="">Tutte le categorie</option>${cats.map(c => `<option${c === aqCat ? ' selected' : ''}>${escHtml(c)}</option>`).join('')}</select>
+      <select class="ck-in" id="aq-st"><option value="">Tutti gli stati</option>${Object.keys(AQ_PILL).map(k => `<option value="${k}"${k === aqSt ? ' selected' : ''}>${AQ_PILL[k][0]}</option>`).join('')}</select></div>
+    ${list.length ? `<div class="aq-list">${list.map(aqCard).join('')}</div>` : `<div class="ck-card"><div class="ck-empty">${acquisti.length ? 'Nessun acquisto corrisponde ai filtri.' : 'Ancora nessun acquisto. Premi «+ Nuovo acquisto»: basta il nome del prodotto e la data dello scontrino.'}</div></div>`}`;
+}
+// ---- scheda
+function aqDetail(id, del){
+  const a = acquisti.find(x => x.id === id); if(!a) return ckClose();
+  const s = aqState(a), as = a.assistenza || {}, w = ckWa(as.tel), docs = a.documenti || [];
+  const row = (l, v) => v ? `<div class="aq-r"><span>${l}</span><b>${v}</b></div>` : '';
+  ckShow(`${ckHead(escHtml(a.prodotto), escHtml([a.marca, a.modello].filter(Boolean).join(' ')) + (a.categoria ? (a.marca || a.modello ? ' · ' : '') + escHtml(a.categoria) : ''))}
+    <div class="md-body"><p style="margin:0 0 10px">${aqPill(s.k)} <span class="ck-mut">${escHtml(aqLeft(s))}</span></p>
+    ${row('Acquistato il', a.data ? ckFmt(a.data) : '')}${row('Negozio', escHtml(a.negozio || ''))}${row('Prezzo', aqEuro(a.prezzo))}${row('Per chi', escHtml(a.persona ? ckFull(a.persona) : ''))}${row('N. serie', escHtml(a.seriale || ''))}
+    ${row('Garanzia', +a.mesi > 0 ? a.mesi + ' mesi dall\'acquisto' : 'nessuna')}${row('Garanzia estesa fino al', a.estesa ? ckFmt(a.estesa) : '')}${row('Avviso', (a.preavviso != null && a.preavviso !== '' ? a.preavviso : 30) + ' giorni prima')}
+    ${a.note ? `<p class="ck-mut" style="margin:10px 0 0;white-space:pre-wrap">${escHtml(a.note)}</p>` : ''}
+    ${(as.nome || as.tel || as.sito) ? `<div class="aq-box"><b>Assistenza</b> ${escHtml(as.nome || '')}<div class="aq-links">${as.tel ? `<a class="btn small ghost" href="tel:${escHtml(ckTel(as.tel))}">📞 ${escHtml(as.tel)}</a>` : ''}${w ? `<a class="btn small ghost" href="${escHtml(w)}" target="_blank" rel="noopener">💬 WhatsApp</a>` : ''}${ckSafeUrl(as.sito) ? `<a class="btn small ghost" href="${escHtml(ckSafeUrl(as.sito))}" target="_blank" rel="noopener">🌐 Sito</a>` : ''}</div></div>` : ''}
+    <div class="aq-box"><b>Documenti</b>${docs.length ? docs.map(d => `<div class="aq-doc"><span>${escHtml(d.nome || 'Documento')}</span><span class="aq-docb">${ckSafeUrl(d.url) ? `<a class="btn small ghost" href="${escHtml(ckSafeUrl(d.url))}" target="_blank" rel="noopener">Apri</a>` : ''}<button type="button" class="btn small ghost" data-aq="share" data-id="${a.id}" data-did="${d.id}">📤 WhatsApp</button></span></div>`).join('') : '<div class="ck-mut" style="margin-top:4px">Nessun documento collegato. Aggiungi lo scontrino dalla Modifica.</div>'}</div>
+    ${del ? `<p style="margin:12px 0 0;color:var(--stamp);font-weight:700">Eliminare questo acquisto? L'operazione non si può annullare.</p>` : ''}</div>
+    <div class="md-foot">${del ? `<button type="button" class="btn small ghost" data-aq="open" data-id="${a.id}">Annulla</button><button type="button" class="btn small primary" data-aq="delyes" data-id="${a.id}">Sì, elimina</button>` : `<button type="button" class="btn small ghost" data-aq="del" data-id="${a.id}">Elimina</button><button type="button" class="btn small primary" data-aq="edit" data-id="${a.id}">Modifica</button>`}</div>`);
+}
+let aqFormDocs = [];
+function aqDocRow(d){
+  return `<div class="aq-frow" data-did="${escHtml(d.id)}"><input class="ck-in aq-dn" list="aq-docnames" value="${escHtml(d.nome || '')}" placeholder="Nome (es. Scontrino)"><input class="ck-in aq-du" type="url" value="${escHtml(d.url || '')}" placeholder="Link al file (https://…)"><button type="button" class="btn small ghost" data-aq="rmdoc" aria-label="Rimuovi">✕</button></div>`;
+}
+function aqForm(id){
+  const a = id ? acquisti.find(x => x.id === id) : null, as = (a && a.assistenza) || {};
+  aqFormDocs = ((a && a.documenti) || []).map(d => ({...d}));
+  const cat = a ? a.categoria : '', names = AQ_DOCS.concat((settings.elenchi && settings.elenchi.nomiDocumento) || []).filter((c, i, ar) => c && ar.indexOf(c) === i);
+  ckShow(`${ckHead(a ? 'Modifica acquisto' : 'Nuovo acquisto')}<div class="md-body"><div class="ck-form">
+    ${ckFld('Prodotto *', `<input class="ck-in" id="aq-prod" value="${escHtml(a ? a.prodotto : '')}" placeholder="es. Lavatrice">`)}
+    ${ckFld('Categoria', `<select class="ck-in" id="aq-cats">${AQ_CATS.concat(cat && !AQ_CATS.includes(cat) ? [cat] : []).map(c => `<option${c === (cat || 'Elettrodomestici') ? ' selected' : ''}>${escHtml(c)}</option>`).join('')}</select>`)}
+    ${ckFld('Marca', `<input class="ck-in" id="aq-marca" value="${escHtml(a ? a.marca || '' : '')}">`)}
+    ${ckFld('Modello', `<input class="ck-in" id="aq-mod" value="${escHtml(a ? a.modello || '' : '')}">`)}
+    ${ckFld('Data acquisto *', `<input class="ck-in" id="aq-data" type="date" value="${escHtml(a ? a.data || '' : ckToday())}">`)}
+    ${ckFld('Prezzo (€)', `<input class="ck-in" id="aq-prezzo" type="number" min="0" step="0.01" value="${a && a.prezzo ? escHtml(a.prezzo) : ''}">`)}
+    ${ckFld('Negozio', `<input class="ck-in" id="aq-neg" value="${escHtml(a ? a.negozio || '' : '')}" placeholder="es. MediaWorld, Amazon">`)}
+    ${ckFld('Per chi <span class="ck-mut">· facoltativo</span>', `<input class="ck-in" id="aq-pers" list="preset-richiedente" value="${escHtml(a ? a.persona || '' : '')}">`)}
+    ${ckFld('N. di serie', `<input class="ck-in" id="aq-ser" value="${escHtml(a ? a.seriale || '' : '')}">`)}
+    ${ckFld('Garanzia (mesi)', `<input class="ck-in" id="aq-mesi" type="number" min="0" max="240" value="${a && a.mesi != null ? escHtml(a.mesi) : 24}">`)}
+    ${ckFld('Garanzia estesa fino al <span class="ck-mut">· facoltativo</span>', `<input class="ck-in" id="aq-est" type="date" value="${escHtml(a ? a.estesa || '' : '')}">`)}
+    ${ckFld('Avvisami prima di', `<select class="ck-in" id="aq-pre">${[7, 15, 30, 45, 60, 90].map(v => `<option value="${v}"${(a && a.preavviso != null && a.preavviso !== '' ? +a.preavviso : 30) === v ? ' selected' : ''}>${v} giorni</option>`).join('')}</select>`)}
+    ${ckFld('Assistenza · nome', `<input class="ck-in" id="aq-an" value="${escHtml(as.nome || '')}" placeholder="es. Centro assistenza Bosch">`)}
+    ${ckFld('Assistenza · telefono', `<input class="ck-in" id="aq-at" type="tel" value="${escHtml(as.tel || '')}">`)}
+    ${ckFld('Assistenza · sito', `<input class="ck-in" id="aq-as" type="url" value="${escHtml(as.sito || '')}" placeholder="https://…">`, 'ck-span')}
+    ${ckFld('Documenti <span class="ck-mut">· scontrino, garanzia, libretto: link al file</span>', `<div id="aq-docs">${aqFormDocs.map(aqDocRow).join('')}</div><datalist id="aq-docnames">${names.map(n => `<option value="${escHtml(n)}">`).join('')}</datalist><button type="button" class="btn small ghost" data-aq="adddoc" style="margin-top:6px">+ Aggiungi documento</button>`, 'ck-span')}
+    ${ckFld('Note', `<textarea class="ck-in" id="aq-note" rows="2">${escHtml(a ? a.note || '' : '')}</textarea>`, 'ck-span')}
+    </div><p class="ck-mut" id="aq-err" style="color:var(--stamp);margin:8px 0 0"></p></div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-aq="${a ? 'open' : 'closeform'}" data-id="${a ? a.id : ''}">Annulla</button><button type="button" class="btn small primary" data-aq="save" data-id="${a ? a.id : ''}">Salva</button></div>`);
+}
+async function aqSave(id){
+  const g = (i) => (document.getElementById(i) || {}).value || '', err = document.getElementById('aq-err');
+  const prod = g('aq-prod').trim(), data = g('aq-data');
+  if(!prod){ err.textContent = 'Scrivi il nome del prodotto.'; return; }
+  if(!data){ err.textContent = 'Inserisci la data di acquisto (quella dello scontrino).'; return; }
+  const mesi = Math.max(0, parseInt(g('aq-mesi'), 10) || 0), est = g('aq-est');
+  if(est && est < data){ err.textContent = 'La garanzia estesa non può finire prima dell\'acquisto.'; return; }
+  const docs = [...document.querySelectorAll('#aq-docs .aq-frow')].map(r => ({id: r.dataset.did || uid(), nome: r.querySelector('.aq-dn').value.trim(), url: r.querySelector('.aq-du').value.trim()})).filter(d => d.nome || d.url);
+  const bad = docs.find(d => d.url && !ckSafeUrl(d.url)); if(bad){ err.textContent = 'Il link deve iniziare con http:// o https://.'; return; }
+  const o = {prodotto: prod, marca: g('aq-marca').trim(), modello: g('aq-mod').trim(), seriale: g('aq-ser').trim(), categoria: g('aq-cats'), data, negozio: g('aq-neg').trim(), prezzo: Math.max(0, parseFloat(g('aq-prezzo')) || 0), persona: g('aq-pers').trim(), mesi, estesa: est, preavviso: +g('aq-pre') || 30, assistenza: {nome: g('aq-an').trim(), tel: g('aq-at').trim(), sito: g('aq-as').trim()}, note: g('aq-note').trim(), documenti: docs};
+  let rid = id;
+  if(id){ acquisti = acquisti.map(x => x.id === id ? {...x, ...o} : x); } else { rid = uid(); acquisti.push({id: rid, ...o}); }
+  await saveAcquisti(); renderAcquisti(); try{ renderPanoramica(); }catch(e){} aqDetail(rid);
+}
+// ---- condivisione file (Web Share)
+function aqShareStart(id, did){
+  const a = acquisti.find(x => x.id === id); if(!a) return;
+  aqShareDoc = {a, d: (a.documenti || []).find(x => x.id === did) || {nome: 'Documento'}}; aqShareFiles = [];
+  let inp = document.getElementById('aq-file'); if(inp) inp.remove();
+  inp = document.createElement('input'); inp.type = 'file'; inp.id = 'aq-file'; inp.accept = 'image/*,application/pdf'; inp.multiple = true; inp.hidden = true;
+  inp.addEventListener('change', () => { aqShareFiles = [...inp.files]; if(aqShareFiles.length) aqShareAsk(); });
+  document.body.append(inp); inp.click();
+}
+function aqShareText(){ const {a, d} = aqShareDoc; return d.nome + ' · ' + a.prodotto + (a.marca ? ' ' + a.marca : '') + (a.persona ? ' · ' + ckFull(a.persona) : ''); }
+function aqShareAsk(){
+  const can = !!(navigator.canShare && navigator.canShare({files: aqShareFiles})), {a, d} = aqShareDoc;
+  ckShow(`${ckHead('Invia su WhatsApp', escHtml(d.nome || '') + ' · ' + escHtml(a.prodotto))}<div class="md-body">
+    <p style="margin:0 0 8px"><b>${aqShareFiles.length === 1 ? '1 file pronto' : aqShareFiles.length + ' file pronti'}:</b></p>
+    <ul class="ck-hist">${aqShareFiles.map(f => `<li>${escHtml(f.name)} <span class="ck-mut">· ${Math.max(1, Math.round(f.size / 1024))} KB</span></li>`).join('')}</ul>
+    ${can ? '<p class="ck-mut" style="margin:10px 0 0">Premi «Condividi» e scegli WhatsApp dalla lista delle app.</p>' : '<p class="ck-mut" style="margin:10px 0 0;color:var(--stamp)">Questo dispositivo o browser non permette di condividere file da qui. Prova dal telefono (Chrome su Android o Safari su iPhone).</p>'}</div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-aq="open" data-id="${a.id}">Indietro</button>${can ? '<button type="button" class="btn small primary" data-aq="sharego">Condividi</button>' : ''}</div>`);
+}
+// ---- eventi
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest && e.target.closest('[data-aq]'); if(!b) return;
+  const a = b.dataset.aq, id = b.dataset.id;
+  if(a === 'new') return aqForm('');
+  if(a === 'open') return aqDetail(id);
+  if(a === 'edit') return aqForm(id);
+  if(a === 'save') return aqSave(id);
+  if(a === 'closeform') return ckClose();
+  if(a === 'del') return aqDetail(id, true);
+  if(a === 'delyes'){ acquisti = acquisti.filter(x => x.id !== id); await saveAcquisti(); ckClose(); renderAcquisti(); try{ renderPanoramica(); }catch(err){} return; }
+  if(a === 'adddoc'){ const box = document.getElementById('aq-docs'); if(box){ box.insertAdjacentHTML('beforeend', aqDocRow({id: uid(), nome: box.children.length ? '' : 'Scontrino', url: ''})); } return; }
+  if(a === 'rmdoc'){ const r = b.closest('.aq-frow'); if(r) r.remove(); return; }
+  if(a === 'share') return aqShareStart(id, b.dataset.did);
+  if(a === 'sharego'){
+    try{ await navigator.share({files: aqShareFiles, text: aqShareText()}); ckClose(); }
+    catch(err){ if(err && err.name !== 'AbortError') showNotice('Condivisione non riuscita: ' + (err.message || err.name)); }
+  }
+});
+document.addEventListener('keydown', (e) => { if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('aq-card')){ e.preventDefault(); aqDetail(e.target.dataset.id); } });
+document.addEventListener('input', (e) => { if(e.target && e.target.id === 'aq-search'){ aqQ = e.target.value; const pos = e.target.selectionStart; const ae = document.activeElement; ae.blur(); renderAcquisti(); const i = document.getElementById('aq-search'); if(i){ i.focus(); try{ i.setSelectionRange(pos, pos); }catch(x){} } } });
+document.addEventListener('change', (e) => { if(!e.target) return; if(e.target.id === 'aq-cat'){ aqCat = e.target.value; renderAcquisti(); } else if(e.target.id === 'aq-st'){ aqSt = e.target.value; renderAcquisti(); } });
+
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -4838,6 +5046,7 @@ document.getElementById('backup-import-btn').addEventListener('click', async () 
   settings.configurato = true;
   medical = fixMedDates(parsed.medical.map(m => migrateMedicalRecord(m, settings.pagatori)));
   ckRestore(parsed);
+  aqRestore(parsed);
   await saveSettings(); applySettings();
   await saveRecurring();
   await saveMedical();
@@ -4846,6 +5055,7 @@ document.getElementById('backup-import-btn').addEventListener('click', async () 
   await saveDocumenti();
   await saveDetrazioni();
   if(parsed.checkup){ await saveCheckups(); await saveSpecialists(); }
+  if(parsed.acquisti){ await saveAcquisti(); }
   renderAll();
   showNotice(`Backup importato: ${recurring.length} pagamenti, ${medical.length} voci di sanità integrativa, ${bilancio.length} bilanci, ${contratti.length} contratti, ${documenti.length} documenti, ${detrazioni.length} detrazioni.`, 'success');
   feedback.textContent = 'Importazione completata.';
@@ -6011,7 +6221,7 @@ function xlDownload(blob, name){
 }
 
 // ---- Dati di ogni scheda per l'esportazione ----
-const XL_TAB = {recurring:'Pagamenti ricorrenti', medical:'Sanità integrativa', bilancio:'Bilancio annuale', contratti:'Contratti a scadenza', documenti:'Documenti personali', detrazioni:'Detrazioni fiscali'};
+const XL_TAB = {recurring:'Pagamenti ricorrenti', medical:'Sanità integrativa', acquisti:'Acquisti e garanzie', bilancio:'Bilancio annuale', contratti:'Contratti a scadenza', documenti:'Documenti personali', detrazioni:'Detrazioni fiscali'};
 const xlSort = (arr, fn, k, d) => (typeof applySort === 'function' && typeof fn === 'function') ? applySort(arr, fn, k, d) : arr;
 const xlStatoDays = (d, soon) => { if(!d) return ''; const g = daysUntil(d); return g < 0 ? 'Scaduto' : g <= soon ? 'In scadenza' : 'Valido'; };
 const xlLvLabel = (pill) => { const m = />([^<]+)</.exec(pill || ''); const t = m ? m[1].trim() : ''; return /^Rimborsato/.test(t) ? 'Rimborsato' : t; };
@@ -6041,6 +6251,8 @@ function xlTabData(tid){
     },
     contratti: () => ({cols:[{h:'Tipo', w:18}, {h:'Controparte', w:26}, {h:'Riferimento', w:22}, {h:'Inizio', w:12, t:'d'}, {h:'Scadenza', w:12, t:'d'}, {h:'Disdetta entro', w:14, t:'d'}, {h:'Canone', w:13, t:'e'}, {h:'Prezzo unitario', w:14, t:'n'}, {h:'Unità', w:10}, {h:'Stato', w:13}, {h:'Note', w:32}, {h:'Documenti', w:40}],
       rows:xlSort(getFilteredContratti(), contrattiSortValue, contrattiSortKey, contrattiSortDir).map(c => [c.tipo || '', c.controparte || '', c.riferimento || '', c.dataInizio, c.dataFine, c.dataDisdetta, c.canone === '' || c.canone == null ? '' : Number(c.canone), c.prezzoUnitario === '' || c.prezzoUnitario == null ? '' : Number(c.prezzoUnitario), c.unitaMisura || '', xlStatoDays(c.dataFine, 90), c.note || '', (c.documenti || []).map(d => d.nome + ': ' + d.url).join('\n')])}),
+    acquisti: () => ({cols:[{h:'Prodotto', w:24}, {h:'Marca', w:14}, {h:'Modello', w:16}, {h:'Categoria', w:18}, {h:'Data acquisto', w:14, t:'d'}, {h:'Negozio', w:16}, {h:'Prezzo', w:12, t:'e'}, {h:'Per chi', w:14}, {h:'Garanzia fino al', w:14, t:'d'}, {h:'Stato', w:15}, {h:'Documenti', w:40}],
+      rows:aqFiltered().map(a => [a.prodotto || '', a.marca || '', a.modello || '', a.categoria || '', a.data, a.negozio || '', Number(a.prezzo) || 0, a.persona || '', aqState(a).fine, AQ_PILL[aqState(a).k][0], (a.documenti || []).map(d => (d.nome || '') + ' ' + (d.url || '')).join(' | ')])}),
     documenti: () => ({cols:[{h:'Tipo', w:20}, {h:'Intestatario', w:16}, {h:'Numero', w:16}, {h:'Ente rilascio', w:20}, {h:'Rilascio', w:12, t:'d'}, {h:'Scadenza', w:12, t:'d'}, {h:'Stato', w:13}, {h:'Link', w:36}, {h:'Note', w:30}],
       rows:xlSort(getFilteredDocumenti(), documentiSortValue, documentiSortKey, documentiSortDir).map(d => [d.tipo || '', d.intestatario || '', d.numero || '', d.enteRilascio || '', d.dataRilascio, d.dataScadenza, xlStatoDays(d.dataScadenza, 90), d.link || '', d.note || ''])}),
     detrazioni: () => ({cols:[{h:'Categoria', w:26}, {h:'Intestatario', w:16}, {h:'Data', w:12, t:'d'}, {h:'Importo', w:13, t:'e'}, {h:'Note', w:36}],
