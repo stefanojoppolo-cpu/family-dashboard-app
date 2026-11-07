@@ -20,5 +20,12 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "id": "./",
+  "lang": "it",
+  "orientation": "portrait",
+  "categories": [
+    "productivity",
+    "lifestyle"
   ]
 }
