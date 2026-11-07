@@ -728,8 +728,8 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .aq-box{margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:13.5px}
 .aq-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.aq-links a.btn{text-decoration:none}
 .aq-doc{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--line);margin-top:6px}.aq-docb{display:flex;gap:6px;flex-wrap:wrap}.aq-docb a.btn{text-decoration:none}
-.aq-frow{display:grid;grid-template-columns:1fr 1.6fr auto;gap:8px;margin-bottom:6px}
-@media (max-width:640px){.aq-kpi{grid-template-columns:repeat(2,1fr)}.aq-list{grid-template-columns:1fr}.aq-frow{grid-template-columns:1fr auto}.aq-frow .aq-du{grid-column:1/2}}
+.aq-frow{display:grid;grid-template-columns:1fr 1.6fr auto auto;gap:8px;margin-bottom:6px}
+@media (max-width:640px){.aq-kpi{grid-template-columns:repeat(2,1fr)}.aq-list{grid-template-columns:1fr}.aq-frow{grid-template-columns:1fr auto auto}.aq-frow .aq-du{grid-column:1/2}}
 .aq-del{background:#fff;color:var(--stamp);border:1.5px solid #E6A6A1}
 
 /* ---- Check-up e visite ---- */
@@ -1169,7 +1169,7 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
         <div id="mf-documenti-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input type="text" id="mf-doc-nome" list="preset-nome-documento" placeholder="Nome (es. Referto)" style="width:170px;"><datalist id="preset-nome-documento"></datalist>
-          <input type="url" id="mf-doc-url" placeholder="Link Google Drive" style="flex:1;min-width:220px;">
+          <input type="url" id="mf-doc-url" placeholder="Link Google Drive" style="flex:1;min-width:220px;"><button type="button" class="btn small ghost" data-drv="pick-mf">📁 Scegli da Drive</button>
           <button type="button" class="btn small ghost" id="mf-doc-add">+ Aggiungi</button>
         </div>
       </div>
@@ -1451,7 +1451,7 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
           </div>
           <div class="field span2">
             <label>Link al documento (facoltativo)</label>
-            <input type="url" id="df-link" placeholder="Link Google Drive">
+            <input type="url" id="df-link" placeholder="Link Google Drive"><button type="button" class="btn small ghost" data-drv="pick-df" style="margin-top:6px">📁 Scegli da Google Drive</button>
           </div>
         </div>
         <div class="form-row form-row-3">
@@ -3219,8 +3219,9 @@ function renderImpostazioni(){
       <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
     ${nomiCompletiHtml()}
+    ${driveSettingsHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 19:59</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 20:50</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -4219,7 +4220,7 @@ function aqDetail(id, del){
 }
 let aqFormDocs = [];
 function aqDocRow(d){
-  return `<div class="aq-frow" data-did="${escHtml(d.id)}"><input class="ck-in aq-dn" list="aq-docnames" value="${escHtml(d.nome || '')}" placeholder="Nome (es. Scontrino)"><input class="ck-in aq-du" type="url" value="${escHtml(d.url || '')}" placeholder="Link al file (https://…)"><button type="button" class="btn small ghost" data-aq="rmdoc" aria-label="Rimuovi">✕</button></div>`;
+  return `<div class="aq-frow" data-did="${escHtml(d.id)}"><input class="ck-in aq-dn" list="aq-docnames" value="${escHtml(d.nome || '')}" placeholder="Nome (es. Scontrino)"><input class="ck-in aq-du" type="url" value="${escHtml(d.url || '')}" placeholder="Link al file (https://…)"><button type="button" class="btn small ghost" data-drv="pick-aq" aria-label="Scegli da Drive" title="Scegli da Google Drive">📁</button><button type="button" class="btn small ghost" data-aq="rmdoc" aria-label="Rimuovi">✕</button></div>`;
 }
 function aqForm(id){
   const a = id ? acquisti.find(x => x.id === id) : null, as = (a && a.assistenza) || {};
@@ -4444,6 +4445,145 @@ showWelcome = function(rerun){ wzInit(!!rerun === true); document.getElementById
   w.addEventListener('input', (e) => { const t = e.target; if(wz && t.dataset && t.dataset.wzImp){ wz.mx[t.dataset.wzImp].importi[t.dataset.pi] = t.value; } });
   document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-wz-rerun]'); if(b) showWelcome(true); });
 })();
+
+// ===== Google Drive: selettore file (Picker) e invio su WhatsApp =====
+const KEY_DRIVE = 'drive-config';
+const DRIVE_DEFAULT = {apiKey: '', clientId: '', appId: ''};   // da compilare se l'app viene distribuita con una configurazione fissa
+const DRV_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+let drvCfg = {...DRIVE_DEFAULT}, drvTok = '', drvExp = 0, drvReady = {gis: false, picker: false}, drvBusy = false;
+const drvOk = () => !!(drvCfg.apiKey && drvCfg.clientId);
+function driveIdFrom(url){
+  const s = String(url || ''); if(!/drive\.google\.com|docs\.google\.com/.test(s)) return '';
+  const m = s.match(/\/(?:file|document|spreadsheets|presentation)\/d\/([\w-]{10,})/) || s.match(/[?&]id=([\w-]{10,})/);
+  return m ? m[1] : '';
+}
+const drvName = (n) => String(n || '').replace(/\.[a-z0-9]{2,5}$/i, '');
+function drvScript(src){
+  return new Promise((res, rej) => {
+    if(document.querySelector('script[data-drv-src="' + src + '"]')) return res();
+    const s = document.createElement('script'); s.src = src; s.async = true; s.dataset.drvSrc = src; s.onload = () => res(); s.onerror = () => rej(new Error('Non riesco a caricare gli strumenti di Google.')); document.head.append(s);
+  });
+}
+async function drvPreload(){
+  if(!drvOk()) return;
+  try{
+    await drvScript('https://accounts.google.com/gsi/client'); drvReady.gis = !!(window.google && google.accounts && google.accounts.oauth2);
+    await drvScript('https://apis.google.com/js/api.js');
+    await new Promise((res) => { try{ gapi.load('picker', {callback: () => { drvReady.picker = true; res(); }, onerror: res}); }catch(e){ res(); } });
+  }catch(e){ console.warn(e); }
+}
+async function saveDriveCfg(){ try{ await storageAdapter.set(KEY_DRIVE, JSON.stringify(drvCfg), false); }catch(e){ console.error(e); showSaveWarning('Non sono riuscito a salvare la configurazione di Google Drive.'); } }
+{
+  const _ld = loadData;
+  loadData = async function(){
+    await _ld();
+    try{ const r = await storageAdapter.get(KEY_DRIVE, false); const v = r ? JSON.parse(r.value) : {}; drvCfg = {...DRIVE_DEFAULT, ...(v && typeof v === 'object' ? v : {})}; }catch(e){ drvCfg = {...DRIVE_DEFAULT}; }
+    setTimeout(() => { drvPreload(); }, 300);
+  };
+}
+// token (chiamare dentro un clic: apre la finestra di consenso di Google se serve)
+function driveToken(){
+  return new Promise((res, rej) => {
+    if(drvTok && Date.now() < drvExp - 60000) return res(drvTok);
+    if(!(window.google && google.accounts && google.accounts.oauth2)) return rej(new Error('Gli strumenti di Google non sono ancora pronti. Riprova tra un istante.'));
+    const tc = google.accounts.oauth2.initTokenClient({client_id: drvCfg.clientId, scope: DRV_SCOPE,
+      callback: (r) => { if(r && r.access_token){ drvTok = r.access_token; drvExp = Date.now() + (+r.expires_in || 3600) * 1000; res(drvTok); } else rej(new Error((r && r.error) || 'consenso negato')); },
+      error_callback: (e) => rej(new Error((e && e.type) || 'finestra chiusa'))});
+    tc.requestAccessToken();
+  });
+}
+function drvNeedCfg(){
+  ckShow(`${ckHead('Collega Google Drive')}<div class="md-body"><p style="margin:0 0 8px">Per scegliere i file dal tuo Drive serve una configurazione, da fare una volta sola.</p><p class="ck-mut" style="margin:0">Apri <b>Impostazioni → Google Drive</b> e inserisci i tre codici del progetto Google Cloud.</p></div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Chiudi</button><button type="button" class="btn small primary" data-drv="settings">Vai a Impostazioni</button></div>`);
+}
+// apre il Picker: ritorna [{id,name,url,mime,size}]
+async function drivePick(multi){
+  if(!drvOk()){ drvNeedCfg(); return []; }
+  if(drvBusy) return []; drvBusy = true;
+  try{
+    const tok = await driveToken();
+    if(!(window.google && google.picker)) throw new Error('Il selettore di Google non è ancora pronto. Riprova tra un istante.');
+    return await new Promise((res) => {
+      const view = new google.picker.DocsView(google.picker.ViewId.DOCS).setIncludeFolders(true).setSelectFolderEnabled(false);
+      let b = new google.picker.PickerBuilder().addView(view).setOAuthToken(tok).setDeveloperKey(drvCfg.apiKey).setLocale('it')
+        .setCallback((d) => {
+          const A = google.picker.Action;
+          if(d.action === A.PICKED){ res((d.docs || []).map(x => ({id: x.id, name: x.name, url: x.url, mime: x.mimeType, size: x.sizeBytes}))); }
+          else if(d.action === A.CANCEL){ res([]); }
+        });
+      if(drvCfg.appId) b = b.setAppId(drvCfg.appId);
+      if(multi){ try{ b = b.enableFeature(google.picker.Feature.MULTISELECT_ENABLED); }catch(e){} }
+      try{ b = b.enableFeature(google.picker.Feature.SUPPORT_DRIVES); }catch(e){}
+      b.build().setVisible(true);
+    });
+  }catch(e){ showNotice('Google Drive: ' + (e.message || e)); return []; }
+  finally{ drvBusy = false; }
+}
+// scarica un file da Drive come File
+async function driveFetchFile(id){
+  const tok = await driveToken();
+  const H = {Authorization: 'Bearer ' + tok};
+  const mr = await fetch('https://www.googleapis.com/drive/v3/files/' + id + '?fields=name,mimeType&supportsAllDrives=true', {headers: H});
+  if(!mr.ok) throw new Error(mr.status === 404 ? 'File non accessibile: sceglilo dal selettore di Drive.' : 'Drive ha risposto ' + mr.status);
+  const meta = await mr.json(), nativo = /^application\/vnd\.google-apps\./.test(meta.mimeType || '');
+  const url = nativo ? 'https://www.googleapis.com/drive/v3/files/' + id + '/export?mimeType=application%2Fpdf' : 'https://www.googleapis.com/drive/v3/files/' + id + '?alt=media&supportsAllDrives=true';
+  const r = await fetch(url, {headers: H}); if(!r.ok) throw new Error('Scaricamento non riuscito (' + r.status + ').');
+  const blob = await r.blob(), type = nativo ? 'application/pdf' : (meta.mimeType || blob.type || 'application/octet-stream');
+  let name = meta.name || 'documento'; if(nativo && !/\.pdf$/i.test(name)) name += '.pdf';
+  return new File([blob], name, {type});
+}
+// ---- invio WhatsApp da Drive: avvolge i flussi esistenti
+{
+  const _ds = dshStart;
+  dshStart = function(item){
+    const id = driveIdFrom(item && item.link);
+    if(!id || !drvOk()) return _ds(item);
+    dshDoc = item; dshFiles = [];
+    driveFetchFile(id).then(f => { dshFiles = [f]; dshAsk(); }).catch(e => { showNotice('Da Drive non riesco: ' + (e.message || e) + ' Scegli il file dal telefono.'); _ds(item); });
+  };
+  const _as = aqShareStart;
+  aqShareStart = function(id, did){
+    const a = acquisti.find(x => x.id === id), d = a && (a.documenti || []).find(x => x.id === did), gid = driveIdFrom(d && d.url);
+    if(!gid || !drvOk()) return _as(id, did);
+    aqShareDoc = {a, d}; aqShareFiles = [];
+    driveFetchFile(gid).then(f => { aqShareFiles = [f]; aqShareAsk(); }).catch(e => { showNotice('Da Drive non riesco: ' + (e.message || e) + ' Scegli il file dal telefono.'); _as(id, did); });
+  };
+}
+// ---- eventi dei pulsanti
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest && e.target.closest('[data-drv]'); if(!b) return;
+  const a = b.dataset.drv;
+  if(a === 'settings'){ ckClose(); const t = document.querySelector('.tab-btn[data-tab="impostazioni"]'); if(t) t.click(); return; }
+  if(a === 'save'){
+    ['apiKey', 'clientId', 'appId'].forEach(k => { const el = document.getElementById('drv-' + k); if(el) drvCfg[k] = el.value.trim(); });
+    await saveDriveCfg(); drvPreload(); showNotice('Configurazione di Google Drive salvata.'); try{ renderImpostazioni(); }catch(err){} return;
+  }
+  if(a === 'test'){
+    ['apiKey', 'clientId', 'appId'].forEach(k => { const el = document.getElementById('drv-' + k); if(el) drvCfg[k] = el.value.trim(); });
+    if(!drvOk()){ showNotice('Inserisci almeno la chiave API e l\'ID client.'); return; }
+    try{ await driveToken(); showNotice('Collegamento riuscito: Drive risponde.'); }catch(err){ showNotice('Collegamento non riuscito: ' + (err.message || err)); } return;
+  }
+  if(a === 'pick-df'){ const r = await drivePick(false); if(r[0]){ document.getElementById('df-link').value = r[0].url; showNotice('Collegato: ' + r[0].name); } return; }
+  if(a === 'pick-mf'){
+    const r = await drivePick(true); if(!r.length) return;
+    const nomeEl = document.getElementById('mf-doc-nome'), nome = nomeEl.value.trim();
+    r.forEach((x, i) => formDocumenti.push({id: uid(), nome: (r.length === 1 && nome) ? nome : drvName(x.name), url: x.url}));
+    nomeEl.value = ''; document.getElementById('mf-doc-url').value = ''; renderFormDocumentiList(); return;
+  }
+  if(a === 'pick-aq'){
+    const row = b.closest('.aq-frow'); const r = await drivePick(true); if(!row || !r.length) return;
+    const dn = row.querySelector('.aq-dn'), du = row.querySelector('.aq-du'); du.value = r[0].url; if(!dn.value.trim()) dn.value = drvName(r[0].name);
+    r.slice(1).forEach(x => row.insertAdjacentHTML('afterend', aqDocRow({id: uid(), nome: drvName(x.name), url: x.url}))); return;
+  }
+});
+function driveSettingsHtml(){
+  const st = drvOk() ? '<span class="hint" style="color:#1f6b45;font-weight:700">Configurato</span>' : '<span class="hint">Non configurato</span>';
+  const f = (k, l, ph) => `<div style="margin-bottom:8px"><label style="font-size:11.5px;color:var(--ink-soft);display:block">${l}</label><input type="text" id="drv-${k}" value="${escHtml(drvCfg[k] || '')}" placeholder="${ph}" style="width:100%" autocomplete="off"></div>`;
+  return `<p class="form-section-title" style="margin:20px 0 6px;">Google Drive ${st}</p>
+    <p class="hint" style="margin:0 0 10px;font-size:12.5px;color:var(--ink-soft);">Serve per scegliere i file dal tuo Drive e inviarli su WhatsApp. Duewell vede solo i file che scegli tu. I tre codici si trovano nel progetto Google Cloud.</p>
+    ${f('apiKey', 'Chiave API', 'AIza…')}${f('clientId', 'ID client OAuth (applicazione web)', '123456789-abc….apps.googleusercontent.com')}${f('appId', 'Numero del progetto', '123456789')}
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" data-drv="save">Salva</button><button type="button" class="btn small ghost" data-drv="test">Prova il collegamento</button></div>`;
+}
 
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
