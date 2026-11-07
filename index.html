@@ -3221,7 +3221,7 @@ function renderImpostazioni(){
     ${nomiCompletiHtml()}
     ${driveSettingsHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
-    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 20:50</b></p>
+    <p class="hint" style="margin:14px 2px 0">Versione app: <b>07/11/2026 21:17</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -4448,7 +4448,7 @@ showWelcome = function(rerun){ wzInit(!!rerun === true); document.getElementById
 
 // ===== Google Drive: selettore file (Picker) e invio su WhatsApp =====
 const KEY_DRIVE = 'drive-config';
-const DRIVE_DEFAULT = {apiKey: '', clientId: '', appId: ''};   // da compilare se l'app viene distribuita con una configurazione fissa
+const DRIVE_DEFAULT = {apiKey: 'AIzaSyC4X1ChtVUedowHoi2cUx7nY29Tp6vvxls', clientId: '810777011875-fd4dvfve9seb6e85tcv0ckljhcun3cl2.apps.googleusercontent.com', appId: '810777011875'};   // da compilare se l'app viene distribuita con una configurazione fissa
 const DRV_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 let drvCfg = {...DRIVE_DEFAULT}, drvTok = '', drvExp = 0, drvReady = {gis: false, picker: false}, drvBusy = false;
 const drvOk = () => !!(drvCfg.apiKey && drvCfg.clientId);
@@ -4477,7 +4477,7 @@ async function saveDriveCfg(){ try{ await storageAdapter.set(KEY_DRIVE, JSON.str
   const _ld = loadData;
   loadData = async function(){
     await _ld();
-    try{ const r = await storageAdapter.get(KEY_DRIVE, false); const v = r ? JSON.parse(r.value) : {}; drvCfg = {...DRIVE_DEFAULT, ...(v && typeof v === 'object' ? v : {})}; }catch(e){ drvCfg = {...DRIVE_DEFAULT}; }
+    try{ const r = await storageAdapter.get(KEY_DRIVE, false); const v = r ? JSON.parse(r.value) : {}; drvCfg = {...DRIVE_DEFAULT}; if(v && typeof v === 'object') Object.keys(DRIVE_DEFAULT).forEach(k => { if(v[k]) drvCfg[k] = v[k]; }); }catch(e){ drvCfg = {...DRIVE_DEFAULT}; }
     setTimeout(() => { drvPreload(); }, 300);
   };
 }
