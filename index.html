@@ -662,6 +662,9 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+nav.tabs{background:linear-gradient(170deg,#10243a 0%,#17406b 62%,#0f7f77 135%)}
+#logout-bar{background:transparent !important}
+@media (max-width:760px){nav.tabs{background:linear-gradient(100deg,#10243a 0%,#17406b 70%,#0f7f77 140%)}#logout-bar{background:var(--bg) !important}}
 .lg-legal{margin:14px 0 0;text-align:center;font-size:12.5px;color:var(--ink-soft)}.lg-legal a{color:var(--ink-soft);text-decoration:underline}
 /* Mobile: ogni riga di tabella diventa una scheda */
 @media (max-width:640px){
@@ -3234,7 +3237,7 @@ function renderImpostazioni(){
     ${driveSettingsHtml()}
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
     <p class="hint" style="margin:14px 2px 0"><a href="privacy.html" target="_blank" rel="noopener">Informativa sulla privacy</a> · <a href="termini.html" target="_blank" rel="noopener">Termini di servizio</a></p>
-    <p class="hint" style="margin:6px 2px 0">Versione app: <b>07/11/2026 22:26</b></p>
+    <p class="hint" style="margin:6px 2px 0">Versione app: <b>07/11/2026 22:31</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
