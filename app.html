@@ -3430,9 +3430,9 @@ function renderImpostazioni(){
         return `<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line);">
           <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;"><input type="checkbox" id="terzo-on" ${T ? 'checked' : ''} style="width:auto;margin-top:3px;"><span><b>C'è un terzo soggetto</b> (es. un familiare o un ex coniuge) a cui chiedere parte di ciò che le assicurazioni non rimborsano?</span></label>
           ${T ? `<div style="margin:12px 0 0 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;">
-            <div><label style="${lab}">Chi è</label><input type="text" data-pag-i="${ti}" value="${escHtml(T.nome)}" maxlength="40" placeholder="es. Cristina Pizzinat" style="width:100%;"></div>
+            <div><label style="${lab}">Chi è</label><input type="text" data-pag-i="${ti}" value="${escHtml(T.nome)}" maxlength="40" placeholder="es. Maria Rossi" style="width:100%;"></div>
             <div><label style="${lab}">Che percentuale paga (%)</label><input type="number" min="1" max="100" step="1" data-pag-quota="${ti}" value="${T.quota}" style="width:100%;"></div>
-            <div><label style="${lab}">Per le spese di chi</label><input type="text" data-pag-per="${ti}" value="${escHtml(T.per || '')}" maxlength="40" placeholder="es. Sara (vuoto = tutti)" style="width:100%;"></div>
+            <div><label style="${lab}">Per le spese di chi</label><input type="text" data-pag-per="${ti}" value="${escHtml(T.per || '')}" maxlength="40" placeholder="es. Anna (vuoto = tutti)" style="width:100%;"></div>
             <div><label style="${lab}">Email per l'invio</label><input type="email" data-pag-email="${ti}" value="${escHtml(T.email || '')}" maxlength="120" placeholder="facoltativa" style="width:100%;"></div>
           </div>
           <p class="hint" style="margin:10px 0 0 26px;" id="terzo-esempio">${terzoEsempio(T)}</p>` : ''}
@@ -3999,7 +3999,7 @@ function ckForm(id, pre){
   const cad = c ? +c.cadenza : 12, std = [0, 6, 12, 24, 36, 60].includes(cad);
   ckShow(`${ckHead(c ? 'Modifica controllo' : 'Nuovo controllo o visita')}
     <div class="md-body"><div class="ck-form">
-    ${ckFld('Per chi', `<input class="ck-in" id="ck-persona" list="preset-richiedente" value="${escHtml(c ? c.persona : pre.persona || '')}" placeholder="es. Stefano">`)}
+    ${ckFld('Per chi', `<input class="ck-in" id="ck-persona" list="preset-richiedente" value="${escHtml(c ? c.persona : pre.persona || '')}" placeholder="es. Luca">`)}
     ${ckFld('Tipo di controllo', `<input class="ck-in" id="ck-tipo" value="${escHtml(c ? c.tipo : pre.tipo || '')}" placeholder="es. Visita dermatologica, Check-up cardiologico">`)}
     ${ckFld('Cadenza', `<select class="ck-in" id="ck-cad">${[[0, 'Una tantum (visita singola)'], [6, 'Ogni 6 mesi'], [12, 'Ogni anno'], [24, 'Ogni 2 anni'], [36, 'Ogni 3 anni'], [60, 'Ogni 5 anni'], ['x', 'Personalizzata (mesi)…']].map(([v, l]) => `<option value="${v}"${(std ? cad === v : v === 'x') ? ' selected' : ''}>${l}</option>`).join('')}</select><input class="ck-in" id="ck-cadx" type="number" min="1" max="240" placeholder="mesi" value="${!std ? cad : ''}" style="margin-top:6px;${std ? 'display:none' : ''}">`)}
     ${ckFld('Avvisami prima di', `<select class="ck-in" id="ck-pre">${[7, 15, 30, 45, 60, 90].map(v => `<option value="${v}"${(c && c.preavviso != null ? +c.preavviso : 30) === v ? ' selected' : ''}>${v} giorni</option>`).join('')}</select>`)}
@@ -4957,7 +4957,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 19:35';
+const SUPPORT_VER = '08/11/2026 19:47';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5009,7 +5009,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 19:35</b></p>`;
+  <p class="st-ver">Versione app: <b>08/11/2026 19:47</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
