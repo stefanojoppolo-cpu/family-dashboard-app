@@ -1029,9 +1029,11 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
       <div id="auth-info" style="display:none;background:#e6f6ee;color:#1f6b45;padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:14px;"></div>
       <button class="lg-google" id="auth-google-btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Continua con Google</button>
       <div class="lg-or"><span></span>oppure con la tua email<span></span></div>
-      <div class="field" style="margin-bottom:12px;"><label>Email</label><input type="email" id="auth-email" placeholder="tuaemail@esempio.it" autocomplete="email" style="width:100%;"></div>
+      <form id="auth-form" novalidate style="margin:0">
+      <div class="field" style="margin-bottom:12px;"><label>Email</label><input type="email" id="auth-email" name="username" placeholder="tuaemail@esempio.it" autocomplete="username" style="width:100%;"></div>
       <div class="field" style="margin-bottom:18px;"><label>Password</label><input type="password" id="auth-password" placeholder="Almeno 6 caratteri" autocomplete="current-password" style="width:100%;"><div style="text-align:right;margin-top:6px;"><button type="button" class="lg-link" id="auth-forgot-btn" style="font-size:13px;">Password dimenticata?</button></div></div>
-      <button class="btn" id="auth-login-btn" style="width:100%;padding:12px;font-size:15px;">Accedi</button>
+      <button class="btn" id="auth-login-btn" type="submit" style="width:100%;padding:12px;font-size:15px;">Accedi</button>
+      </form>
       <p class="lg-legal"><a href="privacy.html" target="_blank" rel="opener">Privacy</a> · <a href="termini.html" target="_blank" rel="opener">Termini di servizio</a></p>
       <p class="lg-reg">Non hai ancora un account? <button type="button" class="lg-link" id="auth-register-btn">Crea un account</button></p>
     </main>
@@ -1881,9 +1883,9 @@ function normalizeSettings(raw){
     const m = raw.moduli && raw.moduli[id];
     if(m){
       if(m.on === false) d.moduli[id].on = false;
-      if(typeof m.nome === 'string' && m.nome.trim()) d.moduli[id].nome = m.nome.trim();
     }
   });
+  MODULI_IDS.forEach(id => { d.moduli[id].nome = (id === 'medical' && d.senzaPagatori) ? 'Spese sanitarie' : MODULI_DEFAULT_NOMI[id]; });
   if(raw.report && Array.isArray(raw.report.charts)){
     d.report.charts = raw.report.charts.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && ['med', 'bil'].includes(x.src) && ['bar', 'hbar', 'line', 'pie'].includes(x.type) && ['tot', 'rimb', 'resid', 'n', 'multi', 'giorni', 'e', 'u', 'r'].includes(x.meas) && ['mese', 'anno', 'persona', 'prestazione', 'pagatore', 'conto'].includes(x.grp))
       .slice(0, 40).map(x => ({id:x.id.slice(0, 30), t:String(x.t || '').slice(0, 60), src:x.src, meas:x.meas, grp:x.grp, stk:x.stk === 'persona' ? 'persona' : '', mod:x.mod === 'Diretta' || x.mod === 'Indiretta' ? x.mod : '', es:x.es === 'ok' || x.es === 'no' ? x.es : '', type:x.type, wide:x.wide === true}));
@@ -3365,8 +3367,7 @@ function renderImpostazioni(){
   const moduliHtml = MODULI_IDS.map(id => `
     <div class="set-row">
       <label class="chk"><input type="checkbox" data-set-modulo-on="${id}" ${V.moduli[id].on ? 'checked' : ''}> Attivo</label>
-      <input type="text" data-set-modulo-nome="${id}" value="${escHtml(V.moduli[id].nome)}" maxlength="40">
-      <span class="doc-ref">${escHtml(MODULI_DEFAULT_NOMI[id])}</span>
+      <b style="flex:1;font-size:14px">${escHtml(id === 'medical' && !V.pagatori.length ? 'Spese sanitarie' : MODULI_DEFAULT_NOMI[id])}</b>
     </div>`).join('');
   const elenchiHtml = Object.keys(ELENCHI_DEF).map(k => `
     <div class="set-card">
@@ -3382,7 +3383,7 @@ function renderImpostazioni(){
     ${profiloCardHtml()}
     <div class="set-card">
       <h3>Moduli</h3>
-      <p class="hint">Attiva solo le schede che ti servono e dai loro il nome che preferisci. I dati dei moduli spenti non vengono cancellati.</p>
+      <p class="hint">Attiva solo le schede che ti servono. I dati dei moduli spenti non vengono cancellati.</p>
       ${moduliHtml}
     </div>
     <div class="set-card">
@@ -3495,7 +3496,7 @@ async function impSave(){
     await saveMedical();
   }
   settings.pagatori = norm.pagatori; settings.senzaPagatori = !norm.pagatori.length;
-  if(settings.moduli.medical){ const mn = settings.moduli.medical; if(settings.senzaPagatori && mn.nome === MODULI_DEFAULT_NOMI.medical) mn.nome = 'Spese sanitarie'; else if(!settings.senzaPagatori && mn.nome === 'Spese sanitarie') mn.nome = MODULI_DEFAULT_NOMI.medical; }
+  MODULI_IDS.forEach(id => { if(settings.moduli[id]) settings.moduli[id].nome = (id === 'medical' && settings.senzaPagatori) ? 'Spese sanitarie' : MODULI_DEFAULT_NOMI[id]; });
   settings.terzoStash = norm.pagatori.some(p => p.quota > 0) ? null : (impDraft.terzoStash !== undefined ? impDraft.terzoStash : settings.terzoStash) || null;
   settings.massimali = norm.pagatori.length ? norm.massimali : settings.massimali;
   if(pagCambiati) settings.dashboard.sezioni = settings.dashboard.sezioni.map(s => s.id === 'medical' ? {...s, box:[]} : s);
@@ -4642,7 +4643,7 @@ async function wzApplica(){
   Object.keys(wz.liste).forEach(k => { if(k !== 'persone') settings.elenchi[k] = wz.liste[k].slice(); });
   if(wz.mods.has('medical')){
     if(!wz.rerun && wz.pagatori.length){ settings.pagatori = wz.pagatori.map((n, i) => ({id: 'p' + (i + 1), nome: n})); settings.senzaPagatori = false; }
-    else if(!wz.rerun){ settings.pagatori = []; settings.senzaPagatori = true; if(settings.moduli.medical && settings.moduli.medical.nome === MODULI_DEFAULT_NOMI.medical) settings.moduli.medical.nome = 'Spese sanitarie'; }
+    else if(!wz.rerun){ settings.pagatori = []; settings.senzaPagatori = true; if(settings.moduli.medical) settings.moduli.medical.nome = 'Spese sanitarie'; }
     WZ_MX.forEach(m => {
       const c = wz.mx[m.id]; if(!c.on) return;
       if(settings.massimali.some(x => (x.nome || '').toLowerCase() === m.nome.toLowerCase())) return;
@@ -4932,7 +4933,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 19:21';
+const SUPPORT_VER = '08/11/2026 19:27';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -4984,7 +4985,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 19:21</b></p>`;
+  <p class="st-ver">Versione app: <b>08/11/2026 19:27</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -6888,7 +6889,8 @@ function showAuthError(err){
   el.textContent = mapping[err.code] || 'Si è verificato un errore. Riprova.';
   el.style.display = 'block';
 }
-document.getElementById('auth-login-btn').addEventListener('click', async () => {
+document.getElementById('auth-form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
   document.getElementById('auth-error').style.display = 'none';
