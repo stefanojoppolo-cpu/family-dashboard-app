@@ -662,6 +662,38 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+.hdr-undo{display:flex;gap:6px;align-items:center;margin-left:auto}
+.u-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:0 1px 1px rgba(16,36,58,.05);transition:transform .08s,opacity .15s,background .15s}
+.u-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.u-btn:hover:not(:disabled){background:#F5F8FC}.u-btn:active:not(:disabled){transform:scale(.94)}
+.u-btn:disabled{opacity:.35;cursor:default}
+.wrap:has(#panel-panoramica.active) > header .u-btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.32);color:#fff;box-shadow:none}
+.wrap:has(#panel-panoramica.active) > header .u-btn:hover:not(:disabled){background:rgba(255,255,255,.24)}
+#undo-bar{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:400;display:flex;align-items:center;gap:14px;background:#13202D;color:#fff;border-radius:14px;padding:10px 10px 10px 18px;font-size:14px;font-weight:600;box-shadow:0 12px 30px rgba(10,20,35,.35);width:max-content;max-width:calc(100vw - 24px);white-space:nowrap;transition:opacity .2s,transform .2s}
+#undo-bar.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#undo-bar button{background:#fff;color:#13202D;border:0;border-radius:10px;font:800 13.5px inherit;padding:8px 14px;cursor:pointer;white-space:nowrap}
+@media (max-width:900px){#undo-bar{bottom:88px}.wrap > header > div{flex-wrap:nowrap !important;gap:8px !important}.wrap > header > div > div:first-child{min-width:0;flex:1 1 auto}.hdr-undo{gap:4px;flex:none}.u-btn{width:34px;height:34px}.u-btn svg{width:17px;height:17px}}
+
+/* ---- Pulsanti ---- */
+body .btn,body .ph-actions .btn,body .ph-actions .add-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 16px !important;border-radius:12px !important;border:1px solid transparent !important;font-weight:700 !important;font-size:14px !important;line-height:1.1;background:var(--accent);color:#fff;box-shadow:0 1px 2px rgba(47,91,234,.35),0 4px 10px -4px rgba(47,91,234,.4);transition:transform .08s,background .15s,border-color .15s;white-space:nowrap}
+body .btn[hidden],body .add-toggle[hidden]{display:none}
+body .btn:hover,body .ph-actions .add-toggle:hover{background:var(--accent-hover,#244AC8)}
+body .btn:active,body .ph-actions .add-toggle:active{transform:scale(.97)}
+body .btn.small,body .ph-actions .btn.small{min-height:34px;padding:0 13px !important;font-size:13px !important;border-radius:10px !important}
+body .btn.ghost,body .ph-actions .btn.ghost,body .ph-actions .add-toggle.sec,body .btn.b-sec{background:#fff !important;color:var(--ink) !important;border:1px solid var(--line) !important;box-shadow:0 1px 1px rgba(16,36,58,.05)}
+body .btn.ghost:hover,body .ph-actions .add-toggle.sec:hover,body .btn.b-sec:hover{background:#F5F8FC !important;border-color:#C5CFDB !important}
+body .btn.b-quiet{background:#EEF2F7 !important;color:var(--ink) !important;border:1px solid #E1E7EE !important;box-shadow:none}
+body .btn.b-quiet:hover{background:#E4EAF2 !important}
+body .btn.danger,body .btn.ghost.danger{background:#FDF1F0 !important;color:var(--stamp) !important;border:1px solid #F6D5D3 !important;box-shadow:none}
+body .btn.danger:hover,body .btn.ghost.danger:hover{background:#FBE3E1 !important}
+body .btn.b-wa{background:#1FA855 !important;color:#fff !important;border-color:transparent !important;box-shadow:0 1px 2px rgba(31,168,85,.4),0 4px 10px -4px rgba(31,168,85,.45)}
+body .btn.b-wa:hover{background:#188a45 !important}
+body .btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.bi::before{content:"";width:16px;height:16px;flex:none;background:currentColor;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+body .btn.small.bi::before{width:15px;height:15px}
+.md-foot .btn.b-wa{order:-1}
+@media (max-width:640px){.md-foot .btn.b-wa{flex:1 1 100%}.md-foot .btn{flex:1 1 auto}.md-foot .btn.b-quiet{flex:0 0 auto;margin-left:auto}}
+
 .st-card{border:1px solid var(--line);border-radius:14px;background:var(--paper-raised,#fff);margin-bottom:10px;overflow:hidden}
 .st-it{display:flex;align-items:center;gap:14px;padding:14px 16px;flex-wrap:wrap}
 .st-it+.st-it{border-top:1px solid var(--line)}
@@ -991,6 +1023,7 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
           <p id="hdr-sub" style="margin:4px 0 0;">Scadenze, rimborsi, contratti e documenti di famiglia in un unico posto.</p>
         </div>
       </div>
+      <div class="hdr-undo" role="group" aria-label="Annulla e ripeti"><button type="button" class="u-btn" id="undo-btn" title="Annulla l'ultima modifica (Ctrl+Z)" aria-label="Annulla l'ultima modifica" disabled><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg></button><button type="button" class="u-btn" id="redo-btn" title="Ripeti (Ctrl+Y)" aria-label="Ripeti la modifica annullata" disabled><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/></svg></button></div>
       <button class="btn ghost" id="toggle-backup-panel" style="white-space:nowrap;display:none;" hidden>⤓ Backup dati</button>
     </div>
   </header>
@@ -4807,7 +4840,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 17:38';
+const SUPPORT_VER = '08/11/2026 17:51';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -4859,7 +4892,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 17:38</b></p>`;
+  <p class="st-ver">Versione app: <b>08/11/2026 17:51</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5007,6 +5040,105 @@ function hdrSubText(){
     }catch(e){}
   };
 }
+// ---- Pulsanti: classi e icone in base al testo ----
+{
+  const IC = {
+    plus:'M12 5v14M5 12h14', filt:'M3 5h18l-7 8v6l-4-2v-4z', dl:'M12 4v11M7 11l5 5 5-5M5 20h14', ul:'M12 20V9M7 13l5-5 5 5M5 4h14',
+    tr:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13', ed:'M4 20h4L19 9l-4-4L4 16z', rf:'M20 11a8 8 0 10-2.3 6M20 5v6h-6',
+    wa:'M4 20l1.3-4.2A8 8 0 1112 20a8 8 0 01-3.8-1z', sd:'M4 12l16-8-6 16-3-7z', cal:'M5 6h14v14H5zM5 10h14M9 3v4M15 3v4', ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6', cp:'M8 8h12v12H8zM4 16V4h12'
+  };
+  const url = (d) => 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>') + '")';
+  const RULES = [[/^(\+|Nuov[oa]\b)/i,'plus'],[/calendar/i,'cal'],[/whatsapp/i,'wa'],[/^(Filtri)/i,'filt'],[/^(Excel|Esporta|Scarica|Backup|Salva backup)/i,'dl'],[/^(Importa|Carica)/i,'ul'],
+    [/^(Elimina|Rimuovi|Cancella)\b/i,'tr'],[/^Modifica/i,'ed'],[/^(Rinnova|Aggiorna|Ripeti)/i,'rf'],[/^(Invia|Scrivi)\b/i,'sd'],[/^(Apri|Dettagli)\b/i,'ext'],[/^Copia/i,'cp'],[/^Aggiungi/i,'plus']];
+  const EMO = /^[\s+➕⬇⤓️\p{Extended_Pictographic}]+/u;
+  const SEC = /^(Modifica|Rinnova|Duplica|Dettagli|Apri|Importa|Copia)/i, QUIET = /^(Chiudi|Annulla|Indietro|Salta)/i;
+  const norm = (b) => (b.textContent || '').replace(/\s+/g, ' ').trim();
+  function polish(b){
+    const cur = norm(b);
+    if(b.dataset.bp === cur && (!b.classList.contains('bi') || b.style.getPropertyValue('--ic'))) return;
+    b.classList.remove('b-quiet', 'b-wa', 'b-sec', 'bi'); b.style.removeProperty('--ic');
+    const t = cur; b.dataset.bp = cur; if(!t || t.length > 40) return;
+    const tn = [...b.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+    if(QUIET.test(t)) b.classList.add('b-quiet');
+    else if(/whatsapp/i.test(t)) b.classList.add('b-wa');
+    else if(b.closest('.md-foot') && !b.classList.contains('ghost') && !b.classList.contains('danger') && SEC.test(t)) b.classList.add('b-sec');
+    if(b.classList.contains('lg-link') || b.querySelector('svg,img') || t.length > 28) return;
+    const k = (RULES.find(r => r[0].test(t)) || [])[1];
+    if(k && tn){ tn.textContent = tn.textContent.replace(EMO, ''); b.classList.add('bi'); b.style.setProperty('--ic', url(IC[k])); b.dataset.bp = norm(b); }
+  }
+  const SEL = '.btn,.add-toggle';
+  let pend = false;
+  const run = () => { pend = false; try{ document.querySelectorAll(SEL).forEach(polish); }catch(e){} };
+  new MutationObserver(() => { if(!pend){ pend = true; (window.requestAnimationFrame || setTimeout)(run); } }).observe(document.body, {childList:true, subtree:true});
+  run();
+}
+
+// ---- Annulla / Ripeti ----
+{
+  const KEYS = {'recurring-payments':'Pagamento', 'medical-expenses':'Spesa', 'annual-balance':'Voce di bilancio', 'expiring-contracts':'Contratto', 'personal-documents':'Documento', 'tax-deductions':'Detrazione', 'checkups':'Controllo', 'specialists':'Specialista', 'acquisti':'Acquisto'};
+  const FEM = {'Spesa':1, 'Voce di bilancio':1, 'Detrazione':1};
+  const shadow = {}, undoS = [], redoS = []; let busy = false, lastT = 0;
+  const _get = storageAdapter.get.bind(storageAdapter), _set = storageAdapter.set.bind(storageAdapter);
+  storageAdapter.get = async function(key){ const r = await _get(key); try{ if(KEYS[key] && r && typeof r.value === 'string') shadow[key] = r.value; }catch(e){} return r; };
+  const count = (s) => { try{ const a = JSON.parse(s); return Array.isArray(a) ? a.length : -1; }catch(e){ return -1; } };
+  const btnU = () => document.getElementById('undo-btn'), btnR = () => document.getElementById('redo-btn');
+  function sync(){ const u = btnU(), r = btnR(); if(u) u.disabled = !undoS.length; if(r) r.disabled = !redoS.length; }
+  let barT = null;
+  function bar(msg, act){
+    let el = document.getElementById('undo-bar');
+    if(!el){ el = document.createElement('div'); el.id = 'undo-bar'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.innerHTML = '<span></span>' + (act ? '<button type="button">Annulla</button>' : ''); el.firstChild.textContent = msg;
+    const b = el.querySelector('button'); if(b) b.onclick = () => { hideBar(); doUndo(); };
+    el.classList.add('on'); clearTimeout(barT); barT = setTimeout(hideBar, 7000);
+  }
+  function hideBar(){ const el = document.getElementById('undo-bar'); if(el) el.classList.remove('on'); }
+  storageAdapter.set = async function(key, value){
+    const res = await _set(key, value);
+    if(KEYS[key] && !busy && typeof value === 'string'){
+      const before = shadow[key] !== undefined ? shadow[key] : '[]';
+      shadow[key] = value;
+      if(before !== value){
+        const now = Date.now(), e = {key, before, after: value};
+        if(undoS.length && now - lastT < 700) undoS[undoS.length - 1].push(e); else { undoS.push([e]); if(undoS.length > 10) undoS.shift(); }
+        lastT = now; redoS.length = 0; sync();
+        const n0 = count(before), n1 = count(value);
+        if(n0 > n1 && n1 >= 0){ const w = KEYS[key]; bar(w + (FEM[w] ? ' eliminata' : ' eliminato'), true); }
+      }
+    }else if(KEYS[key] && typeof value === 'string'){ shadow[key] = value; }
+    return res;
+  };
+  async function apply(group, field){
+    busy = true;
+    try{
+      for(const e of [...group].reverse()) await _set(e.key, e[field]);
+      group.forEach(e => { shadow[e.key] = e[field]; });
+      await loadData(); renderAll();
+    }finally{ busy = false; }
+  }
+  async function doUndo(){
+    if(busy || !undoS.length) return; const g = undoS.pop();
+    try{ await apply(g, 'before'); redoS.push(g); showNotice('Modifica annullata', 'success'); }
+    catch(e){ console.error(e); undoS.push(g); showNotice('Non sono riuscito ad annullare. Riprova.'); }
+    sync();
+  }
+  async function doRedo(){
+    if(busy || !redoS.length) return; const g = redoS.pop();
+    try{ await apply(g, 'after'); undoS.push(g); showNotice('Modifica ripetuta', 'success'); }
+    catch(e){ console.error(e); redoS.push(g); showNotice('Non sono riuscito a ripetere. Riprova.'); }
+    sync();
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('#undo-btn,#redo-btn'); if(!b || b.disabled) return; b.id === 'undo-btn' ? doUndo() : doRedo(); });
+  document.addEventListener('keydown', (e) => {
+    if(!(e.ctrlKey || e.metaKey) || e.altKey) return;
+    const t = e.target, tag = t && t.tagName; if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) return;
+    if(document.querySelector('.md-modal.on,.ck-modal.on')) return;
+    const k = (e.key || '').toLowerCase();
+    if(k === 'z' && !e.shiftKey){ e.preventDefault(); doUndo(); } else if(k === 'y' || (k === 'z' && e.shiftKey)){ e.preventDefault(); doRedo(); }
+  });
+  window.dwUndoState = () => ({undo: undoS.length, redo: redoS.length});
+  sync();
+}
+
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
