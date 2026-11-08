@@ -662,6 +662,25 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+.wrap:has(#panel-panoramica.active) > header{background:linear-gradient(120deg,#10243a 0%,#17406b 60%,#0f7f77 135%);border-radius:18px;padding:20px 26px;margin-bottom:18px;box-shadow:0 8px 24px rgba(16,36,58,.18)}
+.wrap:has(#panel-panoramica.active) > header > div{padding-bottom:0 !important}
+.wrap:has(#panel-panoramica.active) > header h1{color:#fff}
+.wrap:has(#panel-panoramica.active) > header p{color:rgba(255,255,255,.86);font-size:15px}
+.wrap:has(#panel-panoramica.active) > header .hdr-av{box-shadow:0 0 0 3px rgba(255,255,255,.9),0 2px 10px rgba(0,0,0,.25)}
+.wrap:not(:has(#panel-panoramica.active)) > header{margin-bottom:14px}
+.wrap:not(:has(#panel-panoramica.active)) > header > div{padding-bottom:0 !important}
+.wrap:not(:has(#panel-panoramica.active)) > header h1{font-size:19px}
+.wrap:not(:has(#panel-panoramica.active)) > header p{display:none}
+.wrap:not(:has(#panel-panoramica.active)) > header .hdr-av{width:38px;height:38px;font-size:15px;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(15,23,42,.16)}
+.app-card{border:1px solid var(--line);border-radius:14px;background:var(--paper-raised,#fff);padding:4px 20px 16px}
+.app-card .form-section-title{margin:16px 0 6px !important;font-size:13px;color:var(--ink)}
+.app-card .form-section-title:not(:first-child){border-top:1px solid var(--line);padding-top:16px}
+.app-card .hint{margin-left:0 !important;margin-right:0 !important}
+@media (max-width:640px){
+.wrap:has(#panel-panoramica.active) > header{border-radius:16px;padding:16px 16px;margin-bottom:14px}
+.wrap:has(#panel-panoramica.active) > header h1{font-size:21px;line-height:1.2}
+.wrap:has(#panel-panoramica.active) > header p{font-size:13.5px}
+}
 .cr{display:none}
 .cr-sum{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 22px;margin:0 0 14px;border-radius:16px;padding:16px 22px;color:#fff;background:linear-gradient(120deg,#10243a 0%,#17406b 60%,#0f7f77 130%)}
 .cr-sum small{opacity:.82;font-size:14px}.cr-sum b{font-size:28px;letter-spacing:-.01em;line-height:1.2}
@@ -675,6 +694,7 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .table-scroll table.cmp tbody>tr[data-id]>td.cr-host{display:block !important;padding:0 !important;border:0 !important}
 .table-scroll table.cmp td.cr-host>*:not(.cr){display:none !important}
 .table-scroll table.cmp tr.doc-row,.table-scroll table.cmp tr.xrow{display:none !important}
+.table-scroll table.cmp tbody>tr[data-id]:not(:has(.cr-av)){padding-left:14px}
 .cr .cr-av{position:absolute;left:14px;top:14px}.cr .cr-av .av{width:36px;height:36px;font-size:15px}
 .cr-t{font-weight:700;font-size:15.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cr-s{font-size:13.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -943,7 +963,7 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
         <div class="hdr-av" id="hdr-av" role="button" tabindex="0" aria-label="Profilo della famiglia"></div>
         <div>
           <h1 style="margin:0;" id="app-title">Duewell</h1>
-          <p style="margin:4px 0 0;">Scadenze, rimborsi, contratti e documenti di famiglia in un unico posto.</p>
+          <p id="hdr-sub" style="margin:4px 0 0;">Scadenze, rimborsi, contratti e documenti di famiglia in un unico posto.</p>
         </div>
       </div>
       <button class="btn ghost" id="toggle-backup-panel" style="white-space:nowrap;display:none;" hidden>⤓ Backup dati</button>
@@ -3295,7 +3315,7 @@ function renderImpostazioni(){
     <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
     <p class="hint" style="margin:14px 2px 0"><a href="privacy.html" target="_blank" rel="opener">Informativa sulla privacy</a> · <a href="termini.html" target="_blank" rel="opener">Termini di servizio</a></p>
     <p class="hint" style="margin:14px 2px 0"><button type="button" class="lg-link" data-dw="del" style="color:#CF3A3A;font-size:13px">Elimina il mio account</button></p>
-    <p class="hint" style="margin:6px 2px 0">Versione app: <b>08/11/2026 11:26</b></p>
+    <p class="hint" style="margin:6px 2px 0">Versione app: <b>08/11/2026 11:33</b></p>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -4836,6 +4856,17 @@ dwRenderInstall();
         m: miss ? miss.textContent.trim() : '', amt: cell(r, 'Totale') ? cell(r, 'Totale').innerHTML : '',
         chip: bz ? '<span class="badge soon">BOZZA</span>' : (cell(r, 'Stato pratica') ? cell(r, 'Stato pratica').innerHTML : '')};
     },
+    'recurring-body': (r) => {
+      const sc = txt(cell(r, 'Scadenza')), ric = txt(cell(r, 'Ricorrenza'));
+      return {av: '', t: [...cell(r, 'Voce').childNodes].filter(n => n.nodeType === 3 && n.textContent.trim()).map(n => n.textContent.trim())[0] || txt(cell(r, 'Voce')), s: [dash(sc) ? 'scade ' + sc : '', dash(ric)].filter(Boolean).join(' · '), m: '', amt: cell(r, 'Importo') ? '<b>' + cell(r, 'Importo').innerHTML + '</b>' : '', chip: cell(r, 'Stato') ? cell(r, 'Stato').innerHTML : ''};
+    },
+    'contratti-body': (r) => {
+      const fin = txt(cell(r, 'Fine/Scadenza')), cn = txt(cell(r, 'Canone mensile')), sd = cell(r, 'Stato disdetta'), sk = cell(r, 'Stato contratto');
+      const chip = (sd && sd.querySelector('.badge')) ? sd.innerHTML : ((sk && sk.querySelector('.badge')) ? sk.innerHTML : '');
+      return {av: '', t: txt(cell(r, 'Tipo')), s: [txt(cell(r, 'Fornitore/Controparte')), dash(fin) ? 'scade ' + fin : ''].filter(dash).join(' · '), m: '', amt: dash(cn) ? '<b>' + escHtml(cn) + '</b><small style="color:var(--ink-soft);font-weight:600"> /mese</small>' : '', chip};
+    },
+    'detrazioni-body': (r) => ({av: av(cell(r, 'Intestatario')), t: txt(cell(r, 'Categoria')), s: [txt(cell(r, 'Intestatario')), txt(cell(r, 'Data'))].filter(dash).join(' · '), m: '', amt: cell(r, 'Importo') ? '<b>' + cell(r, 'Importo').innerHTML + '</b>' : '', chip: ''}),
+    'bilancio-body': (r) => ({av: '', t: [txt(cell(r, 'Conto')), txt(cell(r, 'Anno'))].filter(Boolean).join(' · '), s: 'Entrate ' + txt(cell(r, 'Entrate')) + ' · Uscite ' + txt(cell(r, 'Uscite')), m: '', amt: cell(r, 'Risparmio') ? '<b style="color:' + (cell(r, 'Risparmio').style.color || 'inherit') + '">' + txt(cell(r, 'Risparmio')) + '</b>' : '', chip: cell(r, 'Dettaglio') ? cell(r, 'Dettaglio').innerHTML : ''}),
     'documenti-body': (r) => {
       const sc = txt(cell(r, 'Scadenza'));
       return {av: av(cell(r, 'Intestatario')), t: txt(cell(r, 'Tipo')), s: [txt(cell(r, 'Intestatario')), dash(sc) ? 'scade ' + sc : ''].filter(Boolean).join(' · '), m: '', amt: '',
@@ -4843,6 +4874,7 @@ dwRenderInstall();
     }
   };
   function summary(bodyId, rows){
+    if(bodyId !== 'medical-body' && bodyId !== 'documenti-body') return;
     const panel = document.getElementById(bodyId).closest('.panel'); if(!panel) return;
     let el = panel.querySelector(':scope > .cr-sum');
     if(!el){ el = document.createElement('div'); el.className = 'cr-sum'; const ts = panel.querySelector('.table-scroll'); if(ts) ts.parentNode.insertBefore(el, ts); else return; }
@@ -4872,7 +4904,7 @@ dwRenderInstall();
     });
     summary(bodyId, rows);
   }
-  ['medical-body', 'documenti-body'].forEach(id => {
+  Object.keys(CFG).forEach(id => {
     const b = document.getElementById(id); if(!b) return;
     new MutationObserver(() => build(id)).observe(b, {childList: true});
     setTimeout(() => build(id), 0);
@@ -4884,6 +4916,37 @@ dwRenderInstall();
     box.addEventListener('touchend', (e) => { if(y0 !== null && e.changedTouches[0].clientY - y0 > 90) close(); y0 = null; }, {passive: true});
   }), 0);
 })();
+
+// ---- Intestazione a gradiente in Panoramica: saluto + riassunto del giorno ----
+function hdrSubText(){
+  let items = []; try{ items = buildUrgentItems(); }catch(e){ return ''; }
+  if(!items.length) return 'Tutto in ordine: nessuna scadenza in arrivo.';
+  const sc = items.filter(it => it.giorni < 0).length, vic = items.filter(it => it.giorni >= 0 && it.giorni <= 14).length, n = items.length;
+  const parts = [n + (n === 1 ? ' scadenza a breve' : ' scadenze a breve')];
+  if(sc) parts.push(sc + (sc === 1 ? ' già scaduta' : ' già scadute'));
+  if(vic) parts.push(vic + (vic === 1 ? ' entro 14 giorni' : ' entro 14 giorni'));
+  return parts.join(' · ');
+}
+{
+  const _rp = renderPanoramica;
+  renderPanoramica = function(){ const r = _rp.apply(this, arguments); try{ const s = document.getElementById('hdr-sub'); if(s) s.textContent = hdrSubText() || s.textContent; }catch(e){} return r; };
+}
+// ---- Impostazioni: blocchi "App e account" raggruppati in una scheda ----
+{
+  const _az = accordionize;
+  accordionize = function(el){
+    _az.apply(this, arguments);
+    try{
+      const kids = [...el.children], i0 = kids.findIndex(x => x.matches('p.form-section-title') && /^App e avvisi/.test(x.textContent.trim()));
+      const i1 = kids.findIndex(x => x.tagName === 'P' && /^Versione app/.test(x.textContent.trim()));
+      if(i0 < 0 || i1 < i0) return;
+      const card = document.createElement('div'); card.className = 'app-card';
+      kids.slice(i0, i1 + 1).forEach(x => card.appendChild(x));
+      const gh = document.createElement('div'); gh.className = 'set-grp'; gh.textContent = 'App e account';
+      el.appendChild(gh); el.appendChild(card);
+    }catch(e){}
+  };
+}
 
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
