@@ -3591,13 +3591,43 @@ function ckFmtLong(iso, ora){ if(!iso) return '—'; const p = iso.split('-').ma
 function ckSafeUrl(u){ u = String(u || '').trim(); return /^https?:\/\//i.test(u) ? u : ''; }
 function ckTel(n){ return String(n || '').replace(/[^\d+]/g, ''); }
 function ckWa(n){ let d = ckTel(n).replace(/^\+/, ''); if(/^3\d{8,9}$/.test(d)) d = '39' + d; else if(/^0039/.test(d)) d = d.slice(2); return d.length >= 8 ? 'https://wa.me/' + d : ''; }
+const CK_IMP_EXTRA = 'Le ricordo che occorre inserire il quesito diagnostico, necessario per poter chiedere il rimborso all\'assicurazione.';
+function ckImpCfg(){ const c = (typeof settings !== 'undefined' && settings.impegnativa) || {}; return {medicoId: c.medicoId || '', extra: typeof c.extra === 'string' ? c.extra : CK_IMP_EXTRA}; }
 function ckMedBase(){
   const ok = (x) => x && ckWa(x.cellulare);
+  const sv = specialists.find(x => x.id === ckImpCfg().medicoId && ok(x)); if(sv) return sv;
   return specialists.find(x => x.prescrive === true && ok(x)) || specialists.find(x => /medico di base|medico di famiglia/i.test(x.specialita || '') && ok(x)) || null;
 }
 function ckFull(n){ return (typeof settings !== 'undefined' && settings.nomiCompleti && settings.nomiCompleti[n]) || n; }
-function ckImpMsg(c, mb){
-  return 'Buongiorno Dottore,\navrei bisogno dell\'impegnativa per ' + c.tipo + '.\nLe ricordo che occorre inserire il quesito diagnostico, necessario per poter chiedere il rimborso all\'assicurazione.\nGrazie mille,\n' + ckFull(c.persona);
+function ckImpMsg(c, mb, extra){
+  const ex = String(extra === undefined ? ckImpCfg().extra : extra).trim();
+  return 'Buongiorno Dottore,\navrei bisogno dell\'impegnativa per ' + c.tipo + '.' + (ex ? '\n' + ex : '') + '\nGrazie mille,\n' + ckFull(c.persona);
+}
+function impReqShow(id){
+  const c = checkups.find(x => x.id === id); if(!c) return;
+  const cand = specialists.filter(x => ckWa(x.cellulare)), mb = ckMedBase(), cfg = ckImpCfg();
+  ckCtx = {t: 'impreq', id};
+  if(!cand.length){ ckShow(`${ckHead('Richiedi impegnativa', escHtml(c.tipo + ' · ' + c.persona))}<div class="md-body"><p style="margin:0">Per mandare la richiesta su WhatsApp serve un medico con il numero di cellulare. Aggiungilo da <b>Specialisti</b> (scheda Check-up e visite).</p></div><div class="md-foot"><button type="button" class="btn small" data-ck="close">Chiudi</button></div>`); return; }
+  const opts = cand.map(s => `<option value="${escHtml(s.id)}"${mb && s.id === mb.id ? ' selected' : ''}>${escHtml(s.nome)}${s.specialita ? ' (' + escHtml(s.specialita) + ')' : ''}</option>`).join('');
+  ckShow(`${ckHead('Richiedi impegnativa', escHtml(c.tipo + ' · ' + c.persona))}<div class="md-body"><div class="ck-form">
+    ${ckFld('A chi la chiedi', `<select class="ck-in" id="ck-imp-doc">${opts}</select>`)}
+    ${ckFld('Aggiunta personalizzata <span class="ck-mut">· dopo il testo standard</span>', `<textarea class="ck-in" id="ck-imp-extra" rows="3" placeholder="Nessuna aggiunta">${escHtml(cfg.extra)}</textarea>`)}
+    <label style="display:flex;gap:8px;align-items:center;font-size:13.5px;margin-top:6px"><input type="checkbox" id="ck-imp-save" checked style="width:auto"> Ricorda medico e aggiunta per le prossime richieste</label>
+    <h4 class="md-h">Anteprima del messaggio</h4><pre id="ck-imp-prev" style="white-space:pre-wrap;font:inherit;background:var(--paper,#F4F6FA);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0;font-size:14px"></pre>
+  </div></div><div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small b-wa" data-ck="impgo" data-id="${escHtml(c.id)}">Apri WhatsApp</button></div>`);
+  impReqPrev();
+}
+function impReqPrev(){
+  const e = document.getElementById('ck-imp-extra'), p = document.getElementById('ck-imp-prev'); if(!e || !p || !ckCtx || ckCtx.t !== 'impreq') return;
+  const c = checkups.find(x => x.id === ckCtx.id); if(c) p.textContent = ckImpMsg(c, null, e.value);
+}
+document.addEventListener('input', (ev) => { if(ev.target && ev.target.id === 'ck-imp-extra') impReqPrev(); });
+function impReqGo(id){
+  const c = checkups.find(x => x.id === id), d = document.getElementById('ck-imp-doc'), e = document.getElementById('ck-imp-extra'), sv = document.getElementById('ck-imp-save');
+  const sp = d && specialists.find(x => x.id === d.value); if(!c || !sp || !e) return;
+  window.open(ckWa(sp.cellulare) + '?text=' + encodeURIComponent(ckImpMsg(c, sp, e.value)), '_blank', 'noopener');
+  if(sv && sv.checked){ settings.impegnativa = {medicoId: sp.id, extra: e.value.trim()}; saveSettings(); }
+  ckClose();
 }
 const CK_NOIMP_RE = /\bdent|odontoiatr|igiene orale|ortodon/i;
 function ckNoImp(c){ if(!c) return false; if(c.senzaImp === true) return true; if(c.senzaImp === false) return false; const sp = ckSp(c.specialistaId); return CK_NOIMP_RE.test((c.tipo || '') + ' ' + (sp ? sp.specialita || '' : '')); }
@@ -4186,7 +4216,8 @@ document.addEventListener('click', async (e) => {
   if(a === 'delyes'){ const c = checkups.find(x => x.id === id); if(c && c.prenotazione && c.prenotazione.medId){ const mid = c.prenotazione.medId; const mm = medical.find(m => m.id === mid); if(mm && mm.bozza){ medical = medical.filter(m => m.id !== mid); await saveMedical(); } } checkups = checkups.filter(x => x.id !== id); await saveCheckups(); ckClose(); return renderAll(); }
   if(a === 'medcomplete'){ ckClose(); jumpToTab('medical'); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); return; }
   if(a === 'showbozze'){ const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); return; }
-  if(a === 'impreq'){ const c = checkups.find(x => x.id === id), mb = ckMedBase(); if(c && mb) window.open(ckWa(mb.cellulare) + '?text=' + encodeURIComponent(ckImpMsg(c, mb)), '_blank', 'noopener'); return; }
+  if(a === 'impreq') return impReqShow(id);
+  if(a === 'impgo') return impReqGo(id);
   if(a === 'impmed'){ ckImpPers = ''; ckImpSel = new Set(); return ckImpMedShow(); }
   if(a === 'impmedgo') return ckImpMedGo();
   if(a === 'refs') return ckRefShow(id);
@@ -4854,7 +4885,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 18:02';
+const SUPPORT_VER = '08/11/2026 18:16';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -4906,7 +4937,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 18:02</b></p>`;
+  <p class="st-ver">Versione app: <b>08/11/2026 18:16</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
