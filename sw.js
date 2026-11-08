@@ -1,5 +1,5 @@
-const CACHE_NAME = 'duewell-v2';
-const urlsToCache = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './privacy.html', './termini.html'];
+const CACHE_NAME = 'duewell-v3';
+const urlsToCache = ['./', './index.html', './app.html', './manifest.json', './icon-192.png', './icon-512.png', './privacy.html', './termini.html'];
 // Componenti esterni necessari per avviare l'app anche senza rete (solo questi, mai i dati dell'utente)
 const EXTERNAL = [/^https:\/\/www\.gstatic\.com\/firebasejs\//, /^https:\/\/fonts\.googleapis\.com\//, /^https:\/\/fonts\.gstatic\.com\//];
 
@@ -28,7 +28,7 @@ self.addEventListener('fetch', (event) => {
           if(response && response.ok){ const clone = response.clone(); caches.open(CACHE_NAME).then((cache) => cache.put(req, clone)); }
           return response;
         })
-        .catch(() => caches.match(req).then((r) => r || (req.mode === 'navigate' ? caches.match('./index.html') : undefined)))
+        .catch(() => caches.match(req).then((r) => r || (req.mode === 'navigate' ? caches.match('./app.html') : undefined)))
     );
     return;
   }

@@ -2,7 +2,7 @@
   "name": "Duewell",
   "short_name": "Duewell",
   "description": "Scadenze, rimborsi, contratti e documenti di famiglia",
-  "start_url": "./index.html",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#FFFFFF",
