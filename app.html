@@ -694,6 +694,20 @@ body .btn.small.bi::before{width:15px;height:15px}
 .md-foot .btn.b-wa{order:-1}
 @media (max-width:640px){.md-foot .btn.b-wa{flex:1 1 100%}.md-foot .btn{flex:1 1 auto}.md-foot .btn.b-quiet{flex:0 0 auto;margin-left:auto}}
 
+#enc-gate{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#10243a 0%,#17406b 60%,#0f7f77 135%);overflow:auto}
+.eg-card{background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(10,20,35,.35);padding:32px 30px;width:100%;max-width:470px;margin:auto}
+.eg-card h2{margin:0 0 6px;font-size:23px;letter-spacing:-.01em}.eg-card p{color:var(--ink-soft);font-size:14.5px;margin:0 0 16px}
+.eg-ic{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#2F5BEA,#12A594);display:grid;place-items:center;font-size:26px;margin-bottom:14px}
+.eg-f{margin-bottom:12px}.eg-f label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}.eg-f input{width:100%}
+.eg-warn{background:#FFF4E0;border:1px solid #F3D9A6;color:#7a4a00;border-radius:12px;padding:10px 12px;font-size:13.5px;margin:0 0 14px}
+.eg-key{font:700 17px/1.5 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;background:#F1F4F9;border:1px dashed #B9C4D2;border-radius:12px;padding:14px;text-align:center;word-break:break-all;user-select:all;margin:0 0 12px}
+.eg-row{display:flex;gap:8px;flex-wrap:wrap}.eg-row .btn{flex:1 1 auto}
+.eg-err{display:none;color:var(--stamp);font-size:13.5px;margin:0 0 10px}
+.eg-chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:12px 0}.eg-chk input{width:auto;margin-top:3px}
+.eg-lnk{background:none;border:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;padding:0}
+.eg-foot{margin-top:14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13.5px}
+@media (max-width:520px){.eg-card{padding:26px 20px}.eg-key{font-size:14.5px;letter-spacing:.02em;padding:12px 8px}}
+
 .st-card{border:1px solid var(--line);border-radius:14px;background:var(--paper-raised,#fff);margin-bottom:10px;overflow:hidden}
 .st-it{display:flex;align-items:center;gap:14px;padding:14px 16px;flex-wrap:wrap}
 .st-it+.st-it{border-top:1px solid var(--line)}
@@ -4840,7 +4854,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 17:51';
+const SUPPORT_VER = '08/11/2026 18:02';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -4891,8 +4905,8 @@ function dwAppSettingsHtml(){
   return `<div class="st-card">${stIt('📲', '#2F5BEA', 'Installazione', instSub, inst)}${stIt('🔔', '#F76B15', 'Avvisi all\'apertura', ntSub, nt)}</div>`;
 }
 function stAccountHtml(){
-  return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 17:51</b></p>`;
+  return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
+  <p class="st-ver">Versione app: <b>08/11/2026 18:02</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5040,6 +5054,230 @@ function hdrSubText(){
     }catch(e){}
   };
 }
+// ---- Crittografia end-to-end ----
+{
+  const PFX = 'enc1:', ITER = 600000;
+  const ENC_ON = !!(window.crypto && crypto.subtle), IS_TEST = /jsdom/i.test(navigator.userAgent || '');
+  const te = new TextEncoder(), td = new TextDecoder();
+  const b64e = (buf) => { const u = new Uint8Array(buf); let s = ''; for(let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+  const b64d = (s) => { const x = atob(s); const u = new Uint8Array(x.length); for(let i = 0; i < x.length; i++) u[i] = x.charCodeAt(i); return u; };
+  const rnd = (n) => crypto.getRandomValues(new Uint8Array(n));
+  let encKey = null, encUid = null;
+  const idb = () => new Promise((res, rej) => { const r = indexedDB.open('duewell-keys', 1); r.onupgradeneeded = () => r.result.createObjectStore('k'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  async function idbGet(k){ try{ const d = await idb(); return await new Promise((res) => { const q = d.transaction('k').objectStore('k').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); }catch(e){ return null; } }
+  async function idbSet(k, v){ try{ const d = await idb(); await new Promise((res) => { const t = d.transaction('k', 'readwrite'); t.objectStore('k').put(v, k); t.oncomplete = res; t.onerror = res; }); }catch(e){} }
+  async function idbDel(k){ try{ const d = await idb(); await new Promise((res) => { const t = d.transaction('k', 'readwrite'); t.objectStore('k').delete(k); t.oncomplete = res; t.onerror = res; }); }catch(e){} }
+  async function encT(key, name, text){ const iv = rnd(12); const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv, additionalData: te.encode(name)}, key, te.encode(text)); return PFX + b64e(iv) + '.' + b64e(ct); }
+  async function decT(key, name, s){ const p = String(s).slice(PFX.length).split('.'); const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv: b64d(p[0]), additionalData: te.encode(name)}, key, b64d(p[1])); return td.decode(pt); }
+  async function kekPass(pass, salt, iter){ const m = await crypto.subtle.importKey('raw', te.encode(String(pass).normalize('NFKC')), 'PBKDF2', false, ['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations: iter, hash:'SHA-256'}, m, {name:'AES-GCM', length:256}, false, ['wrapKey', 'unwrapKey']); }
+  const normRec = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  async function kekRec(rec, salt){ const h = await crypto.subtle.digest('SHA-256', te.encode(normRec(rec) + '|' + b64e(salt))); return crypto.subtle.importKey('raw', h, 'AES-GCM', false, ['wrapKey', 'unwrapKey']); }
+  async function wrap(dek, kek){ const iv = rnd(12); const ct = await crypto.subtle.wrapKey('raw', dek, kek, {name:'AES-GCM', iv}); return {iv: b64e(iv), ct: b64e(ct)}; }
+  async function unwrap(w, kek, ext){ return crypto.subtle.unwrapKey('raw', b64d(w.ct), kek, {name:'AES-GCM', iv: b64d(w.iv)}, {name:'AES-GCM'}, !!ext, ['encrypt', 'decrypt']); }
+  async function lockKey(dek){ const raw = await crypto.subtle.exportKey('raw', dek); return crypto.subtle.importKey('raw', raw, {name:'AES-GCM'}, false, ['encrypt', 'decrypt']); }
+  const ALF = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  function newRecKey(){ const r = rnd(24); let s = ''; for(let i = 0; i < 24; i++){ s += ALF[r[i] & 31]; if(i % 4 === 3 && i < 23) s += '-'; } return s; }
+  async function mkHeader(dek, pass, recOrObj){
+    const salt = rnd(16); const p = await wrap(dek, await kekPass(pass, salt, ITER));
+    let r; if(typeof recOrObj === 'string'){ const rs = rnd(16); r = {salt: b64e(rs), ...(await wrap(dek, await kekRec(recOrObj, rs)))}; } else r = recOrObj;
+    return {v:1, iter: ITER, salt: b64e(salt), p, r, chk: await encT(dek, '_chk', 'duewell-ok')};
+  }
+  const keyOk = async (hdr, key) => { try{ return (await decT(key, '_chk', hdr.chk)) === 'duewell-ok'; }catch(e){ return false; } };
+  const ref = (uid) => doc(db, 'app2', uid);
+  async function readRaw(uid){
+    try{ const snap = await getDoc(ref(uid)); return {raw: snap.exists() ? snap.data() : {}, offline: false}; }
+    catch(e){ const c = dwCacheRead(); if(c && c.d) return {raw: c.d, offline: true}; throw e; }
+  }
+  function ui(html){ let g = document.getElementById('enc-gate'); if(!g){ g = document.createElement('div'); g.id = 'enc-gate'; document.body.appendChild(g); } g.innerHTML = '<div class="eg-card">' + html + '</div>'; g.style.display = 'flex'; return g; }
+  function uiClose(){ const g = document.getElementById('enc-gate'); if(g) g.style.display = 'none'; }
+  const q = (id) => document.getElementById(id);
+  const err = (m) => { const e = q('eg-err'); if(e){ e.textContent = m; e.style.display = m ? 'block' : 'none'; } };
+  const doLogout = () => { try{ idbDel(auth.currentUser.uid); }catch(e){} encKey = null; encUid = null; try{ dwClearCaches(); }catch(e){} uiClose(); signOut(auth); };
+  function passErr(p, p2){
+    if(p.length < 10) return 'Il codice deve avere almeno 10 caratteri. Una frase che ricordi bene va benissimo.';
+    if(/^\d+$/.test(p)) return 'Un codice di soli numeri è troppo facile da indovinare. Aggiungi parole o lettere.';
+    if(p2 !== undefined && p !== p2) return 'I due codici non coincidono.';
+    return '';
+  }
+  function showError(msg){
+    return new Promise((res) => { ui('<div class="eg-ic">⚠️</div><h2>Non riesco a proseguire</h2><p>' + escHtml(msg) + '</p><div class="eg-row"><button type="button" class="btn" id="eg-retry">Riprova</button><button type="button" class="btn ghost" id="eg-out">Esci</button></div>'); q('eg-retry').onclick = () => res('retry'); q('eg-out').onclick = () => { doLogout(); res('out'); }; });
+  }
+  function recFile(rec, email){ return 'Duewell · chiave di recupero\n\nAccount: ' + (email || '') + '\nChiave: ' + rec + '\n\nServe se perdi il codice di sicurezza. Conservala in un posto sicuro (gestore di password, cassaforte, foglio stampato).\nChi ha questa chiave può aprire i tuoi dati. Senza codice e senza chiave i dati non si possono recuperare.\n'; }
+  function recButtons(rec, email){
+    const cp = q('eg-copy'), dl = q('eg-dl');
+    if(cp) cp.onclick = async () => { try{ await navigator.clipboard.writeText(rec); cp.textContent = 'Copiata'; }catch(e){ cp.textContent = 'Seleziona e copia'; } };
+    if(dl) dl.onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([recFile(rec, email)], {type:'text/plain'})); a.download = 'Duewell-chiave-di-recupero.txt'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
+  }
+  async function migrate(uid, raw, dek, hdrStr){
+    const out = {}, orig = {};
+    for(const [k, v] of Object.entries(raw)){ if(k !== '_enc' && typeof v === 'string' && v.indexOf(PFX) !== 0){ out[k] = await encT(dek, k, v); orig[k] = v; } }
+    out._enc = hdrStr;
+    await setDoc(ref(uid), out, {merge:true});
+    try{
+      const d = (await getDoc(ref(uid))).data();
+      for(const k of Object.keys(orig)){ if((await decT(dek, k, d[k])) !== orig[k]) throw new Error('verifica fallita su ' + k); }
+      if(d._enc !== hdrStr) throw new Error('verifica intestazione');
+    }catch(e){
+      console.error(e);
+      try{ await setDoc(ref(uid), {...orig, _enc: null}, {merge:true}); }catch(x){ console.error(x); }
+      throw new Error('La verifica dopo la cifratura non è riuscita. I tuoi dati sono rimasti come prima.');
+    }
+  }
+  function showSetup(user, raw){
+    return new Promise((res) => {
+      const has = Object.keys(raw).some(k => k !== '_enc' && typeof raw[k] === 'string');
+      ui('<div class="eg-ic">🔐</div><h2>Proteggi i tuoi dati</h2><p>Duewell cifra i tuoi dati su questo dispositivo prima di salvarli. <b>Nemmeno noi possiamo leggerli.</b> Per aprirli serve un codice di sicurezza che scegli tu.' + (has ? ' Cifrerò anche i dati che hai già.' : '') + '</p>' +
+        '<div class="eg-f"><label for="eg-p1">Codice di sicurezza</label><input type="password" id="eg-p1" autocomplete="new-password"></div><div class="eg-f"><label for="eg-p2">Ripeti il codice</label><input type="password" id="eg-p2" autocomplete="new-password"></div>' +
+        '<div class="eg-warn">Al passo dopo ti darò una <b>chiave di recupero</b>. Se perdi sia il codice sia la chiave, i dati non si possono recuperare, da nessuno.</div><div class="eg-err" id="eg-err"></div>' +
+        '<div class="eg-row"><button type="button" class="btn" id="eg-next">Continua</button></div><div class="eg-foot"><button type="button" class="eg-lnk" id="eg-out">Esci</button></div>');
+      q('eg-out').onclick = () => { doLogout(); };
+      q('eg-next').onclick = () => {
+        const p1 = q('eg-p1').value, p2 = q('eg-p2').value, m = passErr(p1, p2); if(m) return err(m);
+        const rec = newRecKey();
+        ui('<div class="eg-ic">🗝️</div><h2>Salva la chiave di recupero</h2><p>Se dimentichi il codice, questa chiave è l\'unico modo per riaprire i tuoi dati. Salvala adesso in un posto sicuro.</p><div class="eg-key" id="eg-key">' + rec + '</div>' +
+          '<div class="eg-row"><button type="button" class="btn ghost small" id="eg-copy">Copia</button><button type="button" class="btn ghost small" id="eg-dl">Scarica come file</button></div>' +
+          '<label class="eg-chk"><input type="checkbox" id="eg-ok"><span>Ho salvato la chiave in un posto sicuro</span></label><div class="eg-err" id="eg-err"></div>' +
+          '<div class="eg-row"><button type="button" class="btn" id="eg-go" disabled>Attiva la protezione</button></div><div class="eg-foot"><button type="button" class="eg-lnk" id="eg-back">Indietro</button></div>');
+        recButtons(rec, user.email);
+        q('eg-ok').onchange = () => { q('eg-go').disabled = !q('eg-ok').checked; };
+        q('eg-back').onclick = () => { res(showSetup(user, raw)); };
+        q('eg-go').onclick = async () => {
+          const go = q('eg-go'); go.disabled = true; go.textContent = 'Sto cifrando…'; err('');
+          try{
+            const dek = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt', 'decrypt']);
+            const hdr = await mkHeader(dek, p1, rec);
+            await migrate(user.uid, raw, dek, JSON.stringify(hdr));
+            encKey = await lockKey(dek); encUid = user.uid; await idbSet(user.uid, encKey);
+            try{ dwClearCaches(); }catch(e){}
+            uiClose(); res();
+          }catch(e){ console.error(e); go.disabled = false; go.textContent = 'Attiva la protezione'; err(e && e.message && /verifica/.test(e.message) ? e.message : 'Non sono riuscito ad attivare la protezione. Controlla la connessione e riprova.'); }
+        };
+      };
+    });
+  }
+  function showUnlock(hdr, user){
+    return new Promise((res) => {
+      const form = () => {
+        ui('<div class="eg-ic">🔒</div><h2>Sblocca i tuoi dati</h2><p>Scrivi il codice di sicurezza di <b>' + escHtml(user.email || 'questo account') + '</b>.</p>' +
+          '<div class="eg-f"><label for="eg-c">Codice di sicurezza</label><input type="password" id="eg-c" autocomplete="current-password"></div>' +
+          '<label class="eg-chk"><input type="checkbox" id="eg-rem" checked><span>Ricordami su questo dispositivo</span></label><div class="eg-err" id="eg-err"></div>' +
+          '<div class="eg-row"><button type="button" class="btn" id="eg-go">Sblocca</button></div><div class="eg-foot"><button type="button" class="eg-lnk" id="eg-lost">Ho perso il codice</button><button type="button" class="eg-lnk" id="eg-out">Esci</button></div>');
+        q('eg-out').onclick = () => { doLogout(); };
+        q('eg-lost').onclick = recover;
+        const go = async () => {
+          const b = q('eg-go'), code = q('eg-c').value; if(!code) return err('Scrivi il codice.');
+          b.disabled = true; b.textContent = 'Controllo…'; err('');
+          try{
+            let dek = null;
+            try{ dek = await unwrap(hdr.p, await kekPass(code, b64d(hdr.salt), hdr.iter || ITER), false); }catch(e){ dek = null; }
+            if(!dek || !(await keyOk(hdr, dek))){ b.disabled = false; b.textContent = 'Sblocca'; return err('Codice non corretto.'); }
+            encKey = dek; encUid = user.uid; if(q('eg-rem').checked) await idbSet(user.uid, dek);
+            uiClose(); res();
+          }catch(e){ console.error(e); b.disabled = false; b.textContent = 'Sblocca'; err('Qualcosa è andato storto. Riprova.'); }
+        };
+        q('eg-go').onclick = go; q('eg-c').onkeydown = (e) => { if(e.key === 'Enter') go(); };
+        setTimeout(() => { try{ q('eg-c').focus(); }catch(e){} }, 50);
+      };
+      const recover = () => {
+        ui('<div class="eg-ic">🗝️</div><h2>Usa la chiave di recupero</h2><p>Scrivi la chiave che avevi salvato e scegli un nuovo codice di sicurezza.</p>' +
+          '<div class="eg-f"><label for="eg-r">Chiave di recupero</label><input type="text" id="eg-r" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"></div>' +
+          '<div class="eg-f"><label for="eg-p1">Nuovo codice di sicurezza</label><input type="password" id="eg-p1" autocomplete="new-password"></div><div class="eg-f"><label for="eg-p2">Ripeti il nuovo codice</label><input type="password" id="eg-p2" autocomplete="new-password"></div><div class="eg-err" id="eg-err"></div>' +
+          '<div class="eg-row"><button type="button" class="btn" id="eg-go">Sblocca e cambia codice</button></div><div class="eg-foot"><button type="button" class="eg-lnk" id="eg-back">Indietro</button></div>');
+        q('eg-back').onclick = form;
+        q('eg-go').onclick = async () => {
+          const b = q('eg-go'), rec = q('eg-r').value, p1 = q('eg-p1').value, m = passErr(p1, q('eg-p2').value); if(m) return err(m);
+          b.disabled = true; b.textContent = 'Controllo…'; err('');
+          try{
+            let dek = null;
+            try{ dek = await unwrap({iv: hdr.r.iv, ct: hdr.r.ct}, await kekRec(rec, b64d(hdr.r.salt)), true); }catch(e){ dek = null; }
+            if(!dek || !(await keyOk(hdr, dek))){ b.disabled = false; b.textContent = 'Sblocca e cambia codice'; return err('Chiave di recupero non corretta.'); }
+            const nh = await mkHeader(dek, p1, hdr.r);
+            await setDoc(ref(user.uid), {_enc: JSON.stringify(nh)}, {merge:true});
+            encKey = await lockKey(dek); encUid = user.uid; await idbSet(user.uid, encKey);
+            try{ dwClearCaches(); }catch(e){}
+            uiClose(); res();
+          }catch(e){ console.error(e); b.disabled = false; b.textContent = 'Sblocca e cambia codice'; err('Non sono riuscito a completare. Controlla la connessione e riprova.'); }
+        };
+      };
+      form();
+    });
+  }
+  window.dwEncEnsure = async function(user){
+    if(IS_TEST) return;
+    if(!ENC_ON){ ui('<div class="eg-ic">⚠️</div><h2>Browser non supportato</h2><p>Per proteggere i tuoi dati serve un browser aggiornato (Chrome, Safari, Edge, Firefox) e una connessione sicura (https).</p><div class="eg-row"><button type="button" class="btn ghost" id="eg-out">Esci</button></div>'); q('eg-out').onclick = doLogout; throw new Error('no-crypto'); }
+    if(encKey && encUid === user.uid) return;
+    encKey = null; encUid = null;
+    for(;;){
+      try{
+        const {raw, offline} = await readRaw(user.uid);
+        const hdr = raw._enc ? JSON.parse(raw._enc) : null;
+        if(hdr){
+          const k = await idbGet(user.uid);
+          if(k && await keyOk(hdr, k)){ encKey = k; encUid = user.uid; return; }
+          await showUnlock(hdr, user); return;
+        }
+        if(offline){ const a = await showError('Per attivare la protezione dei dati serve la connessione a internet.'); if(a === 'out') throw new Error('out'); continue; }
+        await showSetup(user, raw); return;
+      }catch(e){
+        if(e && (e.message === 'out' || e.message === 'no-crypto')) throw e;
+        console.error(e); const a = await showError('Non riesco a leggere il tuo account. Controlla la connessione.'); if(a === 'out') throw new Error('out');
+      }
+    }
+  };
+  if(!IS_TEST){
+    const _get = storageAdapter.get.bind(storageAdapter), _set = storageAdapter.set.bind(storageAdapter);
+    storageAdapter.get = async function(key){
+      const r = await _get(key);
+      if(r && typeof r.value === 'string' && r.value.indexOf(PFX) === 0){
+        try{ if(!encKey) throw new Error('chiave non disponibile'); return {key: r.key, value: await decT(encKey, key, r.value)}; }
+        catch(e){ console.error(e); dwReadOnly = true; showNotice('Non riesco a leggere i dati cifrati. Per sicurezza le modifiche sono bloccate: ricarica l\'app.'); throw e; }
+      }
+      return r;
+    };
+    storageAdapter.set = async function(key, value){
+      if(!encKey) throw new Error('Dati protetti: sblocca con il codice di sicurezza.');
+      await _set(key, typeof value === 'string' ? await encT(encKey, key, value) : value);
+      return {key, value};
+    };
+  }
+  async function curHeader(){ const snap = await getDoc(ref(auth.currentUser.uid)); const d = snap.exists() ? snap.data() : {}; return d._enc ? JSON.parse(d._enc) : null; }
+  const eerr = (m) => { const e = q('enc-merr'); if(e){ e.textContent = m; e.style.display = m ? 'block' : 'none'; } };
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-enc]'); if(!b) return; const a = b.dataset.enc;
+    if(a === 'chpass'){
+      ckShow(`${ckHead('Cambia il codice di sicurezza')}<div class="md-body"><div class="field" style="margin-bottom:10px"><label>Codice attuale</label><input type="password" id="enc-cur" autocomplete="current-password" style="width:100%"></div><div class="field" style="margin-bottom:10px"><label>Nuovo codice</label><input type="password" id="enc-n1" autocomplete="new-password" style="width:100%"></div><div class="field"><label>Ripeti il nuovo codice</label><input type="password" id="enc-n2" autocomplete="new-password" style="width:100%"></div><div id="enc-merr" style="display:none;color:var(--stamp);font-size:13px;margin-top:8px"></div></div><div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small" data-enc="chpass-go" id="enc-go">Salva</button></div>`);
+    }else if(a === 'chpass-go'){
+      const cur = q('enc-cur').value, n1 = q('enc-n1').value, m = passErr(n1, q('enc-n2').value); if(m) return eerr(m);
+      b.disabled = true; b.textContent = 'Salvo…'; eerr('');
+      try{
+        const hdr = await curHeader(); if(!hdr) throw new Error('nessuna intestazione');
+        let dek = null; try{ dek = await unwrap(hdr.p, await kekPass(cur, b64d(hdr.salt), hdr.iter || ITER), true); }catch(x){ dek = null; }
+        if(!dek || !(await keyOk(hdr, dek))){ b.disabled = false; b.textContent = 'Salva'; return eerr('Il codice attuale non è corretto.'); }
+        const nh = await mkHeader(dek, n1, hdr.r);
+        await setDoc(ref(auth.currentUser.uid), {_enc: JSON.stringify(nh)}, {merge:true});
+        ckClose(); showNotice('Codice di sicurezza cambiato.', 'success');
+      }catch(x){ console.error(x); b.disabled = false; b.textContent = 'Salva'; eerr('Non sono riuscito a salvare. Riprova.'); }
+    }else if(a === 'newrec'){
+      ckShow(`${ckHead('Nuova chiave di recupero')}<div class="md-body"><p style="margin:0 0 10px">Scrivi il codice di sicurezza per creare una nuova chiave. Quella vecchia smetterà di funzionare.</p><div class="field"><label>Codice di sicurezza</label><input type="password" id="enc-cur" autocomplete="current-password" style="width:100%"></div><div id="enc-merr" style="display:none;color:var(--stamp);font-size:13px;margin-top:8px"></div></div><div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small" data-enc="newrec-go" id="enc-go">Crea la chiave</button></div>`);
+    }else if(a === 'newrec-go'){
+      const cur = q('enc-cur').value; b.disabled = true; b.textContent = 'Creo…'; eerr('');
+      try{
+        const hdr = await curHeader(); if(!hdr) throw new Error('nessuna intestazione');
+        let dek = null; try{ dek = await unwrap(hdr.p, await kekPass(cur, b64d(hdr.salt), hdr.iter || ITER), true); }catch(x){ dek = null; }
+        if(!dek || !(await keyOk(hdr, dek))){ b.disabled = false; b.textContent = 'Crea la chiave'; return eerr('Il codice non è corretto.'); }
+        const rec = newRecKey(), rs = rnd(16);
+        const nh = {...hdr, r: {salt: b64e(rs), ...(await wrap(dek, await kekRec(rec, rs)))}};
+        await setDoc(ref(auth.currentUser.uid), {_enc: JSON.stringify(nh)}, {merge:true});
+        const em = auth.currentUser.email || '';
+        ckShow(`${ckHead('Salva la nuova chiave')}<div class="md-body"><p style="margin:0 0 10px">Questa è la nuova chiave di recupero. Salvala adesso: non verrà più mostrata.</p><div class="eg-key" id="eg-key">${rec}</div><div class="eg-row"><button type="button" class="btn ghost small" id="eg-copy">Copia</button><button type="button" class="btn ghost small" id="eg-dl">Scarica come file</button></div></div><div class="md-foot"><button type="button" class="btn small" data-ck="close">Fatto</button></div>`);
+        recButtons(rec, em);
+      }catch(x){ console.error(x); b.disabled = false; b.textContent = 'Crea la chiave'; eerr('Non sono riuscito a creare la chiave. Riprova.'); }
+    }
+  });
+  const lo = document.getElementById('logout-btn');
+  if(lo) lo.addEventListener('click', () => { try{ idbDel(auth.currentUser.uid); }catch(e){} encKey = null; encUid = null; });
+}
+
 // ---- Pulsanti: classi e icone in base al testo ----
 {
   const IC = {
@@ -7438,6 +7676,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('logout-email').textContent = user.email || '';
     document.getElementById('auth-email').value = '';
     document.getElementById('auth-password').value = '';
+    try{ await window.dwEncEnsure(user); }catch(e){ console.error(e); return; }
     await loadData();
     applySettings();
     renderAll();
