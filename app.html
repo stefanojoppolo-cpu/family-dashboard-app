@@ -4807,7 +4807,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 17:33';
+const SUPPORT_VER = '08/11/2026 17:38';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -4815,7 +4815,8 @@ function supOpen(){
     <div class="field" style="margin-bottom:10px"><label>Di cosa si tratta</label><select id="sup-tipo" style="width:100%"><option>Ho un problema</option><option>Ho una domanda</option><option>Ho un'idea o un suggerimento</option></select></div>
     <div class="field" style="margin-bottom:10px"><label>Messaggio</label><textarea id="sup-msg" rows="5" style="width:100%" placeholder="Cosa stavi facendo e cosa è successo?"></textarea></div>
     <div class="field" style="margin-bottom:10px"><label>La tua email per la risposta</label><input type="email" id="sup-email" value="${escHtml(em)}" autocomplete="email" style="width:100%"></div>
-    <p class="ck-mut" style="margin:0;font-size:12.5px">Con il messaggio inviamo solo versione dell'app e tipo di dispositivo. Non inviamo i tuoi dati di spese, contratti o documenti.</p>
+    <p class="ck-mut" style="margin:0 0 8px;font-size:12.5px"><b>Hai uno screenshot?</b> Quando ti rispondiamo via email puoi allegarlo direttamente alla risposta.</p>
+    <p class="ck-mut" style="margin:0;font-size:12.5px">Con il messaggio inviamo solo la scheda in cui ti trovi, versione dell'app e tipo di dispositivo. Non inviamo i tuoi dati di spese, contratti o documenti.</p>
     <div id="sup-err" style="display:none;color:var(--stamp);font-size:13px;margin-top:8px"></div></div>
     <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small" data-sup="send" id="sup-go">Invia</button></div>`);
 }
@@ -4827,7 +4828,8 @@ async function supSend(){
   const text = msg.value.trim(), mail = em.value.trim();
   if(text.length < 10) return fail('Scrivi qualche riga in più, così possiamo aiutarti.');
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return fail('Controlla l\'indirizzo email.');
-  const info = 'App ' + SUPPORT_VER + ' · ' + (dwStandalone() ? 'installata' : 'browser') + ' · ' + (navigator.userAgent || '').slice(0, 160);
+  let scheda = ''; try{ const a = document.querySelector('.tab-btn.active'); scheda = a ? (a.dataset.tab || '') : ''; }catch(e){}
+  const info = 'Scheda ' + (scheda || '?') + ' · schermo ' + innerWidth + 'x' + innerHeight + ' · App ' + SUPPORT_VER + ' · ' + (dwStandalone() ? 'installata' : 'browser') + ' · ' + (navigator.userAgent || '').slice(0, 160);
   if(!SUPPORT_ENDPOINT){
     location.href = 'mailto:' + SUPPORT_MAIL + '?subject=' + encodeURIComponent('Duewell · ' + tipo.value) + '&body=' + encodeURIComponent(text + '\n\n— ' + info + '\nRispondere a: ' + mail);
     ckClose(); return;
@@ -4857,7 +4859,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 17:33</b></p>`;
+  <p class="st-ver">Versione app: <b>08/11/2026 17:38</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
