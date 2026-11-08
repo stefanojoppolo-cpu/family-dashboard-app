@@ -662,6 +662,10 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+.entry-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media(min-width:641px){.entry-form{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.entry-form .field{min-width:0}.entry-form .field input,.entry-form .field select,.entry-form .field textarea{min-width:0;max-width:100%}
+.entry-form .field>div[style*="display:flex"]>*{min-width:0}
 .hdr-undo{display:flex;gap:6px;align-items:center;margin-left:auto}
 .u-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:0 1px 1px rgba(16,36,58,.05);transition:transform .08s,opacity .15s,background .15s}
 .u-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -1151,8 +1155,16 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
       <div class="field">
         <label>Ricorrenza</label>
         <select id="rf-ricorrenza">
-          <option>Annuale</option><option>Semestrale</option><option>Mensile</option><option>Una tantum</option>
+          <option value="Mensile">Ogni mese</option><option value="Bimestrale">Ogni 2 mesi</option><option value="Trimestrale">Ogni 3 mesi</option><option value="Quadrimestrale">Ogni 4 mesi</option><option value="Semestrale">Ogni 6 mesi</option><option value="Annuale">Ogni anno</option><option value="Personalizzata">Personalizzata…</option><option value="Una tantum">Una sola volta</option>
         </select>
+      </div>
+      <div class="field" id="rf-og-wrap" style="display:none">
+        <label>Ripeti ogni</label>
+        <div style="display:flex;gap:8px"><input type="number" min="1" max="60" step="1" id="rf-og-n" value="2" style="width:84px"><select id="rf-og-u"><option value="giorni">giorni</option><option value="settimane">settimane</option><option value="mesi" selected>mesi</option><option value="anni">anni</option></select></div>
+      </div>
+      <div class="field" id="rf-fine-wrap">
+        <label>Ultima scadenza <span style="font-weight:500;color:var(--ink-soft)">· opzionale</span></label>
+        <input type="date" id="rf-fine">
       </div>
       <div class="field">
         <label>Stato</label>
@@ -2422,7 +2434,7 @@ function renderRecurring(){
       <td data-label="Voce">${p.nome}${p.note ? `<br><span style="color:var(--ink-soft);font-size:12.5px">${p.note}</span>` : ''}</td>
       <td data-label="Scadenza">${fmtDate(p.scadenza)}</td>
       <td class="amount" data-label="Importo">${euro(p.importo)}</td>
-      <td data-label="Ricorrenza">${p.ricorrenza}</td>
+      <td data-label="Ricorrenza">${recLabel(p)}</td>
       <td data-label="Stato">${statusBadgeRecurring(p)}</td>
       <td>
         <div class="row-actions">
@@ -3614,7 +3626,7 @@ function impReqShow(id){
     ${ckFld('Aggiunta personalizzata <span class="ck-mut">· dopo il testo standard</span>', `<textarea class="ck-in" id="ck-imp-extra" rows="3" placeholder="Nessuna aggiunta">${escHtml(cfg.extra)}</textarea>`)}
     <label style="display:flex;gap:8px;align-items:center;font-size:13.5px;margin-top:6px"><input type="checkbox" id="ck-imp-save" checked style="width:auto"> Ricorda medico e aggiunta per le prossime richieste</label>
     <h4 class="md-h">Anteprima del messaggio</h4><pre id="ck-imp-prev" style="white-space:pre-wrap;font:inherit;background:var(--paper,#F4F6FA);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0;font-size:14px"></pre>
-  </div></div><div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small b-wa" data-ck="impgo" data-id="${escHtml(c.id)}">Apri WhatsApp</button></div>`);
+  </div></div><div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small b-wa" data-ck="impwa" data-id="${escHtml(c.id)}">Apri WhatsApp</button></div>`);
   impReqPrev();
 }
 function impReqPrev(){
@@ -4217,7 +4229,7 @@ document.addEventListener('click', async (e) => {
   if(a === 'medcomplete'){ ckClose(); jumpToTab('medical'); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); return; }
   if(a === 'showbozze'){ const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); return; }
   if(a === 'impreq') return impReqShow(id);
-  if(a === 'impgo') return impReqGo(id);
+  if(a === 'impwa') return impReqGo(id);
   if(a === 'impmed'){ ckImpPers = ''; ckImpSel = new Set(); return ckImpMedShow(); }
   if(a === 'impmedgo') return ckImpMedGo();
   if(a === 'refs') return ckRefShow(id);
@@ -4885,7 +4897,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 18:16';
+const SUPPORT_VER = '08/11/2026 18:28';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -4937,7 +4949,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 18:16</b></p>`;
+  <p class="st-ver">Versione app: <b>08/11/2026 18:28</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5426,6 +5438,7 @@ function resetRecurringForm(){
   document.getElementById('rf-scadenza').value = '';
   document.getElementById('rf-importo').value = '';
   document.getElementById('rf-ricorrenza').value = 'Annuale';
+  recFormFill(null);
   document.getElementById('rf-stato').value = 'da_pagare';
   document.getElementById('rf-note').value = '';
   document.getElementById('rf-bloccato').checked = false;
@@ -5465,6 +5478,7 @@ document.getElementById('rf-save').addEventListener('click', async (e) => {
     scadenza,
     importo,
     ricorrenza: document.getElementById('rf-ricorrenza').value,
+    ...recFormExtra(),
     stato: document.getElementById('rf-stato').value,
     note: document.getElementById('rf-note').value.trim(),
     bloccato: vuoleBloccare,
@@ -5774,15 +5788,47 @@ document.getElementById('mf-save').addEventListener('click', async (e) => {
 });
 
 // Row actions (delegation)
-function nextScadenza(dateStr, ricorrenza){
-  const d = new Date(dateStr);
-  if(isNaN(d.getTime())) return null;
-  if(ricorrenza === 'Annuale') d.setFullYear(d.getFullYear() + 1);
-  else if(ricorrenza === 'Semestrale') d.setMonth(d.getMonth() + 6);
-  else if(ricorrenza === 'Mensile') d.setMonth(d.getMonth() + 1);
-  else return null;
-  return d.toISOString().slice(0, 10);
+const REC_STEP = {Mensile:{n:1,u:'mesi'}, Bimestrale:{n:2,u:'mesi'}, Trimestrale:{n:3,u:'mesi'}, Quadrimestrale:{n:4,u:'mesi'}, Semestrale:{n:6,u:'mesi'}, Annuale:{n:1,u:'anni'}};
+const REC_UNITA = {giorni:['giorno','giorni'], settimane:['settimana','settimane'], mesi:['mese','mesi'], anni:['anno','anni']};
+function recStep(p){
+  if(p.ricorrenza === 'Personalizzata'){ const o = p.ogni || {}; const n = Math.max(1, Math.min(60, parseInt(o.n, 10) || 1)); return REC_UNITA[o.u] ? {n, u: o.u} : null; }
+  return REC_STEP[p.ricorrenza] || null;
 }
+function recLabel(p){
+  const nomi = {Mensile:'Ogni mese', Bimestrale:'Ogni 2 mesi', Trimestrale:'Ogni 3 mesi', Quadrimestrale:'Ogni 4 mesi', Semestrale:'Ogni 6 mesi', Annuale:'Ogni anno', 'Una tantum':'Una sola volta'};
+  if(nomi[p.ricorrenza]) return nomi[p.ricorrenza];
+  if(p.ricorrenza === 'Personalizzata'){ const s = recStep(p); return s ? (s.n === 1 ? 'Ogni ' + REC_UNITA[s.u][0] : 'Ogni ' + s.n + ' ' + REC_UNITA[s.u][1]) : 'Personalizzata'; }
+  return p.ricorrenza || '';
+}
+function recAdd(iso, step, ancora){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '')); if(!m || !step) return null;
+  let y = +m[1], mo = +m[2] - 1, d = +m[3];
+  if(step.u === 'giorni' || step.u === 'settimane') return new Date(Date.UTC(y, mo, d) + step.n * (step.u === 'giorni' ? 1 : 7) * 86400000).toISOString().slice(0, 10);
+  const tot = mo + (step.u === 'anni' ? step.n * 12 : step.n); y += Math.floor(tot / 12); mo = ((tot % 12) + 12) % 12;
+  const last = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate(); d = Math.min(ancora || d, last);
+  return y + '-' + String(mo + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+}
+function nextScadenza(dateStr, ricorrenza, ogni, ancora){
+  return recAdd(dateStr, recStep({ricorrenza, ogni}), ancora);
+}
+function recFormToggle(){
+  const r = document.getElementById('rf-ricorrenza').value;
+  document.getElementById('rf-og-wrap').style.display = r === 'Personalizzata' ? '' : 'none';
+  document.getElementById('rf-fine-wrap').style.display = r === 'Una tantum' ? 'none' : '';
+}
+function recFormFill(p){
+  const o = (p && p.ogni) || {};
+  document.getElementById('rf-og-n').value = o.n || 2; document.getElementById('rf-og-u').value = REC_UNITA[o.u] ? o.u : 'mesi';
+  document.getElementById('rf-fine').value = (p && p.fine) || '';
+  recFormToggle();
+}
+function recFormExtra(){
+  const r = document.getElementById('rf-ricorrenza').value, sc = document.getElementById('rf-scadenza').value;
+  const out = {fine: r === 'Una tantum' ? '' : (document.getElementById('rf-fine').value || ''), ancora: /^\d{4}-\d{2}-(\d{2})$/.test(sc) ? +sc.slice(8, 10) : undefined};
+  if(r === 'Personalizzata') out.ogni = {n: Math.max(1, Math.min(60, parseInt(document.getElementById('rf-og-n').value, 10) || 1)), u: document.getElementById('rf-og-u').value};
+  return out;
+}
+document.getElementById('rf-ricorrenza').addEventListener('change', recFormToggle);
 
 document.getElementById('recurring-body').addEventListener('click', async (e) => {
   const btn = e.target.closest('button');
@@ -5794,7 +5840,8 @@ document.getElementById('recurring-body').addEventListener('click', async (e) =>
   if(item.bloccato) return;
   if(action==='mark-paid'){
     item.stato = 'pagato';
-    const nextDate = nextScadenza(item.scadenza, item.ricorrenza);
+    const nextRaw = nextScadenza(item.scadenza, item.ricorrenza, item.ogni, item.ancora || +String(item.scadenza).slice(8, 10) || undefined);
+    const nextDate = nextRaw && (!item.fine || nextRaw <= item.fine) ? nextRaw : null;
     if(nextDate){
       recurring.push({
         id: uid(),
@@ -5802,6 +5849,9 @@ document.getElementById('recurring-body').addEventListener('click', async (e) =>
         scadenza: nextDate,
         importo: item.importo,
         ricorrenza: item.ricorrenza,
+        ...(item.ogni ? {ogni: item.ogni} : {}),
+        ...(item.fine ? {fine: item.fine} : {}),
+        ancora: item.ancora || +String(item.scadenza).slice(8, 10) || undefined,
         stato: 'da_pagare',
         note: item.note
       });
@@ -5810,6 +5860,8 @@ document.getElementById('recurring-body').addEventListener('click', async (e) =>
     renderAll();
     if(nextDate){
       showNotice(`Creata la prossima scadenza: ${item.nome} il ${fmtDate(nextDate)}.`, 'success');
+    }else if(nextRaw){
+      showNotice(`${item.nome}: era l'ultima scadenza, non ne creo altre.`, 'success');
     }
   } else if(action==='delete-recurring'){
     confirmingRecurringDeleteId = id;
@@ -5828,6 +5880,7 @@ document.getElementById('recurring-body').addEventListener('click', async (e) =>
     document.getElementById('rf-scadenza').value = item.scadenza;
     document.getElementById('rf-importo').value = item.importo;
     document.getElementById('rf-ricorrenza').value = item.ricorrenza;
+    recFormFill(item);
     document.getElementById('rf-stato').value = item.stato;
     document.getElementById('rf-note').value = item.note || '';
     rfDocs.set(item.documenti);
@@ -5890,7 +5943,7 @@ document.getElementById('toggle-backup-panel').addEventListener('click', () => {
 
 let confirmingBackupImport = false;
 
-const REC_CSV_COLS = ['id','nome','scadenza','importo','ricorrenza','stato','note','bloccato','documenti'];
+const REC_CSV_COLS = ['id','nome','scadenza','importo','ricorrenza','stato','note','bloccato','documenti','ogni','fine','ancora'];
 const MED_CSV_COLS = ['id','richiedente','tipoDocumento','numeroDocumento','dataDocumento','descrizione','note','modalita','totale','rimborsi','bloccata','documenti','nomi'];
 
 function csvEscape(value){
@@ -5932,7 +5985,7 @@ const DOC_CSV_COLS = ['id','tipo','intestatario','numero','link','enteRilascio',
 const DETR_CSV_COLS = ['id','categoria','intestatario','data','importo','note'];
 
 function currentBackupCSV(){
-  const recRows = recurring.map(p => REC_CSV_COLS.map(c => csvEscape(c === 'documenti' ? JSON.stringify(p.documenti || []) : p[c])).join(','));
+  const recRows = recurring.map(p => REC_CSV_COLS.map(c => csvEscape(c === 'documenti' ? JSON.stringify(p.documenti || []) : c === 'ogni' ? (p.ogni ? JSON.stringify(p.ogni) : '') : (p[c] === undefined ? '' : p[c]))).join(','));
   const medRows = medical.map(m => MED_CSV_COLS.map(c => {
     if(c === 'rimborsi') return csvEscape(JSON.stringify(m.rimborsi || {}));
     if(c === 'nomi') return csvEscape(m.nomi ? JSON.stringify(m.nomi) : '');
@@ -6013,6 +6066,10 @@ function parseBackupCSVCore(text){
     obj.importo = parseFloat(obj.importo) || 0;
     obj.bloccato = obj.bloccato === 'true';
     obj.documenti = (() => { try{ const a = JSON.parse(obj.documenti || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } })();
+    obj.ogni = (() => { try{ const o = obj.ogni ? JSON.parse(obj.ogni) : null; return o && typeof o === 'object' ? o : undefined; }catch(e){ return undefined; } })();
+    if(!obj.ogni) delete obj.ogni;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(obj.fine || '')) delete obj.fine;
+    const an = parseInt(obj.ancora, 10); if(an >= 1 && an <= 31) obj.ancora = an; else delete obj.ancora;
     return obj;
   }) : [];
 
@@ -7416,7 +7473,7 @@ function xlMedical(){
 function xlTabData(tid){
   const S = { // cols: [intestazione, larghezza, tipo]
     recurring: () => ({cols:[{h:'Voce', w:30}, {h:'Scadenza', w:12, t:'d'}, {h:'Importo', w:13, t:'e'}, {h:'Ricorrenza', w:14}, {h:'Stato', w:13}, {h:'Note', w:34}, {h:'Documenti', w:40}],
-      rows:xlSort(recurring, recurringSortValue, recurringSortKey, recurringSortDir).map(p => [p.nome, p.scadenza, Number(p.importo) || 0, p.ricorrenza, p.stato === 'pagato' ? 'Pagato' : (daysUntil(p.scadenza) < 0 ? 'Scaduto' : 'Da pagare'), p.note || '', (p.documenti || []).map(d => d.nome + ': ' + d.url).join('\n')])}),
+      rows:xlSort(recurring, recurringSortValue, recurringSortKey, recurringSortDir).map(p => [p.nome, p.scadenza, Number(p.importo) || 0, recLabel(p), p.stato === 'pagato' ? 'Pagato' : (daysUntil(p.scadenza) < 0 ? 'Scaduto' : 'Da pagare'), p.note || '', (p.documenti || []).map(d => d.nome + ': ' + d.url).join('\n')])}),
     medical: xlMedical,
     bilancio: () => {
       const M = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
@@ -7632,7 +7689,7 @@ function mkDocEditor(pfx){
 const rfDocs = mkDocEditor('rf'), cfDocs = mkDocEditor('cf');
 // ---- Popup di dettaglio generico (ricorrenti, bilancio, contratti, documenti, detrazioni) ----
 const GD = {
-  'recurring-body': {t: 'Pagamento', list: () => recurring, title: (x) => x.nome, sub: (x) => [x.ricorrenza, 'scade ' + fmtDate(x.scadenza)].join(' · '), badge: () => statusBadgeRecurring, edit: 'edit-recurring', del: 'delete-recurring', cdel: 'confirm-delete-recurring', extra: ['mark-paid'], noteKey: 'note'},
+  'recurring-body': {t: 'Pagamento', list: () => recurring, title: (x) => x.nome, sub: (x) => [recLabel(x), 'scade ' + fmtDate(x.scadenza)].join(' · '), badge: () => statusBadgeRecurring, edit: 'edit-recurring', del: 'delete-recurring', cdel: 'confirm-delete-recurring', extra: ['mark-paid'], noteKey: 'note'},
   'bilancio-body': {t: 'Bilancio', list: () => bilancio, title: (x) => 'Bilancio ' + x.anno, sub: (x) => x.conto, edit: 'edit-bilancio', del: 'delete-bilancio', cdel: 'confirm-delete-bilancio'},
   'contratti-body': {t: 'Contratto', list: () => contratti, title: (x) => x.tipo, sub: (x) => x.controparte, edit: 'edit-contratto', del: 'delete-contratto', cdel: 'confirm-delete-contratto', noteKey: 'note'},
   'documenti-body': {t: 'Documento', list: () => documenti, title: (x) => x.tipo, sub: (x) => x.intestatario, edit: 'edit-documento', del: 'delete-documento', cdel: 'confirm-delete-documento', extra: ['share-documento', 'toggle-renew-documento'], noteKey: 'note'},
