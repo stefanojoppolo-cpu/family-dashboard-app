@@ -51,11 +51,19 @@ footer{padding:34px 0 50px;color:var(--soft);font-size:14px;display:flex;justify
 .sph img{display:block;width:100%;height:auto;border-radius:31px;aspect-ratio:390/800;object-fit:cover;object-position:top}
 @media(max-width:860px){.srow,.srow.rev{grid-template-columns:1fr;gap:26px;margin:44px 0;text-align:left}.srow.rev .stxt{order:0}.stxt p{max-width:none}.brand{font-size:26px}.logo{width:46px;height:46px}.logo svg{width:27px;height:27px}}
 @media(max-width:520px){.brand{font-size:24px;gap:10px}.logo{width:42px;height:42px;border-radius:13px}.nav .btn{padding:8px 14px!important}}
+
+.enc{background:var(--grad);color:#fff;border-radius:28px;padding:46px 34px;margin-bottom:34px}.enc h2{color:#fff}.enc .sub{color:rgba(255,255,255,.82);max-width:680px;margin-bottom:28px}
+.flow{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr;gap:0;align-items:stretch}
+.fb{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:20px}.fb .fi{font-size:26px;margin-bottom:8px}.fb h3{margin:0 0 6px;font-size:17px}.fb p{margin:0;font-size:14.5px;opacity:.86}
+.fb.lock{background:rgba(255,255,255,.96);color:var(--ink)}.fb.lock p{color:var(--soft);opacity:1}.fb code{display:block;margin-top:10px;font:600 12px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;color:#2F5BEA;background:#EEF2FF;border-radius:8px;padding:8px 10px}
+.ar{display:grid;place-items:center;font-size:22px;opacity:.8}
+.enc2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}.enc2 div{background:rgba(255,255,255,.08);border-radius:16px;padding:16px}.enc2 b{display:block;margin-bottom:4px}.enc2 span{font-size:14px;opacity:.85}
+@media(max-width:860px){.flow{grid-template-columns:1fr}.ar{transform:rotate(90deg);padding:6px 0}.enc2{grid-template-columns:1fr}.enc{padding:34px 22px}}
 </style></head><body>
 <div class="hero"><div class="wrap" style="display:block"><div class="nav"><div class="brand" style="color:#fff"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.3 9.5"/></svg></div>Duewell</div>
 <div class="r"><a class="lnk" href="#cosa">Cosa fa</a><a class="lnk" href="#schermate">Schermate</a><a class="lnk" href="#sicurezza">Sicurezza</a><a class="btn b1" href="app.html" style="padding:9px 18px">Accedi</a></div></div></div>
 <div class="wrap"><div><span class="tag">Per le famiglie</span><h1>Scadenze, rimborsi e documenti di famiglia. Tutto a posto.</h1><p class="lead">Duewell tiene in un unico posto ciò che la famiglia deve ricordare: rimborsi sanitari, contratti, pagamenti, check-up e documenti. Ti avvisa prima, così non perdi niente.</p>
-<div class="cta"><a class="btn b1" href="app.html?crea=1">Crea il tuo account</a><a class="btn b2" href="app.html">Accedi</a></div><div class="hint">Funziona sul telefono e sul computer. Si installa come un'app.</div></div>
+<div class="cta"><a class="btn b1" href="app.html?crea=1">Crea il tuo account</a><a class="btn b2" href="app.html">Accedi</a></div><div class="hint">Funziona sul telefono e sul computer. Si installa come un'app. I tuoi dati sono cifrati: solo tu puoi leggerli.</div></div>
 <div class="phones">
 <div class="phone p1"><div class="scr"><div class="sb"><span>9:41</span><span>●●● 92%</span></div><div class="hb"><div class="av">F</div><div><b>Buonasera, famiglia Rossi</b><span>3 scadenze a breve</span></div></div>
 <div class="it"><b>Affitto · disdetta</b><small>scade tra 5 giorni</small><span class="st">URGENTE</span></div><div class="it"><b>Visita cardiologica</b><small>manca l'impegnativa</small></div><div class="it"><b>TARI rata 2</b><small>20 nov · € 182,00</small></div><div class="it"><b>Lavatrice · garanzia</b><small>scade a dicembre</small></div><div class="it"><b>Carta d'identità</b><small>valida fino al 2030</small><span class="st g">VALIDA</span></div></div></div>
@@ -82,12 +90,24 @@ footer{padding:34px 0 50px;color:var(--soft);font-size:14px;display:flex;justify
 <section style="padding-top:0"><div class="wrap"><h2>Pronto in tre passi</h2><p class="sub">Niente da configurare per ore: parti dalle schede che ti servono.</p>
 <div class="steps"><div class="step"><h3>Crea l'account</h3><p>Con la tua email o con Google. Ci vuole un minuto.</p></div><div class="step"><h3>Scegli cosa seguire</h3><p>Una guida ti fa attivare solo le schede che ti interessano e aggiungere le persone di casa.</p></div><div class="step"><h3>Lascia che ti avvisi</h3><p>Aggiungi le scadenze e Duewell ti ricorda quando agire.</p></div></div></div></section>
 
-<section id="sicurezza" style="padding-top:0"><div class="wrap split"><div><h2>I tuoi dati restano tuoi</h2><p class="sub" style="margin-bottom:0">Una famiglia vuole sapere dove finiscono documenti e dati sanitari. Qui è semplice.</p></div>
+<section id="sicurezza" style="padding-top:20px"><div class="wrap">
+<div class="enc"><h2>Cifrati sul tuo dispositivo. Nemmeno noi possiamo leggerli.</h2>
+<p class="sub">Spese mediche, contratti, documenti: sono dati delicati. Per questo Duewell li chiude a chiave prima ancora che lascino il tuo telefono o il tuo computer.</p>
+<div class="flow">
+<div class="fb"><div class="fi">📱</div><h3>1 · Sul tuo dispositivo</h3><p>Scrivi una spesa o un contratto. L'app lo trasforma in un testo illeggibile usando una chiave che nasce dal tuo codice di sicurezza.</p></div>
+<div class="ar">➜</div>
+<div class="fb lock"><div class="fi">🔒</div><h3>2 · Nei nostri archivi</h3><p>Arriva solo il testo cifrato. Anche chi gestisce il servizio vede soltanto questo:</p><code>enc1:q8Zk3vX…TnR9aW0pLc2…</code></div>
+<div class="ar">➜</div>
+<div class="fb"><div class="fi">🔑</div><h3>3 · Solo tu lo riapri</h3><p>Il tuo codice resta con te. Inserendolo sul tuo dispositivo, i dati tornano leggibili. Altrove non si aprono.</p></div></div>
+<div class="enc2"><div><b>Il codice lo scegli tu</b><span>Non lo conosciamo e non ci viene mai inviato. Non c'è una password che possiamo “resettare” per leggere i tuoi dati.</span></div>
+<div><b>Chiave di recupero</b><span>Alla prima configurazione ricevi una chiave da conservare. Serve se dimentichi il codice.</span></div>
+<div><b>Una cosa da sapere</b><span>Se perdi sia il codice sia la chiave di recupero, nessuno può recuperare i dati, nemmeno noi. È il prezzo di una riservatezza vera.</span></div></div></div>
+<div class="split"><div><h2>E poi, tutto il resto</h2><p class="sub" style="margin-bottom:0">Una famiglia vuole sapere dove finiscono documenti e dati sanitari. Qui è semplice.</p></div>
 <div class="sec"><ul>
 <li><span class="ck">✓</span><div><b>Duewell non conserva i tuoi documenti.</b> I file restano nel tuo Google Drive e l'app vede solo quelli che scegli tu.</div></li>
 <li><span class="ck">✓</span><div><b>Dati separati per ogni famiglia.</b> Nessun altro utente può vedere i tuoi dati.</div></li>
-<li><span class="ck">✓</span><div><b>Accesso protetto.</b> Con email e password oppure con il tuo account Google.</div></li>
-<li><span class="ck">✓</span><div><b>Decidi tu.</b> Scarichi una copia dei dati quando vuoi ed elimini l'account in qualsiasi momento.</div></li></ul></div></div></section>
+<li><span class="ck">✓</span><div><b>Accesso protetto.</b> Con email e password oppure con il tuo account Google, più il codice di sicurezza per aprire i dati.</div></li>
+<li><span class="ck">✓</span><div><b>Decidi tu.</b> Scarichi una copia dei dati quando vuoi ed elimini l'account in qualsiasi momento.</div></li></ul></div></div></div></section>
 
 <section style="padding-top:0"><div class="wrap"><div class="fin"><h2>Metti in ordine la tua famiglia</h2><p>Crea l'account e inizia dalla prima scadenza.</p><div class="cta" style="justify-content:center"><a class="btn b1" href="app.html?crea=1">Crea il tuo account</a><a class="btn b2" href="app.html">Ho già un account</a></div></div>
 <footer><div>© Duewell</div><div><a href="privacy.html">Privacy</a><a href="termini.html">Termini di servizio</a><a href="mailto:stefano.joppolo@gmail.com">Contatti</a></div></footer></div></section>
