@@ -662,6 +662,19 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+.av.ph{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent;font-size:0}
+.fam-row{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.fam-ph{border:0;background:none;padding:0;cursor:pointer;position:relative;flex:none;border-radius:50%}
+.fam-ph .av{width:52px;height:52px;font-size:21px}
+.fam-ph i{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;background:#1F2937;color:#fff;font-style:normal;font-size:11px;display:grid;place-items:center;border:2px solid #fff}
+.fam-f{flex:1;min-width:200px;display:grid;gap:6px}
+.fam-f input{width:100%;min-width:0;max-width:none}
+.fam-col{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.fam-sw{width:24px;height:24px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.fam-sw.on{box-shadow:0 0 0 2px #1F2937}
+.fam-act{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fam-add{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.fam-add input{flex:1;min-width:140px}
 body.m-nopag #medical-form .nopag-hide{display:none !important}
 body:not(.m-nopag) #medical-form .nopag-only{display:none !important}
 .nop-row{display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin:6px 0 12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper,#F4F6FA)}
@@ -1829,7 +1842,7 @@ function defaultPagatori(){ return [{id:'p1', nome:'Assicurazione'}]; }
 function defaultSettings(){
   const moduli = {}; MODULI_IDS.forEach(id => { moduli[id] = {on:true, nome:MODULI_DEFAULT_NOMI[id]}; });
   const elenchi = {}; Object.keys(ELENCHI_DEF).forEach(k => { elenchi[k] = ELENCHI_DEF[k].default.slice(); });
-  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', app:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}, ultimoBackup:'', backupDa:'', nomiCompleti:{}};
+  return {versione:2, configurato:false, pagatori:defaultPagatori(), massimali:[], moduli, elenchi, dashboard:{urgentiOn:true, sezioni:[]}, profilo:{nome:'', app:'', foto:'', colore:'#2F5BEA'}, report:{charts:null}, ultimoBackup:'', backupDa:'', nomiCompleti:{}, famiglia:{}};
 }
 function normalizeSettings(raw){
   const d = defaultSettings();
@@ -1892,6 +1905,16 @@ function normalizeSettings(raw){
   }
   if(raw.nomiCompleti && typeof raw.nomiCompleti === 'object' && !Array.isArray(raw.nomiCompleti)){
     Object.keys(raw.nomiCompleti).slice(0, 60).forEach(k => { const v = String(raw.nomiCompleti[k] || '').trim().slice(0, 60); if(v && k.length <= 60) d.nomiCompleti[k] = v; });
+  }
+  d.famiglia = {};
+  if(raw.famiglia && typeof raw.famiglia === 'object' && !Array.isArray(raw.famiglia)){
+    Object.keys(raw.famiglia).slice(0, 60).forEach(k => {
+      const f = raw.famiglia[k]; if(!f || typeof f !== 'object' || k.length > 60) return;
+      const o = {};
+      if(typeof f.foto === 'string' && f.foto.length < 40000 && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(f.foto)) o.foto = f.foto;
+      if(typeof f.colore === 'string' && /^#[0-9a-fA-F]{6}$/.test(f.colore)) o.colore = f.colore;
+      if(o.foto || o.colore) d.famiglia[k] = o;
+    });
   }
   Object.keys(ELENCHI_DEF).forEach(k => {
     const v = raw.elenchi && raw.elenchi[k];
@@ -3345,7 +3368,8 @@ function ncPersone(){
   medical.forEach(m => m.richiedente && s.add(m.richiedente));
   return [...s].sort((a, b) => a.localeCompare(b));
 }
-function nomiCompletiHtml(){
+function nomiCompletiHtml(){ return famCardHtml(); }
+function nomiCompletiHtmlOld(){
   const l = ncPersone();
   return `<div class="set-card">
       <h3>Nomi completi</h3>
@@ -3372,7 +3396,7 @@ function renderImpostazioni(){
   const elenchiHtml = Object.keys(ELENCHI_DEF).map(k => `
     <div class="set-card">
       <h3>${ELENCHI_DEF[k].titolo}</h3>
-      <p class="hint">${ELENCHI_DEF[k].hint}</p>
+      <p class="hint">${ELENCHI_DEF[k].hint}</p>${k === 'persone' ? '<p class="hint">Foto, colore e nome completo si gestiscono nella scheda Famiglia. <button type="button" class="btn ghost small" data-fam-go>Apri Famiglia</button></p>' : ''}
       <div class="chips-wrap">
         ${settings.elenchi[k].length ? settings.elenchi[k].map((v, i) => `<span class="vchip"><span class="vname" data-list-rename="${k}" data-i="${i}" title="Clicca per rinominare">${escHtml(v)}</span><button type="button" data-list-del="${k}" data-i="${i}" title="Rimuovi dai suggerimenti">✕</button></span>`).join('') : '<span class="doc-ref">Nessun valore: aggiungine uno qui sotto.</span>'}
       </div>
@@ -3632,7 +3656,7 @@ function ckState(c){
   const g = ckGiorni(due), pre = c.preavviso == null ? 30 : +c.preavviso;
   return {k: g < 0 ? 'scaduto' : g <= pre ? 'prenotare' : 'futuro', data: due, g};
 }
-function ckColor(n){ n = String(n || '').trim().toLowerCase(); let h = 0; for(const ch of n) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AV_COL[h % AV_COL.length]; }
+function ckColor(n){ return famCol(n); }
 function ckFmt(iso){ return iso ? fmtDate(iso) : '—'; }
 function ckFmtLong(iso, ora){ if(!iso) return '—'; const p = iso.split('-').map(Number), d = new Date(p[0], p[1] - 1, p[2]); return CK_GG[d.getDay()] + ' ' + p[2] + ' ' + CK_MESI_C[p[1] - 1] + (p[0] !== new Date().getFullYear() ? ' ' + p[0] : '') + (ora ? ', ' + ora : ''); }
 function ckSafeUrl(u){ u = String(u || '').trim(); return /^https?:\/\//i.test(u) ? u : ''; }
@@ -4933,7 +4957,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 19:27';
+const SUPPORT_VER = '08/11/2026 19:35';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -4985,7 +5009,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 19:27</b></p>`;
+  <p class="st-ver">Versione app: <b>08/11/2026 19:35</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5584,6 +5608,104 @@ document.getElementById('detrazioni-body').addEventListener('click', (e) => {
     w.querySelector('input').addEventListener('change', async (e) => { settings.detrSan = e.target.checked; renderDetrazioni(); await saveSettings(); });
   }
 }
+
+// ---- Famiglia: nome, nome completo, foto e colore di ogni persona ----
+function famInfo(n){ n = String(n || '').trim(); const f = (typeof settings !== 'undefined' && settings && settings.famiglia) || {}; return Object.prototype.hasOwnProperty.call(f, n) ? f[n] : null; }
+function famCol(n){
+  const i = famInfo(n); if(i && i.colore) return i.colore;
+  n = String(n || '').trim().toLowerCase(); let h = 0; for(const ch of n) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AV_COL[h % AV_COL.length];
+}
+function famAv(n){
+  n = String(n || '').trim(); const i = famInfo(n);
+  if(i && i.foto) return `<span class="av ph" style="background-image:url(${i.foto})" title="${escHtml(n)}">${escHtml((n[0] || '?').toUpperCase())}</span>`;
+  return `<span class="av" style="background:${famCol(n)}">${escHtml((n[0] || '?').toUpperCase())}</span>`;
+}
+function famEnsure(n){ if(!settings.famiglia) settings.famiglia = {}; if(!settings.famiglia[n]) settings.famiglia[n] = {}; return settings.famiglia[n]; }
+function famClean(n){ if(settings.famiglia && settings.famiglia[n] && !settings.famiglia[n].foto && !settings.famiglia[n].colore) delete settings.famiglia[n]; }
+function famCardHtml(){
+  const l = ncPersone();
+  const rows = l.map(p => {
+    const i = famInfo(p) || {}, col = famCol(p), E = escHtml(p);
+    return `<div class="fam-row">
+      <button type="button" class="fam-ph" data-fam-pick="${E}" title="Scegli una foto" aria-label="Foto di ${E}">${famAv(p)}<i>📷</i></button>
+      <div class="fam-f">
+        <input type="text" data-fam-nome="${E}" value="${E}" maxlength="30" placeholder="Nome" aria-label="Nome">
+        <input type="text" data-nc="${E}" value="${escHtml((settings.nomiCompleti || {})[p] || '')}" placeholder="Nome completo, es. ${E} Cognome" maxlength="60" aria-label="Nome completo">
+        <div class="fam-col" aria-label="Colore">${AV_COL.map(c => `<button type="button" class="fam-sw${c.toLowerCase() === col.toLowerCase() ? ' on' : ''}" style="background:${c}" data-fam-col="${E}" data-c="${c}" title="Colore" aria-label="Colore"></button>`).join('')}</div>
+        <div class="fam-act">${i.foto ? `<button type="button" class="btn ghost small" data-fam-rmfoto="${E}">Togli foto</button>` : ''}<button type="button" class="btn ghost small" data-fam-del="${E}" style="color:var(--stamp,#C0392B)">Rimuovi</button></div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="set-card"><h3>Persone della famiglia</h3>
+    <p class="hint">Per ogni persona: nome (come compare nell'app), nome completo (usato nei messaggi e nella firma), foto facoltativa e colore del cerchietto. Se cambi il nome, si aggiorna anche nelle righe già salvate.</p>
+    <div id="fam-list">${rows || '<p class="doc-ref" style="margin:0">Nessuna persona ancora inserita.</p>'}</div>
+    <div class="fam-add"><input type="text" id="fam-new" placeholder="Nuova persona" maxlength="30"><button type="button" class="btn small" id="fam-add-btn">Aggiungi</button></div>
+    <input type="file" id="fam-file" accept="image/*" style="display:none">
+  </div>`;
+}
+let famPickFor = null;
+function famRefresh(){ try{ renderAll(); }catch(e){} try{ renderCheckup(); }catch(e){} try{ renderImpostazioni(); }catch(e){} }
+async function famRename(old, nuovo){
+  nuovo = String(nuovo || '').trim().slice(0, 30);
+  if(!nuovo || nuovo === old){ renderImpostazioni(); return; }
+  if(ncPersone().some(x => x !== old && x.toLowerCase() === nuovo.toLowerCase())){ showNotice('Esiste già una persona con questo nome.'); renderImpostazioni(); return; }
+  const L = settings.elenchi.persone, i = L.indexOf(old);
+  if(i >= 0) L[i] = nuovo; else L.push(nuovo);
+  if(settings.famiglia && settings.famiglia[old]){ settings.famiglia[nuovo] = settings.famiglia[old]; delete settings.famiglia[old]; }
+  if(settings.nomiCompleti && settings.nomiCompleti[old]){ settings.nomiCompleti[nuovo] = settings.nomiCompleti[old]; delete settings.nomiCompleti[old]; }
+  const {toSave} = renameInData('persone', old, nuovo);
+  for(const name of toSave) await saveByName(name);
+  let ch = false; checkups.forEach(c => { if(c.persona === old){ c.persona = nuovo; ch = true; } });
+  if(ch) await saveCheckups();
+  applyElenchi(); await saveSettings(); famRefresh(); showNotice('Nome aggiornato.', 'success');
+}
+document.addEventListener('change', (e) => {
+  const t = e.target; if(!t.dataset) return;
+  if(t.dataset.famNome !== undefined) famRename(t.dataset.famNome, t.value);
+  if(t.id === 'fam-file'){
+    const f = t.files[0], who = famPickFor; t.value = ''; if(!f || !who) return;
+    const rd = new FileReader();
+    rd.onload = () => { const im = new Image(); im.onload = async () => {
+      const s = 96, cv = document.createElement('canvas'); cv.width = cv.height = s;
+      const m = Math.min(im.width, im.height), ctx = cv.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, s, s);
+      ctx.drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, s, s);
+      const url = cv.toDataURL('image/jpeg', 0.8);
+      if(url.length > 30000){ showNotice('Foto troppo pesante, provane un\'altra.'); return; }
+      famEnsure(who).foto = url; await saveSettings(); famRefresh(); showNotice('Foto salvata.', 'success');
+    }; im.onerror = () => showNotice('Non riesco a leggere questa immagine.'); im.src = rd.result; };
+    rd.readAsDataURL(f);
+  }
+});
+async function famAddNew(){
+  const inp = document.getElementById('fam-new'); if(!inp) return;
+  const v = inp.value.trim().slice(0, 30); if(!v) return;
+  if(ncPersone().some(x => x.toLowerCase() === v.toLowerCase())){ showNotice('Questa persona c\'è già.'); return; }
+  settings.elenchi.persone.push(v); applyElenchi(); await saveSettings(); renderImpostazioni();
+  const again = document.getElementById('fam-new'); if(again) again.focus();
+}
+document.addEventListener('keydown', (e) => { if(e.key === 'Enter' && e.target.id === 'fam-new'){ e.preventDefault(); famAddNew(); } });
+document.addEventListener('click', async (e) => {
+  const t = e.target, g = (sel) => t.closest ? t.closest(sel) : null;
+  if(g('#fam-add-btn')){ famAddNew(); return; }
+  const go = g('[data-fam-go]');
+  if(go){ accOpen = 'famiglia'; renderImpostazioni(); const a = document.querySelector('.acc[data-k="famiglia"]'); if(a && a.scrollIntoView) a.scrollIntoView({block:'start'}); return; }
+  const pk = g('[data-fam-pick]'); if(pk){ famPickFor = pk.dataset.famPick; const f = document.getElementById('fam-file'); if(f) f.click(); return; }
+  const cl = g('[data-fam-col]');
+  if(cl){ const n = cl.dataset.famCol; famEnsure(n).colore = cl.dataset.c; await saveSettings(); famRefresh(); return; }
+  const rf = g('[data-fam-rmfoto]');
+  if(rf){ const n = rf.dataset.famRmfoto; if(famInfo(n)){ delete settings.famiglia[n].foto; famClean(n); } await saveSettings(); famRefresh(); return; }
+  const dl = g('[data-fam-del]');
+  if(dl){
+    const n = dl.dataset.famDel;
+    if(!window.confirm('Togliere "' + n + '" dall\'elenco delle persone? I dati già inseriti non vengono toccati (se questa persona è ancora usata in qualche riga, resta visibile qui finché non la cambi).')) return;
+    settings.elenchi.persone = settings.elenchi.persone.filter(x => x !== n);
+    if(settings.famiglia) delete settings.famiglia[n];
+    if(settings.nomiCompleti) delete settings.nomiCompleti[n];
+    applyElenchi(); await saveSettings(); famRefresh(); return;
+  }
+});
+
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -7021,8 +7143,7 @@ Object.keys(XCFG).forEach(xSetup);
 const AV_COL = ['#2F5BEA', '#1C8A5A', '#B96A00', '#7A4FD6', '#0F8B8D', '#C2410C'];
 function avatarHtml(n){
   n = String(n || '').trim(); if(!n) return '—';
-  let h = 0; for(const ch of n.toLowerCase()) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return `<div class="who"><span class="av" style="background:${AV_COL[h % AV_COL.length]}">${escHtml(n[0].toUpperCase())}</span>${escHtml(n)}</div>`;
+  return `<div class="who">${famAv(n)}${escHtml(n)}</div>`;
 }
 function fmtShort(d){
   if(!d) return '—'; const p = d.split('-'); if(p.length !== 3) return d;
@@ -7116,7 +7237,7 @@ let rpDraft = null;
 const rpEl = (id) => document.getElementById(id);
 const rpEur = (v) => Math.round(v).toLocaleString('it-IT') + ' €';
 function rpAccent(){ return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#2F5BEA'; }
-function rpPersonColor(n){ let h = 0; for(const ch of String(n).toLowerCase()) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AV_COL[h % AV_COL.length]; }
+function rpPersonColor(n){ return famCol(n); }
 function rpAllowed(src){ const t = src === 'med' ? 'medical' : 'bilancio'; return !visibleTabs || visibleTabs.includes(t); }
 function rpSrcName(src){ return src === 'med' ? ((settings.moduli && settings.moduli.medical && settings.moduli.medical.nome) || 'Spese mediche') : ((settings.moduli && settings.moduli.bilancio && settings.moduli.bilancio.nome) || 'Bilancio'); }
 function rpDefaultCharts(){
@@ -7482,9 +7603,9 @@ function dtTimelineFor(id){ const m = medical.find(x => x.id === id); return m ?
 
 // ---- Impostazioni: schede espandibili, una alla volta; backup nelle impostazioni ----
 let accOpen = null;
-const ACC_GROUPS = [['Famiglia', ['profilo', 'moduli']], ['Sanità', ['rimborsi', 'sanita']], ['Dati', ['elenchi', 'backup']]];
+const ACC_GROUPS = [['Famiglia', ['profilo', 'famiglia', 'moduli']], ['Sanità', ['rimborsi', 'sanita']], ['Dati', ['elenchi', 'backup']]];
 const _accIc = (e, c, dk) => '<span class="ic-col' + (dk ? ' dk' : '') + '" style="--c:' + c + '">' + e + '</span>';
-const ACC_ICON = {profilo:_accIc('👨‍👩‍👧','#F76B15'), moduli:_accIc('🧩','#7C3AED'), rimborsi:_accIc('💶','#1C8A5A'), sanita:_accIc('🩺','#E5484D'), elenchi:_accIc('📋','#0EA5E9',true), backup:_accIc('💾','#475569',true)};
+const ACC_ICON = {profilo:_accIc('👨‍👩‍👧','#F76B15'), famiglia:_accIc('🧑‍🤝‍🧑','#E5484D'), moduli:_accIc('🧩','#7C3AED'), rimborsi:_accIc('💶','#1C8A5A'), sanita:_accIc('🩺','#E5484D'), elenchi:_accIc('📋','#0EA5E9',true), backup:_accIc('💾','#475569',true)};
 function accToday(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function accDaysAgo(iso){ if(!iso) return null; const a = Date.parse(iso + 'T00:00:00Z'), b = Date.parse(accToday() + 'T00:00:00Z'); return isNaN(a) ? null : Math.round((b - a) / 86400000); }
 function accAgo(g){ return g <= 0 ? 'oggi' : g === 1 ? 'ieri' : g + ' giorni fa'; }
@@ -7508,6 +7629,7 @@ function markBackup(){ settings.ultimoBackup = accToday(); backupUiUpdate(); try
 function accStash(){ const bp = document.getElementById('backup-panel'); if(bp && bp.parentElement && bp.parentElement.closest('#panel-impostazioni')){ bp.style.display = 'none'; document.body.appendChild(bp); } }
 function accDescribe(card){
   const h = card.querySelector('h3'), t = h ? h.textContent.trim() : '';
+  if(card.querySelector('#fam-list')){ const n = ncPersone(); return {key:'famiglia', title:'Persone della famiglia', sum:n.length ? n.join(' · ') : 'Nessuna persona ancora'}; }
   if(card.querySelector('#prof-nome')) return {key:'profilo', title:'Profilo della famiglia', sum:((settings.profilo && settings.profilo.nome) || 'Famiglia')};
   if(card.querySelector('#nomi-p')) { const n = nomiMap(); return {key:'rimborsi', title:'Chi ti rimborsa', sum:n.p + ' · ' + n.s}; }
   if(card.id === 'backup-slot') return {key:'backup', title:'Backup e ripristino', sum:backupState().sum};
