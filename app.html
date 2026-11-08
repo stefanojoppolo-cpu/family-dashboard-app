@@ -662,6 +662,31 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+.st-card{border:1px solid var(--line);border-radius:14px;background:var(--paper-raised,#fff);margin-bottom:10px;overflow:hidden}
+.st-it{display:flex;align-items:center;gap:14px;padding:14px 16px;flex-wrap:wrap}
+.st-it+.st-it{border-top:1px solid var(--line)}
+.st-ic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:19px;flex:none;background:color-mix(in srgb,var(--c) 16%,#fff);box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 22%,transparent) inset}
+.st-tx{flex:1 1 240px;min-width:0}
+.st-tx b{display:block;font-size:15px;color:var(--ink);line-height:1.3}
+.st-tx span{display:block;font-size:13px;color:var(--ink-soft);line-height:1.45;margin-top:2px}
+.st-act{display:flex;align-items:center;gap:10px;flex:none;flex-wrap:wrap}
+.st-pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:#EEF1F5;color:var(--ink-soft);white-space:nowrap}
+.st-pill.ok{background:#E1F4EA;color:#1c7a50}
+.st-lnk{font-weight:700;font-size:13.5px;color:var(--accent)}
+.st-lnk:hover{text-decoration:underline}
+.st-danger .st-tx b{color:#CF3A3A}
+.st-del{color:#CF3A3A !important;border-color:#F2C4C4 !important}
+.st-ver{font-size:12px;color:var(--ink-soft);margin:6px 4px 0}
+.st-sw{position:relative;display:inline-block;width:46px;height:28px;cursor:pointer}
+.st-sw input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1}
+.st-sw i{position:absolute;inset:0;border-radius:999px;background:#CBD3DD;transition:background .2s}
+.st-sw i::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.st-sw input:checked+i{background:var(--accent)}
+.st-sw input:checked+i::after{transform:translateX(18px)}
+.st-sw input:focus-visible+i{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:640px){.st-it{padding:14px}.st-act{margin-left:50px;width:100%}}
+
 .wrap:has(#panel-panoramica.active) > header{background:linear-gradient(120deg,#10243a 0%,#17406b 60%,#0f7f77 135%);border-radius:18px;padding:20px 26px;margin-bottom:18px;box-shadow:0 8px 24px rgba(16,36,58,.18)}
 .wrap:has(#panel-panoramica.active) > header > div{padding-bottom:0 !important}
 .wrap:has(#panel-panoramica.active) > header h1{color:#fff}
@@ -3310,12 +3335,7 @@ function renderImpostazioni(){
       <div style="margin-top:10px;"><button type="button" class="btn ghost small" id="mass-add">+ Aggiungi massimale</button></div>
     </div>
     ${nomiCompletiHtml()}
-    ${dwAppSettingsHtml()}
-    ${driveSettingsHtml()}
-    <p style="margin:14px 2px 0"><button type="button" class="btn ghost small" data-wz-rerun="1">Configurazione guidata</button> <span class="hint">Riapri il percorso per cambiare schede, persone ed etichette.</span></p>
-    <p class="hint" style="margin:14px 2px 0"><a href="privacy.html" target="_blank" rel="opener">Informativa sulla privacy</a> · <a href="termini.html" target="_blank" rel="opener">Termini di servizio</a></p>
-    <p class="hint" style="margin:14px 2px 0"><button type="button" class="lg-link" data-dw="del" style="color:#CF3A3A;font-size:13px">Elimina il mio account</button></p>
-    <p class="hint" style="margin:6px 2px 0">Versione app: <b>08/11/2026 11:41</b></p>
+    <div class="st-apps">${dwAppSettingsHtml()}${driveSettingsHtml()}${stAccountHtml()}</div>
     <p class="form-section-title" style="margin:20px 0 10px;">Elenchi di suggerimenti</p>
     <p class="hint" style="margin:-4px 0 14px;font-size:12.5px;color:var(--ink-soft);">Sono solo suggerimenti: nei campi puoi sempre scrivere un valore diverso. Clicca su un valore per rinominarlo.</p>
     ${elenchiHtml}
@@ -4691,10 +4711,8 @@ document.addEventListener('click', async (e) => {
   }
 });
 function driveSettingsHtml(){
-  const st = drvOk() ? '<span class="hint" style="color:#1f6b45;font-weight:700">Collegato</span>' : '<span class="hint">Non disponibile</span>';
-  return `<p class="form-section-title" style="margin:20px 0 6px;">Google Drive ${st}</p>
-    <p class="hint" style="margin:0 0 10px;font-size:12.5px;color:var(--ink-soft);">Scegli i file dal tuo Drive e inviali su WhatsApp. Duewell vede solo i file che scegli tu. Il collegamento si attiva la prima volta che usi il pulsante 📁.</p>
-    <div><button type="button" class="btn small ghost" data-drv="test">Prova il collegamento</button></div>`;
+  const ok = drvOk();
+  return `<div class="st-card">${stIt('📁', '#0EA5E9', 'Google Drive', 'Scegli i file dal tuo Drive e inviali su WhatsApp. Duewell vede solo i file che scegli tu. Il collegamento si attiva la prima volta che usi il pulsante 📁.', (ok ? '<span class="st-pill ok">Collegato</span>' : '<span class="st-pill">Non disponibile</span>') + '<button type="button" class="btn ghost small" data-drv="test">Prova</button>')}</div>`;
 }
 
 { const av = document.getElementById('hdr-av'); const go = () => { const t = document.querySelector('.tab-btn[data-tab="impostazioni"]'); if(t) t.click(); };
@@ -4786,17 +4804,25 @@ async function dwNotifToggle(){
 }
 
 // ---- impostazioni
-function dwAppSettingsHtml(){
-  const inst = dwStandalone() ? '<span class="hint" style="color:#1f6b45;font-weight:700">Installata su questo dispositivo</span>'
-    : (dwCanInstall() ? '<button type="button" class="btn small" data-dw="install">Installa l\'app</button>' : '<span class="hint">Per installarla apri Duewell dal browser del telefono o del computer.</span>');
-  const on = dwNotifOn(), supp = dwNotifOk();
-  const nt = supp ? `<label class="chk" style="display:flex;gap:8px;align-items:center;font-size:13.5px;margin-top:10px"><input type="checkbox" data-dw="notif" ${on ? 'checked' : ''} style="width:auto"> Avvisami all'apertura se ci sono scadenze entro 14 giorni</label>`
-    : '<p class="hint" style="margin:10px 0 0">Gli avvisi non sono disponibili su questo dispositivo. Su iPhone installa prima l\'app nella schermata Home.</p>';
-  return `<p class="form-section-title" style="margin:20px 0 6px;">App e avvisi</p>
-    <p class="hint" style="margin:0 0 10px;font-size:12.5px;color:var(--ink-soft);">Installata, Duewell si apre a schermo intero dalla Home e funziona in sola consultazione anche senza rete. Gli avvisi compaiono quando apri l'app, al massimo una volta al giorno. Gli avvisi ad app chiusa richiedono un servizio online e non sono ancora attivi.</p>
-    <div>${inst}</div>${nt}`;
+function stIt(ic, col, t, s, act, cls){
+  return `<div class="st-it${cls ? ' ' + cls : ''}"><span class="st-ic" style="--c:${col}">${ic}</span><div class="st-tx"><b>${t}</b><span>${s}</span></div>${act ? `<div class="st-act">${act}</div>` : ''}</div>`;
 }
-
+function dwAppSettingsHtml(){
+  const std = dwStandalone();
+  const inst = std ? '<span class="st-pill ok">Installata</span>'
+    : (dwCanInstall() ? '<button type="button" class="btn small" data-dw="install">Installa l\'app</button>' : '<span class="st-pill">Dal browser</span>');
+  const instSub = std ? 'Si apre a schermo intero dalla Home e funziona in sola consultazione anche senza rete.'
+    : (dwCanInstall() ? 'Aggiungila alla Home: si apre a schermo intero e funziona in consultazione anche senza rete.' : 'Per installarla apri Duewell dal browser del telefono o del computer.');
+  const on = dwNotifOn(), supp = dwNotifOk();
+  const nt = supp ? `<label class="st-sw"><input type="checkbox" data-dw="notif" ${on ? 'checked' : ''}><i></i><span class="sr">Avvisi all'apertura</span></label>` : '<span class="st-pill">Non disponibile</span>';
+  const ntSub = supp ? 'Quando apri l\'app ti segnala le scadenze entro 14 giorni, al massimo una volta al giorno. Ad app chiusa serve un servizio online, non ancora attivo.'
+    : 'Non disponibili su questo dispositivo. Su iPhone installa prima l\'app nella schermata Home.';
+  return `<div class="st-card">${stIt('📲', '#2F5BEA', 'Installazione', instSub, inst)}${stIt('🔔', '#F76B15', 'Avvisi all\'apertura', ntSub, nt)}</div>`;
+}
+function stAccountHtml(){
+  return `<div class="st-card">${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
+  <p class="st-ver">Versione app: <b>08/11/2026 17:20</b></p>`;
+}
 // ---- eliminazione account
 function dwDeleteAsk(){
   const u = auth.currentUser; if(!u) return;
@@ -4931,23 +4957,18 @@ function hdrSubText(){
   const _rp = renderPanoramica;
   renderPanoramica = function(){ const r = _rp.apply(this, arguments); try{ const s = document.getElementById('hdr-sub'); if(s) s.textContent = hdrSubText() || s.textContent; }catch(e){} return r; };
 }
-// ---- Impostazioni: blocchi "App e account" raggruppati in una scheda ----
+// ---- Impostazioni: blocchi "App e account" a schede ----
 {
   const _az = accordionize;
   accordionize = function(el){
     _az.apply(this, arguments);
     try{
-      const kids = [...el.children], i0 = kids.findIndex(x => x.matches('p.form-section-title') && /^App e avvisi/.test(x.textContent.trim()));
-      const i1 = kids.findIndex(x => x.tagName === 'P' && /^Versione app/.test(x.textContent.trim()));
-      if(i0 < 0 || i1 < i0) return;
-      const card = document.createElement('div'); card.className = 'app-card';
-      kids.slice(i0, i1 + 1).forEach(x => card.appendChild(x));
+      const box = el.querySelector(':scope > .st-apps'); if(!box) return;
       const gh = document.createElement('div'); gh.className = 'set-grp'; gh.textContent = 'App e account';
-      el.appendChild(gh); el.appendChild(card);
+      el.appendChild(gh); el.appendChild(box);
     }catch(e){}
   };
 }
-
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
