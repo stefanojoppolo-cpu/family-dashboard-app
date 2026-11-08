@@ -662,6 +662,14 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+body.m-nopag #medical-form .nopag-hide{display:none !important}
+body:not(.m-nopag) #medical-form .nopag-only{display:none !important}
+.nop-row{display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin:6px 0 12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper,#F4F6FA)}
+.nop-row input{width:auto;margin-top:3px}.nop-row small{color:var(--ink-soft);font-size:12.5px;line-height:1.45}
+#detr-san-wrap{display:inline-flex;align-items:center;gap:6px;margin-left:18px;font-size:13px;white-space:nowrap}
+#detr-san-wrap input{width:auto}
+#detrazioni-body tr.row-linked td:first-child{box-shadow:inset 3px 0 0 var(--accent,#2F5BEA)}
+#detrazioni-body tr.row-linked{cursor:pointer}
 .st-apps{border:1px solid var(--line);border-radius:14px;background:var(--paper-raised,#fff);overflow:hidden;margin-bottom:10px}
 .st-apps .st-card{border:0;border-radius:0;margin:0;background:transparent;box-shadow:none}
 .st-apps .st-card+.st-card{border-top:1px solid var(--line)}
@@ -1302,7 +1310,7 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
         </div>
       </div>
 
-      <div class="form-section">
+      <div class="form-section nopag-hide">
         <p class="form-section-title">Modalità</p>
         <div class="form-row form-row-modstato">
           <div class="field">
@@ -1316,16 +1324,20 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
       </div>
 
       <div class="form-section">
-        <p class="form-section-title">Importi e rimborsi</p>
-        <p class="form-section-hint">Un blocco per ogni pagatore impostato in Impostazioni, nell'ordine di richiesta. I campi in grigio si calcolano da soli.</p>
+        <p class="form-section-title nopag-hide">Importi e rimborsi</p><p class="form-section-title nopag-only">Importo e detrazione</p>
+        <p class="form-section-hint nopag-hide">Un blocco per ogni pagatore impostato in Impostazioni, nell'ordine di richiesta. I campi in grigio si calcolano da soli.</p>
         <div class="form-row form-row-importi" style="grid-template-columns:1fr;max-width:260px;">
           <div class="field">
             <label>Totale fattura (€)</label>
             <input type="number" step="0.01" id="mf-totale">
           </div>
         </div>
-        <div id="mf-rimborsi"></div>
-        <div class="form-row form-row-importi">
+        <div id="mf-rimborsi" class="nopag-hide"></div>
+        <div class="nopag-only" style="margin:6px 0 4px">
+          <div class="form-row form-row-importi" style="grid-template-columns:1fr;max-width:300px;"><div class="field"><label>Da detrarre (€) <span style="font-weight:500;color:var(--ink-soft)">· vuoto = tutto il totale</span></label><input type="number" step="0.01" min="0" id="mf-detr" placeholder="come il totale"></div></div>
+          <label style="display:flex;gap:8px;align-items:center;font-size:13.5px;margin-top:8px"><input type="checkbox" id="mf-tracc" style="width:auto"> Pagata con mezzo tracciabile (carta, bancomat, bonifico)</label>
+        </div>
+        <div class="form-row form-row-importi nopag-hide">
           <div class="field">
             <label>Totale rimborsato (€)</label>
             <input type="text" id="mf-totrimborsato" disabled>
@@ -1836,17 +1848,18 @@ function normalizeSettings(raw){
     const lista = raw.pagatori
       .filter(x => x && typeof x.id === 'string' && x.id && String(x.nome || '').trim() && !visti.has(x.id) && visti.add(x.id))
       .map(x => ({id:x.id, nome:String(x.nome).trim(), email:String(x.email || '').trim().slice(0, 120), quota:Math.min(100, Math.max(0, Math.round((parseFloat(x.quota) || 0) * 100) / 100)), per:String(x.per || '').trim().slice(0, 40)}));
-    if(lista.length) d.pagatori = lista;
+    if(lista.length) d.pagatori = lista; else if(raw.senzaPagatori === true) d.pagatori = [];
   } else if(raw.sanitaModalita === 'completa'){
     d.pagatori = [{id:'p1', nome:'Primo livello'}, {id:'p2', nome:'Secondo livello'}];
   }
+  d.senzaPagatori = !d.pagatori.length; if(typeof raw.detrSan === 'boolean') d.detrSan = raw.detrSan;
   const importiDa = (x) => {
     const imp = {};
     if(x.importi && typeof x.importi === 'object'){
       d.pagatori.forEach(p => { const v = parseFloat(x.importi[p.id]); if(v > 0) imp[p.id] = v; });
     } else {
       const a = parseFloat(x.importo1), b = parseFloat(x.importo2);
-      if(a > 0) imp[d.pagatori[0].id] = a;
+      if(a > 0 && d.pagatori[0]) imp[d.pagatori[0].id] = a;
       if(b > 0 && d.pagatori[1]) imp[d.pagatori[1].id] = b;
     }
     return imp;
@@ -2139,14 +2152,14 @@ function metricsDocumenti(){
 }
 
 function metricsDetrazioni(){
-  const anniPresenti = [...new Set(detrazioni.map(d => (d.data||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  const anniPresenti = [...new Set(detrAllList().map(d => (d.data||'').slice(0,4)).filter(Boolean))].sort().reverse();
   const annoRecente = anniPresenti[0];
-  const totaleAnno = detrazioni.filter(d => (d.data||'').slice(0,4)===annoRecente).reduce((s,d)=> s + (Number(d.importo)||0), 0);
-  const totaleStorico = detrazioni.reduce((s,d)=> s + (Number(d.importo)||0), 0);
+  const totaleAnno = detrAllList().filter(d => (d.data||'').slice(0,4)===annoRecente).reduce((s,d)=> s + (Number(d.importo)||0), 0);
+  const totaleStorico = detrAllList().reduce((s,d)=> s + (Number(d.importo)||0), 0);
   return [
-    {valore: detrazioni.length, label: 'Voci detraibili registrate', cls: ''},
+    {valore: detrAllList().length, label: 'Voci detraibili registrate', cls: ''},
     {valore: annoRecente ? euro(totaleAnno) : '—', label: `Totale ${annoRecente || 'anno più recente'}`, cls: ''},
-    {valore: euro(totaleStorico), label: 'Totale voci manuali storico', cls: ''}
+    {valore: euro(totaleStorico), label: detrSanOn() ? 'Totale storico' : 'Totale voci manuali storico', cls: ''}
   ];
 }
 
@@ -2243,7 +2256,7 @@ function legacyToRimborsi(m, pagatori){
   const out = {};
   const s1 = st === 'da_aprire_fasi' ? 'da_inviare' : st === 'aperta_fasi' ? 'attesa' : (m.fasiRifiutato ? 'rifiutata' : 'chiusa');
   const dt = (m.date && typeof m.date === 'object') ? m.date : {};
-  out[pagatori[0].id] = {stato:s1, pagato:Number(m.fasi && m.fasi.pagato) || 0, ...(dt.aperturaFasi ? {inviata:dt.aperturaFasi} : {}), ...(dt.chiusuraFasi ? {chiusa:dt.chiusuraFasi} : {})};
+  if(pagatori[0]) out[pagatori[0].id] = {stato:s1, pagato:Number(m.fasi && m.fasi.pagato) || 0, ...(dt.aperturaFasi ? {inviata:dt.aperturaFasi} : {}), ...(dt.chiusuraFasi ? {chiusa:dt.chiusuraFasi} : {})};
   if(pagatori[1]){
     const s2 = ['da_aprire_fasi','aperta_fasi','chiusa_fasi','da_aprire_secondo'].includes(st) ? 'da_inviare' : st === 'aperta_secondo' ? 'attesa' : (m.secondoRifiutato ? 'rifiutata' : 'chiusa');
     out[pagatori[1].id] = {stato:s2, pagato:Number(m.secondoLivello && m.secondoLivello.rimborsato) || 0, ...(dt.invioSecondo ? {inviata:dt.invioSecondo} : {}), ...(dt.chiusuraSecondo ? {chiusa:dt.chiusuraSecondo} : {})};
@@ -2900,20 +2913,20 @@ function detrazioniSortValue(d, key){
 function getFilteredDetrazioni(){
   const filterAnno = document.getElementById('detrazioni-filter-anno').value;
   const filterCategoria = document.getElementById('detrazioni-filter-categoria').value;
-  let filtered = filterAnno ? detrazioni.filter(d => (d.data||'').slice(0,4)===filterAnno) : detrazioni;
+  let filtered = filterAnno ? detrAllList().filter(d => (d.data||'').slice(0,4)===filterAnno) : detrAllList();
   if(filterCategoria) filtered = filtered.filter(d => d.categoria===filterCategoria);
   return filtered;
 }
 function refreshDetrazioniFilterOptions(){
   const selAnno = document.getElementById('detrazioni-filter-anno');
   const currentAnno = selAnno.value;
-  const anni = [...new Set(detrazioni.map(d => (d.data||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  const anni = [...new Set(detrAllList().map(d => (d.data||'').slice(0,4)).filter(Boolean))].sort().reverse();
   selAnno.innerHTML = `<option value="">Tutti</option>` + anni.map(a => `<option value="${a}">${a}</option>`).join('');
   if(anni.includes(currentAnno)) selAnno.value = currentAnno;
 
   const selCat = document.getElementById('detrazioni-filter-categoria');
   const currentCat = selCat.value;
-  const categorie = [...new Set(detrazioni.map(d => d.categoria).filter(Boolean))].sort();
+  const categorie = [...new Set(detrAllList().map(d => d.categoria).filter(Boolean))].sort();
   selCat.innerHTML = `<option value="">Tutte</option>` + categorie.map(c => `<option value="${c}">${c}</option>`).join('');
   if(categorie.includes(currentCat)) selCat.value = currentCat;
 
@@ -3375,6 +3388,7 @@ function renderImpostazioni(){
     <div class="set-card">
       <h3>${escHtml(V.moduli.medical.nome)}</h3>
       <h3 style="margin:10px 0 4px;font-size:13.5px;">Pagatori dei rimborsi</h3>
+      <label class="nop-row" id="nopag-row"><input type="checkbox" id="nopag-on" ${V.pagatori.length ? '' : 'checked'}><span><b>Non ricevo rimborsi</b><br><small>Tengo solo l'elenco delle spese sanitarie da portare in detrazione. Si possono riattivare i pagatori quando vuoi: i rimborsi già registrati restano.</small></span></label>
       <p class="hint">Chi ti rimborsa le spese mediche: fondo sanitario, assicurazione, datore di lavoro… Ognuno diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta e l'importo rimborsato. Mettili nell'ordine in cui di solito invii le richieste. Ne basta uno; puoi aggiungerne altri e dare a ciascuno il nome che vuoi. Il residuo da portare in detrazione si calcola dopo tutti i rimborsi.</p>
       ${V.pagatori.map((p, i) => p.quota > 0 ? '' : `
       <div class="set-row"><span style="width:18px;color:var(--ink-soft);">${V.pagatori.slice(0, i).filter(x => !(x.quota > 0)).length + 1}.</span>
@@ -3472,7 +3486,7 @@ async function impSave(){
   const tolti = settings.pagatori.filter(p => !nuoviIds.includes(p.id));
   const conDati = tolti.filter(p => medical.some(m => { const r = rimborsoDi(m, p.id); return r.stato !== 'da_inviare' || r.pagato > 0; }));
   if(conDati.length && !window.confirm(`Stai togliendo ${conDati.map(p => '"' + p.nome + '"').join(', ')}: i rimborsi già registrati da questo pagatore non verranno più conteggiati (cambiano residuo e massimali). Procedere?`)) return;
-  const norm = normalizeSettings({pagatori: impDraft.pagatori, massimali: impDraft.massimali});
+  const norm = normalizeSettings({pagatori: impDraft.pagatori, massimali: impDraft.massimali, senzaPagatori: !impDraft.pagatori.length});
   const pagCambiati = JSON.stringify(settings.pagatori.map(p => p.id)) !== JSON.stringify(norm.pagatori.map(p => p.id));
   settings.moduli = impDraft.moduli;
   const rinom = norm.pagatori.map(p => ({id:p.id, vecchio:(settings.pagatori.find(o => o.id === p.id) || {}).nome})).filter((r, i) => r.vecchio && r.vecchio !== norm.pagatori[i].nome);
@@ -3480,9 +3494,10 @@ async function impSave(){
     medical = medical.map(m => { const nomi = {...(m.nomi || {})}; let mod = false; rinom.forEach(r => { if(!nomi[r.id]){ nomi[r.id] = r.vecchio; mod = true; } }); return mod ? {...m, nomi} : m; });
     await saveMedical();
   }
-  settings.pagatori = norm.pagatori;
+  settings.pagatori = norm.pagatori; settings.senzaPagatori = !norm.pagatori.length;
+  if(settings.moduli.medical){ const mn = settings.moduli.medical; if(settings.senzaPagatori && mn.nome === MODULI_DEFAULT_NOMI.medical) mn.nome = 'Spese sanitarie'; else if(!settings.senzaPagatori && mn.nome === 'Spese sanitarie') mn.nome = MODULI_DEFAULT_NOMI.medical; }
   settings.terzoStash = norm.pagatori.some(p => p.quota > 0) ? null : (impDraft.terzoStash !== undefined ? impDraft.terzoStash : settings.terzoStash) || null;
-  settings.massimali = norm.massimali;
+  settings.massimali = norm.pagatori.length ? norm.massimali : settings.massimali;
   if(pagCambiati) settings.dashboard.sezioni = settings.dashboard.sezioni.map(s => s.id === 'medical' ? {...s, box:[]} : s);
   impDraft = null;
   applySettings();
@@ -4583,7 +4598,7 @@ function wzBody(st){
   if(st === 'mods') return `<h2>${wz.rerun ? 'Cosa vuoi tenere sotto controllo?' : 'Benvenuto in Duewell! Cosa vuoi tenere sotto controllo?'}</h2><p class="sub">Scegli quello che ti serve. Potrai cambiare idea quando vuoi dalle Impostazioni.</p>
     <div class="wz-grid">${MODULI_IDS.map(id => { const m = WZ_MODS[id], on = wz.mods.has(id); return `<div class="wz-card ${on ? 'sel' : ''}" data-wz="mod" data-id="${id}" role="checkbox" aria-checked="${on}" tabindex="0">${wzIc(m[0], WZ_COL[id], id)}<div><b>${wzEsc(m[1])}</b><span>${wzEsc(m[2])}</span></div><i class="chk">${on ? '✓' : ''}</i></div>`; }).join('')}</div>`;
   if(st === 'persone') return `<h2>Chi fa parte della famiglia?</h2><p class="sub">Compariranno come scelte rapide quando inserisci spese, documenti e visite. Scrivi il nome con cui li chiami, te compreso.</p>${wzChips('persone', wz.persone)}`;
-  if(st === 'pagatori') return `<h2>Chi ti rimborsa le spese mediche?</h2><p class="sub">Ogni nome diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta. Mettili nell'ordine in cui di solito invii le pratiche.</p>${wzChips('pagatori', wz.pagatori, WZ_PAG_SUG)}<div class="wz-note">Non ricevi rimborsi? Lascia un nome generico, ad esempio «Assicurazione»: potrai cambiarlo dalle Impostazioni.</div>`;
+  if(st === 'pagatori') return `<h2>Chi ti rimborsa le spese mediche?</h2><p class="sub">Ogni nome diventa una colonna in Sanità integrativa, dove segui lo stato di ogni richiesta. Mettili nell'ordine in cui di solito invii le pratiche.</p>${wzChips('pagatori', wz.pagatori, WZ_PAG_SUG)}<div class="wz-note">Non ricevi rimborsi? Non inserire nessun nome: avrai un semplice elenco di spese sanitarie da portare in detrazione. Potrai cambiare idea dalle Impostazioni.</div>`;
   if(st === 'tetti'){
     const pg = wz.rerun ? settings.pagatori.map(p => p.nome) : wz.pagatori;
     const esiste = (m) => wz.rerun && settings.massimali.some(x => (x.nome || '').toLowerCase() === m.nome.toLowerCase());
@@ -4618,7 +4633,7 @@ function wzAddVal(key){
 }
 function wzValida(st){
   if(st === 'mods' && !wz.mods.size) return 'Seleziona almeno una scheda.';
-  if(st === 'pagatori' && !wz.pagatori.length) return 'Inserisci almeno un nome, ad esempio «Assicurazione».';
+  
   return '';
 }
 async function wzApplica(){
@@ -4626,7 +4641,8 @@ async function wzApplica(){
   settings.elenchi.persone = wz.persone.slice();
   Object.keys(wz.liste).forEach(k => { if(k !== 'persone') settings.elenchi[k] = wz.liste[k].slice(); });
   if(wz.mods.has('medical')){
-    if(!wz.rerun && wz.pagatori.length) settings.pagatori = wz.pagatori.map((n, i) => ({id: 'p' + (i + 1), nome: n}));
+    if(!wz.rerun && wz.pagatori.length){ settings.pagatori = wz.pagatori.map((n, i) => ({id: 'p' + (i + 1), nome: n})); settings.senzaPagatori = false; }
+    else if(!wz.rerun){ settings.pagatori = []; settings.senzaPagatori = true; if(settings.moduli.medical && settings.moduli.medical.nome === MODULI_DEFAULT_NOMI.medical) settings.moduli.medical.nome = 'Spese sanitarie'; }
     WZ_MX.forEach(m => {
       const c = wz.mx[m.id]; if(!c.on) return;
       if(settings.massimali.some(x => (x.nome || '').toLowerCase() === m.nome.toLowerCase())) return;
@@ -4916,7 +4932,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 18:42';
+const SUPPORT_VER = '08/11/2026 19:21';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -4968,7 +4984,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 18:42</b></p>`;
+  <p class="st-ver">Versione app: <b>08/11/2026 19:21</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5054,9 +5070,10 @@ dwRenderInstall();
     let h = '';
     if(bodyId === 'medical-body'){
       const real = rows.filter(r => !r.classList.contains('row-bozza')), bz = rows.length - real.length;
-      const res = real.reduce((s, r) => s + num(txt(cell(r, 'Residuo'))), 0);
-      const open = real.filter(r => num(txt(cell(r, 'Residuo'))) > 0).length;
-      h = '<small>Da incassare</small><b>' + euro(res) + '</b><small>' + open + (open === 1 ? ' pratica in corso' : ' pratiche in corso') + (bz ? ' · ' + bz + (bz === 1 ? ' bozza' : ' bozze') : '') + '</small>';
+      const rl = noPag() ? 'Da detrarre' : 'Residuo';
+      const res = real.reduce((s, r) => s + num(txt(cell(r, rl))), 0);
+      const open = real.filter(r => num(txt(cell(r, rl))) > 0).length;
+      h = noPag() ? '<small>Da detrarre</small><b>' + euro(res) + '</b><small>' + real.length + (real.length === 1 ? ' spesa' : ' spese') + (bz ? ' · ' + bz + (bz === 1 ? ' bozza' : ' bozze') : '') + '</small>' : '<small>Da incassare</small><b>' + euro(res) + '</b><small>' + open + (open === 1 ? ' pratica in corso' : ' pratiche in corso') + (bz ? ' · ' + bz + (bz === 1 ? ' bozza' : ' bozze') : '') + '</small>';
     } else {
       const sc = rows.filter(r => r.classList.contains('row-overdue')).length, so = rows.filter(r => r.classList.contains('row-soon')).length;
       h = sc + so ? '<small>Da controllare</small><b>' + (sc + so) + '</b><small>' + sc + (sc === 1 ? ' scaduto' : ' scaduti') + ' · ' + so + ' in scadenza</small>' : '<small>Documenti</small><b>Tutto in regola</b><small>' + rows.length + (rows.length === 1 ? ' documento' : ' documenti') + '</small>';
@@ -5452,6 +5469,120 @@ function hdrSubText(){
   scan(document);
   new MutationObserver(ms => { ms.forEach(m => m.addedNodes.forEach(n => { if(n.nodeType === 1){ if(n.matches && n.matches('input[type=password]')) fix(n); scan(n); } })); }).observe(document.documentElement, {childList: true, subtree: true});
 })();
+// ---- Spese sanitarie senza pagatori + spese dentro Detrazioni ----
+function noPag(){ return !settings.pagatori || settings.pagatori.length === 0; }
+const _mrn37 = medicalRowNumbers;
+medicalRowNumbers = function(m){
+  const r = _mrn37(m);
+  if(noPag() && m && !m.bozza){
+    const tot = r.totale, dv = (m.detr !== undefined && m.detr !== null && m.detr !== '' && isFinite(Number(m.detr))) ? Math.max(0, Math.min(tot, Number(m.detr))) : tot;
+    r.residuo = dv; r.daRichiedere = 0; r.statoInfo = {label: 'Registrata', cls: 'paid'};
+  }
+  return r;
+};
+const _mm37 = metricsMedical;
+metricsMedical = function(cm){
+  if(!noPag()) return _mm37(cm);
+  const anno = String(new Date().getFullYear());
+  const lista = medical.filter(m => !m.bozza && (m.dataDocumento || '').slice(0, 4) === anno).map(m => medicalRowNumbers(m));
+  return [
+    {k:'spese', valore: lista.length, label: 'Spese ' + anno, cls: ''},
+    {k:'tot', valore: euro(lista.reduce((s, n) => s + n.totale, 0)), label: 'Totale speso ' + anno, cls: ''},
+    {k:'detr', valore: euro(lista.reduce((s, n) => s + n.residuo, 0)), label: 'Da portare in detrazione ' + anno, cls: ''}
+  ];
+};
+function medExtraFromForm(){
+  const prev = editingMedicalId ? medical.find(x => x.id === editingMedicalId) : null, out = {};
+  if(noPag()){
+    const v = document.getElementById('mf-detr').value, t = parseFloat(document.getElementById('mf-totale').value);
+    const n = parseFloat(v);
+    if(v !== '' && isFinite(n) && n >= 0 && !(isFinite(t) && Math.abs(n - t) < 0.005)) out.detr = Math.round(n * 100) / 100;
+    if(document.getElementById('mf-tracc').checked) out.tracciabile = true;
+  } else if(prev){
+    if(prev.detr !== undefined) out.detr = prev.detr;
+    if(prev.tracciabile) out.tracciabile = true;
+  }
+  return out;
+}
+const _rmf37 = resetMedicalForm;
+resetMedicalForm = function(){ _rmf37(); document.getElementById('mf-detr').value = ''; document.getElementById('mf-tracc').checked = false; };
+document.getElementById('medical-body').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-action="edit-medical"]'); if(!b) return;
+  const m = medical.find(x => x.id === b.dataset.id); if(!m) return;
+  setTimeout(() => { if(editingMedicalId !== m.id) return; document.getElementById('mf-detr').value = m.detr !== undefined && m.detr !== null ? m.detr : ''; document.getElementById('mf-tracc').checked = !!m.tracciabile; }, 0);
+});
+function nopagApply(){
+  const on = noPag();
+  document.body.classList.toggle('m-nopag', on);
+  const hideWithLabel = (el, labelEl) => { if(!el) return; el.style.display = on ? 'none' : ''; if(labelEl && labelEl.tagName === 'LABEL') labelEl.style.display = on ? 'none' : ''; };
+  const p = document.getElementById('medical-filter-pag'); hideWithLabel(p, p && p.previousElementSibling);
+  const s = document.getElementById('stato-ms'); hideWithLabel(s, s && s.previousElementSibling);
+  const h = document.getElementById('medical-filter-hide-closed'); if(h && h.closest('label')) h.closest('label').style.display = on ? 'none' : '';
+  const th = document.querySelector('#medical-thead-row th[data-sort-key="residuo"]'); if(th && on){ th.firstChild.textContent = 'Da detrarre '; }
+  document.querySelectorAll('#medical-body tr[data-id]').forEach(tr => {
+    tr.querySelectorAll('td[data-label="Stato pratica"], td[data-label="Modalità"]').forEach(td => td.classList.toggle('solo-completo', on));
+    const r = tr.querySelector('td[data-label="Residuo"]'); if(r && on) r.setAttribute('data-label', 'Da detrarre');
+  });
+}
+const _rm37 = renderMedical;
+renderMedical = function(){ _rm37(); nopagApply(); };
+const _avm37 = applyModalitaVisibility;
+applyModalitaVisibility = function(){ _avm37(); nopagApply(); };
+// Impostazioni: "Non ricevo rimborsi"
+const _ri37 = renderImpostazioni;
+renderImpostazioni = function(){
+  _ri37.apply(this, arguments);
+  const row = document.getElementById('nopag-row'); if(!row || !row.nextElementSibling) return;
+  const V = impView ? impView() : null;
+  if(V && !V.pagatori.length){ let n = row.nextElementSibling; while(n){ n.style.display = 'none'; n = n.nextElementSibling; } }
+};
+document.getElementById('panel-impostazioni').addEventListener('change', (e) => {
+  if(e.target.id !== 'nopag-on') return;
+  const D = impEnsureDraft();
+  if(e.target.checked){ D.pagStash = D.pagatori.slice(); D.pagatori = []; }
+  else { D.pagatori = D.pagStash && D.pagStash.length ? D.pagStash : defaultPagatori(); }
+  renderImpostazioni();
+});
+// Detrazioni fiscali: spese sanitarie collegate (sola lettura)
+function detrSanOn(){ return settings.detrSan === undefined ? noPag() : !!settings.detrSan; }
+function detrSanRows(){
+  if(!detrSanOn()) return [];
+  return medical.filter(m => !m.bozza).map(m => {
+    const n = medicalRowNumbers(m);
+    const tr = noPag() ? (m.tracciabile ? ' · tracciabile' : ' · tracciabilità non indicata') : '';
+    return {id: 'med:' + m.id, categoria: 'Spese sanitarie', intestatario: escHtml(m.richiedente || ''), data: m.dataDocumento || '', importo: n.residuo, note: escHtml(m.descrizione || '') + tr};
+  }).filter(r => r.importo > 0.004);
+}
+function detrAllList(){ return detrazioni.concat(detrSanRows()); }
+
+function detrMedOpen(id){
+  const t = document.querySelector('.tab-btn[data-tab="medical"]'); if(t) t.click();
+  expandedMedicalIds.add(id); renderMedical();
+  setTimeout(() => { const r = document.querySelector('#medical-body tr[data-id="' + id + '"]'); if(r) r.scrollIntoView({block: 'center'}); }, 60);
+}
+const _rd37 = renderDetrazioni;
+renderDetrazioni = function(){
+  _rd37();
+  document.querySelectorAll('#detrazioni-body tr[data-id^="med:"]').forEach(tr => {
+    tr.classList.add('row-linked');
+    const ra = tr.querySelector('.row-actions'); if(ra) ra.innerHTML = '<button type="button" class="btn small ghost" data-detr-med="' + tr.dataset.id.slice(4) + '">Apri spesa</button>';
+  });
+  const w = document.getElementById('detr-san-wrap'), cb = document.getElementById('detr-san-on');
+  if(w && cb){ cb.checked = detrSanOn(); w.style.display = (medical.length || cb.checked) ? '' : 'none'; }
+};
+document.getElementById('detrazioni-body').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr[data-id^="med:"]'); if(!tr) return;
+  e.stopPropagation(); e.preventDefault(); detrMedOpen(tr.dataset.id.slice(4));
+}, true);
+{
+  const sel = document.getElementById('detrazioni-filter-categoria');
+  if(sel && !document.getElementById('detr-san-wrap')){
+    const w = document.createElement('label'); w.id = 'detr-san-wrap';
+    w.innerHTML = '<input type="checkbox" id="detr-san-on"> Includi le spese sanitarie';
+    sel.insertAdjacentElement('afterend', w);
+    w.querySelector('input').addEventListener('change', async (e) => { settings.detrSan = e.target.checked; renderDetrazioni(); await saveSettings(); });
+  }
+}
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -5644,8 +5775,8 @@ function buildCommercialistaCSV(){
   const speseMediche = medical
     .filter(m => !anno || (m.dataDocumento||'').slice(0,4)===anno)
     .map(m => {
-      const {totale, totPagato} = medicalRowNumbers(m);
-      const nonRimborsato = Math.max(0, totale - totPagato);
+      const {totale, totPagato, residuo} = medicalRowNumbers(m);
+      const nonRimborsato = noPag() ? residuo : Math.max(0, totale - totPagato);
       return {
         data: m.dataDocumento,
         categoria: 'Spese mediche',
@@ -5804,7 +5935,8 @@ document.getElementById('mf-save').addEventListener('click', async (e) => {
     rimborsi: readRimborsiForm(),
     nomi: nomiPerSalvare(),
     bloccata: vuoleBloccare,
-    documenti: formDocumenti
+    documenti: formDocumenti,
+    ...medExtraFromForm()
   };
   { const _p = editingMedicalId ? medical.find(x => x.id === editingMedicalId) : null; if(_p && _p.checkupId){ entry.checkupId = _p.checkupId; if(_p.struttura) entry.struttura = _p.struttura; } }
   if(editingMedicalId){
@@ -5976,7 +6108,7 @@ document.getElementById('toggle-backup-panel').addEventListener('click', () => {
 let confirmingBackupImport = false;
 
 const REC_CSV_COLS = ['id','nome','scadenza','importo','ricorrenza','stato','note','bloccato','documenti','ogni','fine','ancora'];
-const MED_CSV_COLS = ['id','richiedente','tipoDocumento','numeroDocumento','dataDocumento','descrizione','note','modalita','totale','rimborsi','bloccata','documenti','nomi'];
+const MED_CSV_COLS = ['id','richiedente','tipoDocumento','numeroDocumento','dataDocumento','descrizione','note','modalita','totale','rimborsi','bloccata','documenti','nomi','detr','tracciabile'];
 
 function csvEscape(value){
   const s = (value === null || value === undefined) ? '' : String(value);
@@ -6022,6 +6154,8 @@ function currentBackupCSV(){
     if(c === 'rimborsi') return csvEscape(JSON.stringify(m.rimborsi || {}));
     if(c === 'nomi') return csvEscape(m.nomi ? JSON.stringify(m.nomi) : '');
     if(c === 'bloccata') return csvEscape(m.bloccata ? 'true' : 'false');
+    if(c === 'tracciabile') return csvEscape(m.tracciabile ? 'true' : '');
+    if(c === 'detr') return csvEscape(m.detr === undefined || m.detr === null ? '' : m.detr);
     if(c === 'documenti') return csvEscape(JSON.stringify(m.documenti || []));
     return csvEscape(m[c]);
   }).join(','));
@@ -6136,7 +6270,9 @@ function parseBackupCSVCore(text){
       ...(rimborsi ? {rimborsi} : legacy),
       ...((() => { try{ const n = raw.nomi ? JSON.parse(raw.nomi) : null; return n && typeof n === 'object' ? {nomi:n} : {}; }catch(e){ return {}; } })()),
       bloccata: raw.bloccata === 'true',
-      documenti: (() => { try{ return JSON.parse(raw.documenti || '[]'); }catch(e){ return []; } })()
+      documenti: (() => { try{ return JSON.parse(raw.documenti || '[]'); }catch(e){ return []; } })(),
+      ...(raw.detr !== undefined && raw.detr !== '' && isFinite(parseFloat(raw.detr)) ? {detr: parseFloat(raw.detr)} : {}),
+      ...(raw.tracciabile === 'true' ? {tracciabile: true} : {})
     };
   }) : [];
 
