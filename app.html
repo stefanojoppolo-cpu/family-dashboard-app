@@ -4804,6 +4804,42 @@ async function dwNotifToggle(){
 }
 
 // ---- impostazioni
+// ---- Supporto
+const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
+const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
+const SUPPORT_VER = '08/11/2026 17:33';
+function supOpen(){
+  const em = (auth.currentUser && auth.currentUser.email) || '';
+  ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
+    <p class="ck-mut" style="margin:0 0 12px">Raccontaci cosa succede. Rispondiamo all'email che indichi qui sotto.</p>
+    <div class="field" style="margin-bottom:10px"><label>Di cosa si tratta</label><select id="sup-tipo" style="width:100%"><option>Ho un problema</option><option>Ho una domanda</option><option>Ho un'idea o un suggerimento</option></select></div>
+    <div class="field" style="margin-bottom:10px"><label>Messaggio</label><textarea id="sup-msg" rows="5" style="width:100%" placeholder="Cosa stavi facendo e cosa è successo?"></textarea></div>
+    <div class="field" style="margin-bottom:10px"><label>La tua email per la risposta</label><input type="email" id="sup-email" value="${escHtml(em)}" autocomplete="email" style="width:100%"></div>
+    <p class="ck-mut" style="margin:0;font-size:12.5px">Con il messaggio inviamo solo versione dell'app e tipo di dispositivo. Non inviamo i tuoi dati di spese, contratti o documenti.</p>
+    <div id="sup-err" style="display:none;color:var(--stamp);font-size:13px;margin-top:8px"></div></div>
+    <div class="md-foot"><button type="button" class="btn small ghost" data-ck="close">Annulla</button><button type="button" class="btn small" data-sup="send" id="sup-go">Invia</button></div>`);
+}
+async function supSend(){
+  const msg = document.getElementById('sup-msg'), em = document.getElementById('sup-email'), tipo = document.getElementById('sup-tipo'), er = document.getElementById('sup-err'), go = document.getElementById('sup-go');
+  if(!msg || !em) return;
+  const fail = (m) => { er.textContent = m; er.style.display = 'block'; go.disabled = false; go.textContent = 'Invia'; };
+  er.style.display = 'none';
+  const text = msg.value.trim(), mail = em.value.trim();
+  if(text.length < 10) return fail('Scrivi qualche riga in più, così possiamo aiutarti.');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return fail('Controlla l\'indirizzo email.');
+  const info = 'App ' + SUPPORT_VER + ' · ' + (dwStandalone() ? 'installata' : 'browser') + ' · ' + (navigator.userAgent || '').slice(0, 160);
+  if(!SUPPORT_ENDPOINT){
+    location.href = 'mailto:' + SUPPORT_MAIL + '?subject=' + encodeURIComponent('Duewell · ' + tipo.value) + '&body=' + encodeURIComponent(text + '\n\n— ' + info + '\nRispondere a: ' + mail);
+    ckClose(); return;
+  }
+  go.disabled = true; go.textContent = 'Invio…';
+  try{
+    const r = await fetch(SUPPORT_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json', 'Accept':'application/json'}, body: JSON.stringify({email: mail, tipo: tipo.value, message: text, info, _subject: 'Duewell · ' + tipo.value})});
+    if(!r.ok) throw new Error('http ' + r.status);
+  }catch(e){ console.error(e); return fail('Non sono riuscito a inviare. Riprova tra poco oppure scrivi a ' + SUPPORT_MAIL + '.'); }
+  ckClose(); showNotice('Messaggio inviato. Ti rispondiamo il prima possibile.', 'success');
+}
+document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-sup]'); if(!b) return; if(b.dataset.sup === 'open') supOpen(); else if(b.dataset.sup === 'send') supSend(); });
 function stIt(ic, col, t, s, act, cls){
   return `<div class="st-it${cls ? ' ' + cls : ''}"><span class="st-ic" style="--c:${col}">${ic}</span><div class="st-tx"><b>${t}</b><span>${s}</span></div>${act ? `<div class="st-act">${act}</div>` : ''}</div>`;
 }
@@ -4820,8 +4856,8 @@ function dwAppSettingsHtml(){
   return `<div class="st-card">${stIt('📲', '#2F5BEA', 'Installazione', instSub, inst)}${stIt('🔔', '#F76B15', 'Avvisi all\'apertura', ntSub, nt)}</div>`;
 }
 function stAccountHtml(){
-  return `<div class="st-card">${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 17:20</b></p>`;
+  return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
+  <p class="st-ver">Versione app: <b>08/11/2026 17:33</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
