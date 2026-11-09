@@ -662,6 +662,12 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+#upd-bar{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:6000;display:none;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px);background:#10243A;color:#fff;border-radius:14px;padding:11px 14px;box-shadow:0 10px 30px rgba(0,0,0,.28);font-size:14px;line-height:1.35}
+#upd-bar.on{display:flex}
+#upd-bar b{font-weight:700}
+#upd-bar button{border:0;border-radius:9px;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer}
+#upd-bar .u-go{background:#12A594;color:#fff}
+#upd-bar .u-no{background:rgba(255,255,255,.14);color:#fff}
 .hq{display:inline-grid;place-items:center;position:relative;width:17px;height:17px;margin-left:6px;border-radius:50%;background:#E3E8EF;color:#4B5B6E;font:700 11px/1 inherit;cursor:help;vertical-align:middle;text-transform:none;letter-spacing:0;flex:none}
 .hq::before{content:'?'}
 .acc-t b .hq,.acc-t span.hq{display:inline-grid;overflow:visible;white-space:normal;font-size:11px;color:#4B5B6E}
@@ -4965,7 +4971,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '09/11/2026 11:58';
+const SUPPORT_VER = '09/11/2026 12:37';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5017,7 +5023,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>09/11/2026 11:58</b></p>`;
+  <p class="st-ver">Versione app: <b>09/11/2026 12:37</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5782,6 +5788,35 @@ document.addEventListener('focusin', (e) => { const h = e.target.closest && e.ta
 document.addEventListener('focusout', (e) => { if(e.target.closest && e.target.closest('.hq') && !hqSticky) hqHide(); });
 window.addEventListener('scroll', () => { if(hqCur) hqHide(); }, true);
 window.addEventListener('resize', () => { if(hqCur) hqHide(); });
+
+
+// ---- Avviso «nuova versione disponibile» ----
+const APP_BUILD = '20261109113740';
+let updShown = false, updLast = 0;
+function updBar(){
+  let b = document.getElementById('upd-bar');
+  if(!b){
+    b = document.createElement('div'); b.id = 'upd-bar'; b.setAttribute('role', 'status');
+    b.innerHTML = '<span><b>C’è una nuova versione di Duewell.</b> Salva ciò che stai scrivendo e aggiorna.</span><button type="button" class="u-go">Aggiorna</button><button type="button" class="u-no">Dopo</button>';
+    document.body.appendChild(b);
+    b.querySelector('.u-go').addEventListener('click', () => { location.reload(); });
+    b.querySelector('.u-no').addEventListener('click', () => { b.classList.remove('on'); updShown = false; updLast = Date.now(); });
+  }
+  return b;
+}
+async function updCheck(force){
+  try{
+    if(/jsdom/i.test(navigator.userAgent || '') || location.protocol === 'file:' || typeof fetch !== 'function') return;
+    if(!force && Date.now() - updLast < 5 * 60 * 1000) return;
+    updLast = Date.now();
+    const r = await fetch(location.pathname, {cache:'no-store'}); if(!r.ok) return;
+    const t = await r.text(), m = t.match(/const APP_BUILD = '([0-9]{8,})'/);
+    if(m && m[1] !== APP_BUILD && !updShown){ updShown = true; updBar().classList.add('on'); }
+  }catch(e){}
+}
+if(!/jsdom/i.test(navigator.userAgent || '')){ setTimeout(() => updCheck(true), 8000); setInterval(() => updCheck(false), 15 * 60 * 1000); }
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') updCheck(false); });
+window.addEventListener('online', () => updCheck(true));
 
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
