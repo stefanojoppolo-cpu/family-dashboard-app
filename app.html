@@ -662,6 +662,14 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+.hq{display:inline-grid;place-items:center;position:relative;width:17px;height:17px;margin-left:6px;border-radius:50%;background:#E3E8EF;color:#4B5B6E;font:700 11px/1 inherit;cursor:help;vertical-align:middle;text-transform:none;letter-spacing:0;flex:none}
+.hq::before{content:'?'}
+.acc-t b .hq,.acc-t span.hq{display:inline-grid;overflow:visible;white-space:normal;font-size:11px;color:#4B5B6E}
+.acc-t b .hq:hover,.acc-t b .hq.on{color:#fff}
+.hq::after{content:'';position:absolute;inset:-9px}
+.hq:hover,.hq:focus-visible,.hq.on{background:var(--accent,#2F5BEA);color:#fff;outline:0}
+#hq-pop{position:fixed;z-index:99999;max-width:min(280px,calc(100vw - 24px));background:#1F2937;color:#fff;font-size:13px;line-height:1.4;font-weight:500;padding:9px 12px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:none;pointer-events:none;text-transform:none;letter-spacing:0;text-align:left}
+#hq-pop.on{display:block}
 .av.ph{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent;font-size:0}
 .fam-row{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
 .fam-ph{border:0;background:none;padding:0;cursor:pointer;position:relative;flex:none;border-radius:50%}
@@ -4957,7 +4965,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '08/11/2026 19:47';
+const SUPPORT_VER = '09/11/2026 11:58';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5009,7 +5017,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>08/11/2026 19:47</b></p>`;
+  <p class="st-ver">Versione app: <b>09/11/2026 11:58</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5705,6 +5713,75 @@ document.addEventListener('click', async (e) => {
     applyElenchi(); await saveSettings(); famRefresh(); return;
   }
 });
+
+
+// ---- Punti interrogativi con spiegazione ----
+const HQ_TIPS = [
+  [/^Da detrarre/, 'Importo di questa spesa che porti in detrazione nel 730. Se lo lasci vuoto si considera tutto il totale.'],
+  [/^Da portare in detrazione/, 'Totale delle spese che porti nella dichiarazione dei redditi.'],
+  [/^Residuo$/, 'Quanto resta a tuo carico dopo i rimborsi ricevuti.'],
+  [/^Da richiedere/, 'Quanto puoi ancora chiedere in rimborso a questo pagatore.'],
+  [/^Stato pratica/, 'A che punto è la richiesta di rimborso: da inviare, in attesa o chiusa.'],
+  [/^Modalità$/, 'Diretta: il fondo paga la struttura. Indiretta: paghi tu e poi chiedi il rimborso.'],
+  [/^Ricorrenza$/, 'Ogni quanto si ripete il pagamento. Puoi anche scegliere intervalli personalizzati, per esempio ogni 2 mesi.'],
+  [/^Ripeti ogni/, 'Per ripetere a intervalli diversi dal solito, per esempio ogni 2 mesi.'],
+  [/^Limite disdetta/, 'Ultimo giorno utile per mandare la disdetta ed evitare il rinnovo.'],
+  [/^Data fine\/scadenza/, 'Quando il contratto finisce o si rinnova.'],
+  [/^Avvisami prima di/, 'Quanto prima della scadenza il controllo compare tra quelli da prenotare.'],
+  [/^Cadenza$/, 'Ogni quanto va ripetuto il controllo.'],
+  [/^Impegnativa$/, 'La richiesta del medico per la visita. Se non serve, segnalo e l\'app non te la chiede.'],
+  [/^Codice di sicurezza$/, 'Apre i tuoi dati cifrati. Cambiarlo non tocca i dati né la chiave di recupero.'],
+  [/^Chiave di recupero$/, 'Serve se dimentichi il codice. Salvala in un posto sicuro: senza codice e chiave i dati non si recuperano.'],
+  [/^Persone della famiglia$/, 'Nome, foto e colore di ogni persona. Compaiono nelle tabelle e nei check-up.'],
+  [/^Moduli$/, 'Scegli quali schede usare. I dati delle schede spente non si cancellano.'],
+  [/^Chi ti rimborsa e massimali$/, 'I pagatori che rimborsano le spese e i tetti annui da tenere d\'occhio.'],
+  [/^Massimali annui$/, 'Tetti annui di rimborso: in Panoramica vedi quanto ti resta.'],
+  [/^Backup e ripristino$/, 'Una copia dei tuoi dati in un file di testo. Scaricane una ogni mese e prima di ogni aggiornamento.'],
+  [/^Avvisi all'apertura$/, 'Cosa vedi appena apri l\'app: scadenze e cose urgenti.'],
+  [/^Elenchi di suggerimenti$/, 'Valori proposti mentre scrivi. Puoi sempre scrivere altro.']
+];
+function hqScan(){
+  document.querySelectorAll('label, th, h3, h4, .st-it b, .acc-t > b, .md-h').forEach(el => {
+    if(el.querySelector(':scope > .hq')) return;
+    let tn = null; for(const n of el.childNodes){ if(n.nodeType === 3 && n.textContent.trim()){ tn = n; break; } if(n.nodeType === 1 && n.tagName !== 'BR') break; }
+    if(!tn) return;
+    const t = tn.textContent.replace(/\s+/g, ' ').trim();
+    const hit = HQ_TIPS.find(x => x[0].test(t)); if(!hit) return;
+    const s = document.createElement('span'); s.className = 'hq'; s.tabIndex = 0; s.setAttribute('role', 'button'); s.setAttribute('aria-label', 'Spiegazione'); s.dataset.tip = hit[1];
+    el.appendChild(s);
+  });
+}
+let hqRaf = 0;
+function hqLater(){ if(hqRaf) return; hqRaf = requestAnimationFrame(() => { hqRaf = 0; try{ hqScan(); }catch(e){} }); }
+try{ new MutationObserver(hqLater).observe(document.body, {childList:true, subtree:true}); }catch(e){}
+document.addEventListener('DOMContentLoaded', hqLater); hqLater();
+let hqCur = null, hqSticky = false;
+function hqPop(){ let p = document.getElementById('hq-pop'); if(!p){ p = document.createElement('div'); p.id = 'hq-pop'; p.setAttribute('role', 'tooltip'); document.body.appendChild(p); } return p; }
+function hqShow(el, sticky){
+  const p = hqPop(); if(hqCur && hqCur !== el) hqCur.classList.remove('on');
+  hqCur = el; hqSticky = !!sticky; el.classList.add('on'); p.textContent = el.dataset.tip; p.classList.add('on');
+  const r = el.getBoundingClientRect(), pr = p.getBoundingClientRect();
+  let x = r.left + r.width / 2 - pr.width / 2; x = Math.max(8, Math.min(x, innerWidth - pr.width - 8));
+  let y = r.bottom + 8; if(y + pr.height > innerHeight - 8) y = Math.max(8, r.top - pr.height - 8);
+  p.style.left = x + 'px'; p.style.top = y + 'px';
+}
+function hqHide(){ const p = document.getElementById('hq-pop'); if(p) p.classList.remove('on'); if(hqCur) hqCur.classList.remove('on'); hqCur = null; hqSticky = false; }
+document.addEventListener('pointerover', (e) => { const h = e.target.closest && e.target.closest('.hq'); if(h && e.pointerType === 'mouse' && !hqSticky) hqShow(h, false); });
+document.addEventListener('pointerout', (e) => { const h = e.target.closest && e.target.closest('.hq'); if(h && e.pointerType === 'mouse' && !hqSticky) hqHide(); });
+document.addEventListener('click', (e) => {
+  const h = e.target.closest && e.target.closest('.hq');
+  if(h){ e.stopPropagation(); e.preventDefault(); if(hqCur === h && hqSticky) hqHide(); else hqShow(h, true); return; }
+  if(hqCur) hqHide();
+}, true);
+document.addEventListener('keydown', (e) => {
+  const h = e.target.closest && e.target.closest('.hq');
+  if(h && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); e.stopPropagation(); if(hqCur === h && hqSticky) hqHide(); else hqShow(h, true); }
+  else if(e.key === 'Escape' && hqCur) hqHide();
+}, true);
+document.addEventListener('focusin', (e) => { const h = e.target.closest && e.target.closest('.hq'); if(h && !hqSticky) hqShow(h, false); });
+document.addEventListener('focusout', (e) => { if(e.target.closest && e.target.closest('.hq') && !hqSticky) hqHide(); });
+window.addEventListener('scroll', () => { if(hqCur) hqHide(); }, true);
+window.addEventListener('resize', () => { if(hqCur) hqHide(); });
 
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -7622,7 +7699,7 @@ function backupUiUpdate(){
   const btn = document.querySelector('.tab-btn[data-tab="impostazioni"]');
   if(btn){ let d = btn.querySelector('.bk-dot'); if(s.alert && !d){ d = document.createElement('span'); d.className = 'bk-dot'; btn.appendChild(d); } else if(!s.alert && d) d.remove(); }
   const l = document.getElementById('backup-last'); if(l) l.innerHTML = s.line;
-  const sm = document.querySelector('.acc[data-k="backup"] .acc-t span'); if(sm) sm.textContent = s.sum;
+  const sm = document.querySelector('.acc[data-k="backup"] .acc-t > span'); if(sm) sm.textContent = s.sum;
   const w = document.querySelector('.bk-warn'); if(w && !s.alert) w.remove();
 }
 function markBackup(){ settings.ultimoBackup = accToday(); backupUiUpdate(); try{ saveSettings(); }catch(e){} }
