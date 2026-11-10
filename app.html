@@ -1254,9 +1254,8 @@ tr.row-bozza{background:var(--gold-soft)}tr.row-bozza td{border-top:1px dashed #
         <option value="">Tutti</option>
       </select>
       <label style="margin-left:18px;margin-right:8px;">Pagatore</label>
-      <select id="medical-filter-pag">
-        <option value="">Tutti</option>
-      </select>
+      <div class="msel" id="pag-ms"><button type="button" class="msel-b" aria-haspopup="true">Tutti</button><div class="msel-pop" hidden></div></div>
+      <select id="medical-filter-pag" multiple hidden></select>
       <label style="margin-left:18px;margin-right:8px;">Stato pratica</label>
       <div class="msel" id="stato-ms"><button type="button" class="msel-b" aria-haspopup="true">Tutti</button><div class="msel-pop" hidden></div></div>
       <select id="medical-filter-stato" multiple hidden></select>
@@ -2321,14 +2320,14 @@ function refreshMedicalFilterOptions(){
   sel.innerHTML = `<option value="">Tutti</option>` + names.map(n => `<option value="${escHtml(n)}">${escHtml(n)}</option>`).join('');
   if(names.includes(current)) sel.value = current;
 
-  const selPag = document.getElementById('medical-filter-pag'), curPag = selPag.value;
-  selPag.innerHTML = `<option value="">Tutti</option>` + settings.pagatori.map(p => `<option value="${escHtml(p.id)}">${escHtml(p.nome)}</option>`).join('');
-  if(settings.pagatori.some(p => p.id === curPag)) selPag.value = curPag;
+  const selPag = document.getElementById('medical-filter-pag'), curPag = [...selPag.selectedOptions].map(o => o.value);
+  selPag.innerHTML = settings.pagatori.map(p => `<option value="${escHtml(p.id)}">${escHtml(p.nome)}</option>`).join('');
+  [...selPag.options].forEach(o => { o.selected = curPag.includes(o.value); }); mspRender();
 
   const selStato = document.getElementById('medical-filter-stato');
   const currentStato = [...selStato.selectedOptions].map(o => o.value);
   selStato.innerHTML = Object.keys(STATI_RIMBORSO).map(k => `<option value="${k}">${STATI_RIMBORSO[k].label}</option>`).join('');
-  if(selPag.value) selStato.insertAdjacentHTML('beforeend', '<option value="coda">In coda (dopo i precedenti)</option>');
+  if(selPag.selectedOptions.length) selStato.insertAdjacentHTML('beforeend', '<option value="coda">In coda (dopo i precedenti)</option>');
   [...selStato.options].forEach(o => { o.selected = currentStato.includes(o.value); }); msRender();
 
   const selAnno = document.getElementById('medical-filter-anno');
@@ -2365,6 +2364,25 @@ function msRender(){
   document.addEventListener('click', (e) => { if(!e.target.closest('#stato-ms')) pop.hidden = true; });
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape') pop.hidden = true; });
 })();
+function mspRender(){
+  const sel = document.getElementById('medical-filter-pag'), box = document.getElementById('pag-ms'); if(!sel || !box) return;
+  const b = box.querySelector('.msel-b'), pop = box.querySelector('.msel-pop');
+  const v = [...sel.selectedOptions];
+  b.textContent = v.length === 0 ? 'Tutti' : (v.length <= 2 ? v.map(o => o.textContent).join(' + ') : v.length + ' pagatori');
+  pop.innerHTML = [...sel.options].map(o => `<label class="msel-o"><input type="checkbox" value="${escHtml(o.value)}" ${o.selected ? 'checked' : ''}> ${escHtml(o.textContent)}</label>`).join('');
+}
+(function(){
+  const box = document.getElementById('pag-ms'), sel = document.getElementById('medical-filter-pag'); if(!box) return;
+  const b = box.querySelector('.msel-b'), pop = box.querySelector('.msel-pop');
+  b.addEventListener('click', () => { pop.hidden = !pop.hidden; });
+  pop.addEventListener('change', (e) => {
+    const cb = e.target; if(!cb || cb.type !== 'checkbox') return;
+    [...sel.options].forEach(o => { if(o.value === cb.value) o.selected = cb.checked; });
+    mspRender(); pop.hidden = false; sel.dispatchEvent(new Event('change', {bubbles: true}));
+  });
+  document.addEventListener('click', (e) => { if(!e.target.closest('#pag-ms')) pop.hidden = true; });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') pop.hidden = true; });
+})();
 function getFilteredMedical(){
   const filterName = document.getElementById('medical-filter').value;
   const filterStato = [...document.getElementById('medical-filter-stato').selectedOptions].map(o => o.value);
@@ -2373,9 +2391,9 @@ function getFilteredMedical(){
   const filterDocumento = document.getElementById('medical-filter-documento').value.trim().toLowerCase();
   const hideClosed = document.getElementById('medical-filter-hide-closed').checked;
   let filtered = filterName ? medical.filter(m => m.richiedente===filterName) : medical;
-  const pagSel = document.getElementById('medical-filter-pag').value, pagObj = settings.pagatori.find(p => p.id === pagSel);
-  if(pagObj) filtered = filtered.filter(m => payerApplies(m, pagObj));
-  if(filterStato.length) filtered = filtered.filter(m => filterStato.includes(pagObj ? efStatoPag(m, pagObj) : medicalRowNumbers(m).kind));
+  const pagIds = [...document.getElementById('medical-filter-pag').selectedOptions].map(o => o.value), pagObjs = settings.pagatori.filter(p => pagIds.includes(p.id));
+  if(pagObjs.length) filtered = filtered.filter(m => pagObjs.some(p => payerApplies(m, p)));
+  if(filterStato.length) filtered = filtered.filter(m => pagObjs.length ? pagObjs.filter(p => payerApplies(m, p)).some(p => filterStato.includes(efStatoPag(m, p))) : filterStato.includes(medicalRowNumbers(m).kind));
   if(filterAnno) filtered = filtered.filter(m => (m.dataDocumento||'').slice(0,4)===filterAnno);
   if(filterPrestazione) filtered = filtered.filter(m => (m.descrizione||'').toLowerCase().includes(filterPrestazione));
   if(filterDocumento) filtered = filtered.filter(m => `${m.tipoDocumento||''} ${m.numeroDocumento||''}`.toLowerCase().includes(filterDocumento));
@@ -4971,7 +4989,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '09/11/2026 12:37';
+const SUPPORT_VER = '10/11/2026 11:31';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5023,7 +5041,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>09/11/2026 12:37</b></p>`;
+  <p class="st-ver">Versione app: <b>10/11/2026 11:31</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5554,7 +5572,7 @@ function nopagApply(){
   const on = noPag();
   document.body.classList.toggle('m-nopag', on);
   const hideWithLabel = (el, labelEl) => { if(!el) return; el.style.display = on ? 'none' : ''; if(labelEl && labelEl.tagName === 'LABEL') labelEl.style.display = on ? 'none' : ''; };
-  const p = document.getElementById('medical-filter-pag'); hideWithLabel(p, p && p.previousElementSibling);
+  const p = document.getElementById('pag-ms'); hideWithLabel(p, p && p.previousElementSibling);
   const s = document.getElementById('stato-ms'); hideWithLabel(s, s && s.previousElementSibling);
   const h = document.getElementById('medical-filter-hide-closed'); if(h && h.closest('label')) h.closest('label').style.display = on ? 'none' : '';
   const th = document.querySelector('#medical-thead-row th[data-sort-key="residuo"]'); if(th && on){ th.firstChild.textContent = 'Da detrarre '; }
@@ -5791,7 +5809,7 @@ window.addEventListener('resize', () => { if(hqCur) hqHide(); });
 
 
 // ---- Avviso «nuova versione disponibile» ----
-const APP_BUILD = '20261109113740';
+const APP_BUILD = '20261110103146';
 let updShown = false, updLast = 0;
 function updBar(){
   let b = document.getElementById('upd-bar');
