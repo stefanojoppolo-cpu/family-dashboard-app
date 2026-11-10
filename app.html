@@ -662,6 +662,10 @@ table.xt .med-det > div > b{display:block;min-width:0;overflow-wrap:anywhere}tab
 .md-bd{position:fixed;inset:0;background:rgba(16,37,58,.45);z-index:270;display:none}.md-bd.on{display:block}
 .md-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(880px,94vw);max-height:90vh;display:none;flex-direction:column;z-index:280;background:var(--paper-raised,#fff);border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 70px rgba(16,37,58,.38);overflow:hidden}
 .md-modal.on{display:flex}
+body .ck-bznote{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px}
+.ck-bznote .bz-t{flex:1 1 320px;min-width:0}
+.ck-bznote .bz-b{display:flex;gap:8px;flex:none;flex-wrap:wrap;margin:0}
+@media(max-width:560px){.ck-bznote .bz-b{width:100%}.ck-bznote .bz-b .btn{flex:1 1 0;padding-left:8px;padding-right:8px;white-space:normal}}
 #upd-bar{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:6000;display:none;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px);background:#10243A;color:#fff;border-radius:14px;padding:11px 14px;box-shadow:0 10px 30px rgba(0,0,0,.28);font-size:14px;line-height:1.35}
 #upd-bar.on{display:flex}
 #upd-bar b{font-weight:700}
@@ -2383,6 +2387,7 @@ function mspRender(){
   document.addEventListener('click', (e) => { if(!e.target.closest('#pag-ms')) pop.hidden = true; });
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape') pop.hidden = true; });
 })();
+let medHideBozze = false;
 function getFilteredMedical(){
   const filterName = document.getElementById('medical-filter').value;
   const filterStato = [...document.getElementById('medical-filter-stato').selectedOptions].map(o => o.value);
@@ -2398,6 +2403,7 @@ function getFilteredMedical(){
   if(filterPrestazione) filtered = filtered.filter(m => (m.descrizione||'').toLowerCase().includes(filterPrestazione));
   if(filterDocumento) filtered = filtered.filter(m => `${m.tipoDocumento||''} ${m.numeroDocumento||''}`.toLowerCase().includes(filterDocumento));
   if(hideClosed) filtered = filtered.filter(m => !medicalRowNumbers(m).conclusa);
+  if(medHideBozze) filtered = filtered.filter(m => !m.bozza);
   return filtered;
 }
 
@@ -3932,6 +3938,12 @@ function ckSpecHtml(){
 }
 
 // ---------- Pannello ----------
+function bzBtns(){
+  const st = [...document.getElementById('medical-filter-stato').selectedOptions].map(o => o.value), onlyB = st.length === 1 && st[0] === 'bozza';
+  return '<span class="bz-b">' + (onlyB ? '' : '<button type="button" class="btn small ghost" data-ck="showbozze">Mostra solo le bozze</button>')
+    + (onlyB || medHideBozze ? '' : '<button type="button" class="btn small ghost" data-ck="hidebozze">Nascondi le bozze</button>')
+    + (onlyB || medHideBozze ? '<button type="button" class="btn small" data-ck="resetbozze">Ripristina vista</button>' : '') + '</span>';
+}
 function renderCheckup(){
   const root = document.getElementById('ck-root'); if(!root) return;
   const ae = document.activeElement;
@@ -3946,7 +3958,7 @@ function renderCheckup(){
   const nb = medical.filter(m => m.bozza).length;
   if(fb){
     if(nb){ if(!note){ note = document.createElement('div'); note.id = 'bozze-note'; note.className = 'ck-bznote'; fb.insertAdjacentElement('afterend', note); }
-      note.innerHTML = `<b>${nb} ${nb === 1 ? 'visita prenotata da completare' : 'visite prenotate da completare'}</b> · le bozze non entrano in totali, residuo e report finché non inserisci importo e fattura. <button type="button" class="btn small ghost" data-ck="showbozze">Mostra solo le bozze</button>`; }
+      note.innerHTML = `<span class="bz-t"><b>${nb} ${nb === 1 ? 'visita prenotata da completare' : 'visite prenotate da completare'}</b> · le bozze non entrano in totali, residuo e report finché non inserisci importo e fattura.</span>${bzBtns()}`; }
     else if(note) note.remove();
   }
 }
@@ -4318,7 +4330,9 @@ document.addEventListener('click', async (e) => {
   if(a === 'delno'){ ckCtx = {t: 'detail', id, del: false}; return ckDetail(id); }
   if(a === 'delyes'){ const c = checkups.find(x => x.id === id); if(c && c.prenotazione && c.prenotazione.medId){ const mid = c.prenotazione.medId; const mm = medical.find(m => m.id === mid); if(mm && mm.bozza){ medical = medical.filter(m => m.id !== mid); await saveMedical(); } } checkups = checkups.filter(x => x.id !== id); await saveCheckups(); ckClose(); return renderAll(); }
   if(a === 'medcomplete'){ ckClose(); jumpToTab('medical'); const eb = document.querySelector('#medical-body [data-action="edit-medical"][data-id="' + id + '"]'); if(eb) eb.click(); return; }
-  if(a === 'showbozze'){ const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); return; }
+  if(a === 'hidebozze'){ medHideBozze = true; renderMedical(); renderCheckup(); return; }
+  if(a === 'resetbozze'){ medHideBozze = false; const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = false; }); sel.dispatchEvent(new Event('change', {bubbles: true})); renderCheckup(); return; }
+  if(a === 'showbozze'){ medHideBozze = false; const sel = document.getElementById('medical-filter-stato'); [...sel.options].forEach(o => { o.selected = o.value === 'bozza'; }); sel.dispatchEvent(new Event('change', {bubbles: true})); renderCheckup(); return; }
   if(a === 'impreq') return impReqShow(id);
   if(a === 'impwa') return impReqGo(id);
   if(a === 'impmed'){ ckImpPers = ''; ckImpSel = new Set(); return ckImpMedShow(); }
@@ -4989,7 +5003,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '10/11/2026 11:31';
+const SUPPORT_VER = '10/11/2026 17:33';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5041,7 +5055,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>10/11/2026 11:31</b></p>`;
+  <p class="st-ver">Versione app: <b>10/11/2026 17:33</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5809,7 +5823,7 @@ window.addEventListener('resize', () => { if(hqCur) hqHide(); });
 
 
 // ---- Avviso «nuova versione disponibile» ----
-const APP_BUILD = '20261110103146';
+const APP_BUILD = '20261110163309';
 let updShown = false, updLast = 0;
 function updBar(){
   let b = document.getElementById('upd-bar');
@@ -5835,6 +5849,8 @@ async function updCheck(force){
 if(!/jsdom/i.test(navigator.userAgent || '')){ setTimeout(() => updCheck(true), 8000); setInterval(() => updCheck(false), 15 * 60 * 1000); }
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') updCheck(false); });
 window.addEventListener('online', () => updCheck(true));
+
+document.getElementById('medical-filter-stato').addEventListener('change', () => { if(document.getElementById('bozze-note')) setTimeout(() => { try{ renderCheckup(); }catch(e){} }, 0); });
 
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
