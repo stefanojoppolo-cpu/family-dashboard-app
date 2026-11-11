@@ -783,7 +783,7 @@ body .btn.small.bi::before{width:15px;height:15px}
 .st-ic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:19px;flex:none;background:color-mix(in srgb,var(--c) 16%,#fff);box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 22%,transparent) inset}
 .st-tx{flex:1 1 240px;min-width:0}
 .st-tx b{display:block;font-size:15px;color:var(--ink);line-height:1.3}
-.st-tx span{display:block;font-size:13px;color:var(--ink-soft);line-height:1.45;margin-top:2px}
+.st-tx > span{display:block;font-size:13px;color:var(--ink-soft);line-height:1.45;margin-top:2px}
 .st-act{display:flex;align-items:center;gap:10px;flex:none;flex-wrap:wrap}
 .st-pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:#EEF1F5;color:var(--ink-soft);white-space:nowrap}
 .st-pill.ok{background:#E1F4EA;color:#1c7a50}
@@ -3974,7 +3974,7 @@ function ckFitAgenda(){
   const s = document.querySelector('.ck-cal .ck-side'); if(!s) return;
   const items = [...s.querySelectorAll('.ck-ag')]; items.forEach(i => i.style.display = '');
   if(window.ResizeObserver && !s._ro){ s._ro = new ResizeObserver(() => { clearTimeout(window._ckFt); window._ckFt = setTimeout(ckFitAgenda, 60); }); s._ro.observe(s); }
-  if(!window.matchMedia('(min-width:1101px)').matches || !s.offsetHeight) return;
+  if(!window.matchMedia || !window.matchMedia('(min-width:1101px)').matches || !s.offsetHeight) return;
   const lim = s.getBoundingClientRect().bottom - 6; let hide = false;
   items.forEach(i => { if(hide || i.getBoundingClientRect().bottom > lim){ hide = true; i.style.display = 'none'; } });
 }
@@ -5020,7 +5020,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '11/11/2026 15:43';
+const SUPPORT_VER = '11/11/2026 20:26';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5072,7 +5072,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>11/11/2026 15:43</b></p>`;
+  <p class="st-ver">Versione app: <b>11/11/2026 20:26</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5840,7 +5840,7 @@ window.addEventListener('resize', () => { if(hqCur) hqHide(); });
 
 
 // ---- Avviso «nuova versione disponibile» ----
-const APP_BUILD = '20261111144353';
+const APP_BUILD = '20261111192645';
 let updShown = false, updLast = 0;
 function updBar(){
   let b = document.getElementById('upd-bar');
@@ -5938,7 +5938,20 @@ document.getElementById('rf-save').addEventListener('click', async (e) => {
   } else {
     recurring.push(entry);
   }
+  let recNuova = null;
+  if(entry.stato === 'pagato'){
+    const nx = nextScadenza(entry.scadenza, entry.ricorrenza, entry.ogni, entry.ancora || +String(entry.scadenza).slice(8, 10) || undefined);
+    const nm = String(entry.nome).trim().toLowerCase();
+    const esiste = recurring.some(p => p.id !== entry.id && String(p.nome).trim().toLowerCase() === nm && p.scadenza > entry.scadenza);
+    if(nx && (!entry.fine || nx <= entry.fine) && !esiste){
+      recNuova = {id: uid(), nome: entry.nome, scadenza: nx, importo: entry.importo, ricorrenza: entry.ricorrenza,
+        ...(entry.ogni ? {ogni: entry.ogni} : {}), ...(entry.fine ? {fine: entry.fine} : {}),
+        ancora: entry.ancora || +String(entry.scadenza).slice(8, 10) || undefined, stato: 'da_pagare', note: entry.note};
+      recurring.push(recNuova);
+    }
+  }
   await saveRecurring();
+  if(recNuova) showNotice(`Creata la prossima scadenza: ${recNuova.nome} il ${fmtDate(recNuova.scadenza)}.`, 'success');
   recurringForm.classList.remove('open');
   resetRecurringForm();
   editingRecurringId = null;
