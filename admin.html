@@ -317,7 +317,7 @@ async function loadUsage(){
     const m = (e && e.message) || String(e);
     $('u-err').textContent = /has not been used|disabled/i.test(m) ? 'Cloud Monitoring API non è attiva nel progetto: attivala dalla console Google Cloud (API e servizi) e riprova.' :
       /permission|forbidden|403/i.test(m) ? 'L\'account non ha il permesso di leggere i dati di monitoraggio del progetto.' :
-      /popup|cancel|closed/i.test((e && e.code) + m) ? 'Accesso annullato.' : 'Non sono riuscito a leggere i consumi: ' + m;
+      /popup|cancel|closed/i.test((e && e.code) + m) ? 'Accesso annullato o interrotto (' + ((e && e.code) || 'nessun codice') + '). Se avevi premuto «Vai a… (non sicuro)», riprova e conferma il permesso fino alla fine.' : 'Non sono riuscito a leggere i consumi: ' + m;
   }finally{ btn.disabled = false; }
 }
 $('u-load').addEventListener('click', loadUsage);
