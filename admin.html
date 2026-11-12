@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Duewell · Gestione</title>
 <link rel="icon" href="icon-192.png">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -276,12 +277,29 @@ function secsFromPacificMidnight(now){
   const g = (t) => +(p.find((x) => x.type === t) || {value: 0}).value;
   return (g('hour') % 24) * 3600 + g('minute') * 60 + g('second');
 }
+// Autorizzazione di sola lettura sul monitoraggio, con Google Identity Services (come il collegamento a Drive):
+// non usa la finestra di Firebase, che con la schermata «app non verificata» si chiude da sola.
+const GIS_CLIENT = '810777011875-fd4dvfve9seb6e85tcv0ckljhcun3cl2.apps.googleusercontent.com';
+function monToken(){
+  return new Promise((res, rej) => {
+    if(!(window.google && google.accounts && google.accounts.oauth2)) return rej(new Error('Gli strumenti di Google non sono ancora pronti. Riprova tra un istante.'));
+    const tc = google.accounts.oauth2.initTokenClient({client_id: GIS_CLIENT, scope: 'https://www.googleapis.com/auth/monitoring.read', login_hint: (auth.currentUser && auth.currentUser.email) || undefined,
+      callback: (r) => { if(r && r.access_token) res(r.access_token); else rej(new Error((r && (r.error_description || r.error)) || 'consenso negato')); },
+      error_callback: (e) => rej(new Error((e && e.type) || 'finestra chiusa'))});
+    tc.requestAccessToken();
+  });
+}
 async function mon(token, metric, startIso, endIso, period, aligner){
   const u = 'https://monitoring.googleapis.com/v3/projects/' + PID + '/timeSeries?filter=' + encodeURIComponent('metric.type="' + metric + '"') +
     '&interval.startTime=' + encodeURIComponent(startIso) + '&interval.endTime=' + encodeURIComponent(endIso) +
     '&aggregation.alignmentPeriod=' + period + 's&aggregation.perSeriesAligner=' + aligner + '&aggregation.crossSeriesReducer=REDUCE_SUM';
-  const r = await fetch(u, {headers: {Authorization: 'Bearer ' + token}});
-  const j = await r.json().catch(() => ({}));
+  let r = await fetch(u, {headers: {Authorization: 'Bearer ' + token}});
+  let j = await r.json().catch(() => ({}));
+  // L'autorizzazione appartiene a un altro progetto Google: se l'API non è attiva lì, si addebita il consumo al progetto di Duewell.
+  if(!r.ok && /has not been used|disabled|SERVICE_DISABLED/i.test(JSON.stringify(j.error || '')) ){
+    r = await fetch(u, {headers: {Authorization: 'Bearer ' + token, 'X-Goog-User-Project': PID}});
+    j = await r.json().catch(() => ({}));
+  }
   if(!r.ok) throw new Error((j.error && j.error.message) || ('Errore ' + r.status));
   return j.timeSeries || [];
 }
@@ -295,10 +313,7 @@ const fmtB = (n) => n >= 1073741824 ? (n / 1073741824).toFixed(2) + ' GiB' : (n 
 async function loadUsage(){
   $('u-err').textContent = ''; const btn = $('u-load'); btn.disabled = true;
   try{
-    const prov = new GoogleAuthProvider(); prov.addScope('https://www.googleapis.com/auth/monitoring.read');
-    const res = await signInWithPopup(auth, prov);
-    const cred = GoogleAuthProvider.credentialFromResult(res), token = cred && cred.accessToken;
-    if(!token) throw new Error('Google non ha fornito l\'autorizzazione richiesta.');
+    const token = await monToken();
     const now = new Date(), secs = Math.max(60, secsFromPacificMidnight(now)), start = new Date(now.getTime() - secs * 1000);
     let html = '';
     for(const [lab, metric, lim] of LIMITI){
@@ -317,7 +332,7 @@ async function loadUsage(){
     const m = (e && e.message) || String(e);
     $('u-err').textContent = /has not been used|disabled/i.test(m) ? 'Cloud Monitoring API non è attiva nel progetto: attivala dalla console Google Cloud (API e servizi) e riprova.' :
       /permission|forbidden|403/i.test(m) ? 'L\'account non ha il permesso di leggere i dati di monitoraggio del progetto.' :
-      /popup|cancel|closed/i.test((e && e.code) + m) ? 'Accesso annullato o interrotto (' + ((e && e.code) || 'nessun codice') + '). Se avevi premuto «Vai a… (non sicuro)», riprova e conferma il permesso fino alla fine.' : 'Non sono riuscito a leggere i consumi: ' + m;
+      /popup|cancel|closed/i.test((e && e.code) + m) ? 'Accesso annullato o interrotto (' + ((e && e.code) || m) + '). Se avevi premuto «Vai a… (non sicuro)», riprova e conferma il permesso fino alla fine.' : 'Non sono riuscito a leggere i consumi: ' + m;
   }finally{ btn.disabled = false; }
 }
 $('u-load').addEventListener('click', loadUsage);
