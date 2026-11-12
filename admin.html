@@ -126,7 +126,7 @@ td{padding:10px 8px}td select,td input{font-size:13px}
       <div class="stat"><b id="s-big">0</b><span>Archivi oltre il 70% del limite</span></div>
     </div>
     <div class="card use">
-      <div class="top"><div><h3>Consumi Firebase di oggi</h3><div class="mut" id="u-sub">Limiti del piano gratuito (Spark). Premi il pulsante per leggere i dati reali.</div></div><div class="sp"></div>
+      <div class="top"><div><h3>Consumi Firebase di oggi</h3><div class="mut" id="u-sub">Limiti del piano gratuito (Spark). Premi il pulsante una volta: l'autorizzazione di Google dura circa un'ora e, finché è valida, i dati si caricano da soli.</div></div><div class="sp"></div>
         <a class="btn" href="https://console.firebase.google.com/project/family-dashboard-882b5/firestore/usage" target="_blank" rel="noopener" style="text-decoration:none;color:var(--ink)">Apri in Firebase</a>
         <button class="btn p" id="u-load">Carica consumi</button></div>
       <div id="u-body"></div>
@@ -307,6 +307,7 @@ async function load(){
     $('main').classList.remove('hide');
     render();
     loadTickets();
+    loadUsage(true);
   }catch(e){
     $('main').classList.add('hide');
     if(e && (e.code === 'permission-denied' || /permission|insufficient/i.test(e.message || ''))) $('denied').classList.remove('hide');
@@ -349,11 +350,17 @@ function secsFromPacificMidnight(now){
 // Autorizzazione di sola lettura sul monitoraggio, con Google Identity Services (come il collegamento a Drive):
 // non usa la finestra di Firebase, che con la schermata «app non verificata» si chiude da sola.
 const GIS_CLIENT = '810777011875-fd4dvfve9seb6e85tcv0ckljhcun3cl2.apps.googleusercontent.com';
+// L'autorizzazione dura circa un'ora: si tiene nella scheda (sessionStorage) per non richiederla a ogni aggiornamento.
+function cachedMonToken(){
+  try{ const c = JSON.parse(sessionStorage.getItem('dw-mon') || 'null'); if(c && c.tok && c.exp > Date.now() + 60000) return c.tok; }catch(e){}
+  return null;
+}
 function monToken(){
+  const c = cachedMonToken(); if(c) return Promise.resolve(c);
   return new Promise((res, rej) => {
     if(!(window.google && google.accounts && google.accounts.oauth2)) return rej(new Error('Gli strumenti di Google non sono ancora pronti. Riprova tra un istante.'));
     const tc = google.accounts.oauth2.initTokenClient({client_id: GIS_CLIENT, scope: 'https://www.googleapis.com/auth/monitoring.read', login_hint: (auth.currentUser && auth.currentUser.email) || undefined,
-      callback: (r) => { if(r && r.access_token) res(r.access_token); else rej(new Error((r && (r.error_description || r.error)) || 'consenso negato')); },
+      callback: (r) => { if(r && r.access_token){ try{ sessionStorage.setItem('dw-mon', JSON.stringify({tok: r.access_token, exp: Date.now() + (+r.expires_in || 3600) * 1000})); }catch(e){} res(r.access_token); } else rej(new Error((r && (r.error_description || r.error)) || 'consenso negato')); },
       error_callback: (e) => rej(new Error((e && e.type) || 'finestra chiusa'))});
     tc.requestAccessToken();
   });
@@ -369,6 +376,7 @@ async function mon(token, metric, startIso, endIso, period, aligner){
     r = await fetch(u, {headers: {Authorization: 'Bearer ' + token, 'X-Goog-User-Project': PID}});
     j = await r.json().catch(() => ({}));
   }
+  if(r.status === 401){ try{ sessionStorage.removeItem('dw-mon'); }catch(e){} throw new Error('Autorizzazione scaduta: premi Carica consumi.'); }
   if(!r.ok) throw new Error((j.error && j.error.message) || ('Errore ' + r.status));
   return j.timeSeries || [];
 }
@@ -379,7 +387,8 @@ function bar(lab, n, lim, fmt){
 }
 const fmtN = (n) => Math.round(n).toLocaleString('it-IT');
 const fmtB = (n) => n >= 1073741824 ? (n / 1073741824).toFixed(2) + ' GiB' : (n / 1048576).toFixed(1) + ' MiB';
-async function loadUsage(){
+async function loadUsage(auto){
+  if(auto === true && !cachedMonToken()) return;   // aggiornamento automatico: mai finestre, solo con l'autorizzazione già data
   $('u-err').textContent = ''; const btn = $('u-load'); btn.disabled = true;
   try{
     const token = await monToken();
@@ -396,7 +405,7 @@ async function loadUsage(){
       const pts = ts.flatMap((s) => s.points || []); if(pts.length) html += bar('Archiviazione', pts.reduce((a, p) => a + val(p), 0) / Math.max(1, ts.length), STORAGE_LIM, fmtB);
     }catch(e){ /* facoltativo */ }
     $('u-body').innerHTML = html;
-    $('u-sub').textContent = 'Dall\'inizio della giornata (mezzanotte, ora del Pacifico), aggiornato alle ' + now.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'}) + '. I dati possono avere qualche minuto di ritardo.';
+    $('u-sub').textContent = 'Dall\'inizio della giornata (mezzanotte, ora del Pacifico), aggiornato alle ' + now.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'}) + ' (si aggiorna da solo ogni 2 minuti finché la pagina resta aperta). I dati possono avere qualche minuto di ritardo.';
   }catch(e){
     const m = (e && e.message) || String(e);
     $('u-err').textContent = /has not been used|disabled/i.test(m) ? 'Cloud Monitoring API non è attiva nel progetto: attivala dalla console Google Cloud (API e servizi) e riprova.' :
@@ -404,7 +413,8 @@ async function loadUsage(){
       /popup|cancel|closed/i.test((e && e.code) + m) ? 'Accesso annullato o interrotto (' + ((e && e.code) || m) + '). Se avevi premuto «Vai a… (non sicuro)», riprova e conferma il permesso fino alla fine.' : 'Non sono riuscito a leggere i consumi: ' + m;
   }finally{ btn.disabled = false; }
 }
-$('u-load').addEventListener('click', loadUsage);
+$('u-load').addEventListener('click', () => loadUsage());
+setInterval(() => { if(!document.hidden && !$('main').classList.contains('hide')) loadUsage(true); }, 120000);
 $('copy-rules').addEventListener('click', async () => { try{ await navigator.clipboard.writeText(RULES); toast('Regole copiate'); }catch(e){ toast('Seleziona il testo e copialo a mano'); } });
 
 $('g-google').addEventListener('click', async () => { $('g-err').textContent = ''; try{ await signInWithPopup(auth, new GoogleAuthProvider()); }catch(e){ $('g-err').textContent = 'Accesso non riuscito.'; } });
