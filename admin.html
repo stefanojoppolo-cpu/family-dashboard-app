@@ -45,7 +45,7 @@ td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
 .tw{overflow:auto;border:1px solid var(--line);border-radius:12px}
 td select,td input{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
-td input.note{width:100%;min-width:140px}
+td input.note{width:100%;min-width:90px}
 .em{font-weight:700;white-space:nowrap}
 .mut{color:var(--soft);font-size:12.5px}
 .chip{display:inline-block;white-space:nowrap;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
@@ -63,11 +63,19 @@ td input.note{width:100%;min-width:140px}
 .use .val{width:200px;white-space:nowrap;text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
 .use .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .use .top .sp{flex:1}
+.tk{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;background:#fff}
+.tk.ch{opacity:.6}
+.tk .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.tk .t{white-space:pre-wrap;word-break:break-word;margin:6px 0}
+.tk .a{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.tk select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff}
+a.btn{text-decoration:none;color:var(--ink);display:inline-block}
 .empty{padding:26px;text-align:center;color:var(--soft)}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#10243A;color:#fff;border-radius:999px;padding:10px 18px;font-weight:700;display:none;z-index:9}
 .hide{display:none !important}
 @media(max-width:1100px){.stats{grid-template-columns:repeat(3,1fr)}}
-table{min-width:1120px}
+table{min-width:1000px}
+td{padding:10px 8px}td select,td input{font-size:13px}
 @media(max-width:860px){
   table{min-width:0}
   .em{white-space:normal;word-break:break-all}
@@ -124,6 +132,13 @@ table{min-width:1120px}
       <div id="u-body"></div>
       <div class="err" id="u-err"></div>
     </div>
+    <div class="card use" id="tk-card">
+      <div class="top"><div><h3>Richieste di assistenza <span class="chip no" id="tk-n">0 aperte</span></h3><div class="mut">Arrivano dal modulo «Scrivi al supporto» dell'app. Per rispondere usa l'email indicata dall'utente.</div></div><div class="sp"></div>
+        <select id="tk-f" class="btn"><option value="aperte">Solo aperte e in corso</option><option value="tutte">Tutte</option></select></div>
+      <div id="tk-list"></div>
+      <div class="empty hide" id="tk-empty">Nessuna richiesta.</div>
+      <div class="err" id="tk-err"></div>
+    </div>
     <div class="card">
       <div class="tools">
         <input type="search" id="q" placeholder="Cerca per email o nota">
@@ -132,7 +147,7 @@ table{min-width:1120px}
         <button class="btn" id="reload">Aggiorna</button>
       </div>
       <div class="tw"><table>
-        <thead><tr><th>Email</th><th>Iscritto</th><th>Ultimo accesso</th><th>Versione</th><th>Archivio</th><th>Pacchetto</th><th>Scade il</th><th>Stato</th><th>Nota</th><th></th></tr></thead>
+        <thead><tr><th>Email</th><th>Iscritto</th><th>Ultimo accesso</th><th>Versione</th><th>Archivio</th><th>Errori</th><th>Pacchetto</th><th>Scade il</th><th>Stato</th><th>Nota</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
       </table></div>
       <div class="empty hide" id="empty">Nessun iscritto trovato.</div>
@@ -168,6 +183,14 @@ const RULES = `match /users/{uid} {
 match /access/{uid} {
   allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
   allow write: if isAdmin();
+}
+match /tickets/{id} {
+  allow create: if request.auth != null
+    && request.resource.data.uid == request.auth.uid
+    && request.resource.data.stato == 'aperto'
+    && request.resource.data.testo is string
+    && request.resource.data.testo.size() <= 2000;
+  allow read, update, delete: if isAdmin();
 }
 function isAdmin() {
   return request.auth != null
@@ -230,6 +253,7 @@ function render(){
       <td data-l="Ultimo accesso"><span class="mut">${ago(u.ultimoAccesso)}</span></td>
       <td data-l="Versione"><span class="mut">${esc(u.build ? String(u.build).slice(0, 8) : '—')}</span></td>
       <td data-l="Archivio"><span class="chip ${fmtSize(u.dimensione).k}" title="Dimensione stimata dell'archivio dell'utente. Limite di Firestore: 1 MiB">${fmtSize(u.dimensione).t}</span></td>
+      <td data-l="Errori">${u.errori ? `<span class="chip sc" title="${esc((u.ultimoErrore || '') + ' · ' + fmtDate(u.quandoErrore))}">${esc(u.errori)}</span>` : '<span class="mut">0</span>'}</td>
       <td data-l="Pacchetto"><select class="f-p">${PACCHETTI.map(([v, l]) => `<option value="${v}"${(a.pacchetto || 'nessuno') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></td>
       <td data-l="Scade il"><input type="date" class="f-s" value="${esc(a.scade || '')}"></td>
       <td data-l="Stato"><span class="chip ${st.k}">${st.t}</span></td>
@@ -239,6 +263,41 @@ function render(){
   }).join('');
 }
 
+let tickets = [];
+const STATI_TK = [['aperto', 'Aperta'], ['in_corso', 'In corso'], ['chiuso', 'Chiusa']];
+function renderTickets(){
+  const open = tickets.filter((t) => t.stato !== 'chiuso').length;
+  $('tk-n').textContent = open + (open === 1 ? ' aperta' : ' aperte'); $('tk-n').className = 'chip ' + (open ? 'am' : 'no');
+  const list = tickets.filter((t) => $('tk-f').value === 'tutte' || t.stato !== 'chiuso').sort((a, b) => String(b.creato || '').localeCompare(String(a.creato || '')));
+  $('tk-empty').classList.toggle('hide', list.length > 0);
+  $('tk-list').innerHTML = list.map((t) => `<div class="tk${t.stato === 'chiuso' ? ' ch' : ''}" data-id="${esc(t.id)}">
+    <div class="h"><b>${esc(t.email)}</b><span class="chip no">${esc(t.tipo || '')}</span><span class="mut">${fmtDate(t.creato)} · ${ago(t.creato)}</span></div>
+    <div class="t">${esc(t.testo)}</div>
+    <div class="mut">${esc(t.info || '')}</div>
+    <div class="a"><select class="tk-s">${STATI_TK.map(([v, l]) => `<option value="${v}"${t.stato === v ? ' selected' : ''}>${l}</option>`).join('')}</select>
+      <button class="btn p tk-save" disabled>Salva</button>
+      <a class="btn" href="mailto:${esc(t.email)}?subject=${encodeURIComponent('Re: Duewell · ' + (t.tipo || ''))}&body=${encodeURIComponent('\n\n---\nIl tuo messaggio del ' + fmtDate(t.creato) + ':\n' + (t.testo || ''))}">Rispondi via email</a></div></div>`).join('');
+}
+async function loadTickets(){
+  $('tk-err').textContent = '';
+  try{
+    const r = await getDocs(collection(db, 'tickets'));
+    tickets = r.docs.map((d) => Object.assign({id: d.id}, d.data()));
+  }catch(e){
+    tickets = [];
+    $('tk-err').textContent = (e && e.code === 'permission-denied') ? 'Per vedere le richieste aggiorna le regole di Firestore (sezione tickets): le trovi nel riquadro «Questo account non è ancora abilitato» o in panoramica-progetto.md.' : 'Errore nel caricamento delle richieste.';
+  }
+  renderTickets();
+}
+$('tk-f').addEventListener('change', renderTickets);
+$('tk-list').addEventListener('change', (e) => { const c = e.target.closest('.tk'); if(c) c.querySelector('.tk-save').disabled = false; });
+$('tk-list').addEventListener('click', async (e) => {
+  const b = e.target.closest('.tk-save'); if(!b) return;
+  const c = b.closest('.tk'), id = c.dataset.id, t = tickets.find((x) => x.id === id), stato = c.querySelector('.tk-s').value;
+  b.disabled = true;
+  try{ await setDoc(doc(db, 'tickets', id), {stato, aggiornato: new Date().toISOString()}, {merge: true}); t.stato = stato; renderTickets(); toast('Salvato'); }
+  catch(err){ b.disabled = false; toast('Non salvato: ' + ((err && err.code) || (err && err.message) || err)); }
+});
 async function load(){
   $('denied').classList.add('hide');
   try{
@@ -247,6 +306,7 @@ async function load(){
     access = {}; ac.docs.forEach((d) => { access[d.id] = d.data(); });
     $('main').classList.remove('hide');
     render();
+    loadTickets();
   }catch(e){
     $('main').classList.add('hide');
     if(e && (e.code === 'permission-denied' || /permission|insufficient/i.test(e.message || ''))) $('denied').classList.remove('hide');
@@ -269,9 +329,9 @@ $('fp').addEventListener('change', render);
 $('reload').addEventListener('click', load);
 $('csv').addEventListener('click', () => {
   const q = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
-  const rows = [['email', 'iscritto', 'ultimo_accesso', 'versione', 'archivio_byte', 'pacchetto', 'scade', 'stato', 'nota']].concat(visible().map((u) => {
+  const rows = [['email', 'iscritto', 'ultimo_accesso', 'versione', 'archivio_byte', 'errori', 'pacchetto', 'scade', 'stato', 'nota']].concat(visible().map((u) => {
     const a = access[u.uid] || {};
-    return [u.email, day(u.creato), day(u.ultimoAccesso), u.build, u.dimensione || '', a.pacchetto || 'nessuno', a.scade || '', stato(a).t, a.note];
+    return [u.email, day(u.creato), day(u.ultimoAccesso), u.build, u.dimensione || '', u.errori || 0, a.pacchetto || 'nessuno', a.scade || '', stato(a).t, a.note];
   }));
   const blob = new Blob(['﻿' + rows.map((r) => r.map(q).join(';')).join('\r\n')], {type: 'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'duewell-iscritti-' + today() + '.csv'; a.click();

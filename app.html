@@ -1819,16 +1819,34 @@ const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 
+// Contatore errori: si accumula nel dispositivo e viene comunicato al prossimo accesso (solo numero e testo breve dell'errore).
+(function(){
+  const noise = /ResizeObserver|Script error|Non-Error promise|extension|AbortError|NetworkError|Failed to fetch|Load failed/i;
+  function reg(msg, file){
+    try{
+      msg = String(msg || '').slice(0, 200); if(!msg || noise.test(msg) || /^(chrome|moz|safari)-extension:/.test(String(file || ''))) return;
+      let c = {n: 0}; try{ c = JSON.parse(localStorage.getItem('dw-err') || '{"n":0}') || {n: 0}; }catch(e){}
+      c.n = Math.min(9999, (+c.n || 0) + 1); c.ult = msg; c.t = new Date().toISOString();
+      localStorage.setItem('dw-err', JSON.stringify(c));
+    }catch(e){}
+  }
+  window.addEventListener('error', (e) => reg(e && e.message, e && e.filename));
+  window.addEventListener('unhandledrejection', (e) => reg(e && e.reason && (e.reason.message || e.reason)));
+})();
 // Registro iscritti: email, primo e ultimo accesso, versione. Nessun contenuto dell'utente.
 async function dwRegisterUser(user){
   try{
     const ref = doc(db, 'users', user.uid), now = new Date().toISOString();
-    let first = true;
-    try{ const s = await getDoc(ref); first = !s.exists() || !(s.data() || {}).creato; }catch(e){}
+    let first = true, prev = null;
+    try{ const s = await getDoc(ref); prev = s.exists() ? (s.data() || {}) : null; first = !prev || !prev.creato; }catch(e){}
     const d = {email: user.email || '', ultimoAccesso: now, build: (typeof APP_BUILD !== 'undefined' ? APP_BUILD : '')};
+    const prevErr = (prev && +prev.errori) || 0;
+    let ec = null; try{ ec = JSON.parse(localStorage.getItem('dw-err') || 'null'); }catch(e){}
+    if(ec && ec.n > 0){ d.errori = Math.min(99999, prevErr + ec.n); d.ultimoErrore = ec.ult || ''; d.quandoErrore = ec.t || now; }
     try{ if(typeof dwCacheData !== 'undefined' && dwCacheData) d.dimensione = new TextEncoder().encode(JSON.stringify(dwCacheData)).length; }catch(e){}
     if(first) d.creato = now;
     await setDoc(ref, d, {merge: true});
+    if(d.errori != null) try{ localStorage.removeItem('dw-err'); }catch(e){}
   }catch(e){ /* facoltativo: se le regole non lo permettono, l'app funziona lo stesso */ }
 }
 const KEY_RECURRING = "recurring-payments";
@@ -5037,7 +5055,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '12/11/2026 16:14';
+const SUPPORT_VER = '12/11/2026 16:20';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5065,10 +5083,19 @@ async function supSend(){
     ckClose(); return;
   }
   go.disabled = true; go.textContent = 'Invio…';
+  // 1) elenco richieste nel pannello di gestione; 2) email di avviso. Basta che una delle due riesca.
+  let okTk = false, okMail = false;
+  try{
+    const u = auth.currentUser, id = (u ? u.uid.slice(0, 8) : 'anon') + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+    await setDoc(doc(db, 'tickets', id), {uid: u.uid, email: mail, tipo: tipo.value, testo: text.slice(0, 2000), info: info.slice(0, 400), stato: 'aperto', creato: new Date().toISOString(), build: (typeof APP_BUILD !== 'undefined' ? APP_BUILD : '')});
+    okTk = true;
+  }catch(e){ console.warn('ticket', e); }
   try{
     const r = await fetch(SUPPORT_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json', 'Accept':'application/json'}, body: JSON.stringify({email: mail, tipo: tipo.value, message: text, info, _subject: 'Duewell · ' + tipo.value})});
     if(!r.ok) throw new Error('http ' + r.status);
-  }catch(e){ console.error(e); return fail('Non sono riuscito a inviare. Riprova tra poco oppure scrivi a ' + SUPPORT_MAIL + '.'); }
+    okMail = true;
+  }catch(e){ console.error(e); }
+  if(!okTk && !okMail) return fail('Non sono riuscito a inviare. Riprova tra poco oppure scrivi a ' + SUPPORT_MAIL + '.');
   ckClose(); showNotice('Messaggio inviato. Ti rispondiamo il prima possibile.', 'success');
 }
 document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-sup]'); if(!b) return; if(b.dataset.sup === 'open') supOpen(); else if(b.dataset.sup === 'send') supSend(); });
@@ -5089,7 +5116,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>12/11/2026 16:14</b></p>`;
+  <p class="st-ver">Versione app: <b>12/11/2026 16:20</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5858,7 +5885,7 @@ window.addEventListener('resize', () => { if(hqCur) hqHide(); });
 
 
 // ---- Avviso «nuova versione disponibile» ----
-const APP_BUILD = '20261112151428';
+const APP_BUILD = '20261112152043';
 let updShown = false, updLast = 0;
 function updBar(){
   let b = document.getElementById('upd-bar');
