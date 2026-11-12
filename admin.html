@@ -52,11 +52,22 @@ td input.note{width:100%;min-width:140px}
 .warn{background:#FFF4E0;border:1px dashed #E6B455;border-radius:14px;padding:16px 18px;margin-bottom:16px}
 .warn h3{margin:0 0 6px;font-size:16px}
 .warn pre{background:#10243A;color:#E8F0FA;border-radius:10px;padding:12px;overflow:auto;font-size:12.5px;margin:10px 0}
+.use{margin-bottom:16px}
+.use h3{margin:0 0 4px;font-size:16px}
+.use .row{display:flex;align-items:center;gap:12px;margin:10px 0}
+.use .lab{width:130px;font-weight:700;font-size:13px}
+.use .bar{flex:1;height:12px;background:#EEF2F8;border-radius:99px;overflow:hidden}
+.use .bar i{display:block;height:100%;border-radius:99px;background:var(--teal)}
+.use .bar i.am{background:#E39A1B}.use .bar i.rd{background:var(--red)}
+.use .val{width:200px;white-space:nowrap;text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
+.use .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.use .top .sp{flex:1}
 .empty{padding:26px;text-align:center;color:var(--soft)}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#10243A;color:#fff;border-radius:999px;padding:10px 18px;font-weight:700;display:none;z-index:9}
 .hide{display:none !important}
 @media(max-width:860px){
   .stats{grid-template-columns:1fr 1fr}
+  .use .row{flex-wrap:wrap;gap:4px}.use .lab{width:100%}.use .bar{flex:1 1 60%}.use .val{width:auto}
   thead{display:none}
   table,tbody,tr,td{display:block}
   .tw{border:0;overflow:visible}
@@ -99,6 +110,13 @@ td input.note{width:100%;min-width:140px}
       <div class="stat"><b id="s-att">0</b><span>Attivi negli ultimi 7 giorni</span></div>
       <div class="stat"><b id="s-new">0</b><span>Nuovi negli ultimi 30 giorni</span></div>
       <div class="stat"><b id="s-pay">0</b><span>Con pacchetto a pagamento attivo</span></div>
+    </div>
+    <div class="card use">
+      <div class="top"><div><h3>Consumi Firebase di oggi</h3><div class="mut" id="u-sub">Limiti del piano gratuito (Spark). Premi il pulsante per leggere i dati reali.</div></div><div class="sp"></div>
+        <a class="btn" href="https://console.firebase.google.com/project/family-dashboard-882b5/firestore/usage" target="_blank" rel="noopener" style="text-decoration:none;color:var(--ink)">Apri in Firebase</a>
+        <button class="btn p" id="u-load">Carica consumi</button></div>
+      <div id="u-body"></div>
+      <div class="err" id="u-err"></div>
     </div>
     <div class="card">
       <div class="tools">
@@ -249,6 +267,60 @@ $('csv').addEventListener('click', () => {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'duewell-iscritti-' + today() + '.csv'; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 });
+// ---- Consumi reali (Cloud Monitoring) ----
+const PID = 'family-dashboard-882b5';
+const LIMITI = [['Letture', 'firestore.googleapis.com/document/read_count', 50000], ['Scritture', 'firestore.googleapis.com/document/write_count', 20000], ['Cancellazioni', 'firestore.googleapis.com/document/delete_count', 20000]];
+const STORAGE_METRIC = 'firestore.googleapis.com/storage/data_and_index_storage_bytes', STORAGE_LIM = 1024 * 1024 * 1024;
+function secsFromPacificMidnight(now){
+  const p = new Intl.DateTimeFormat('en-GB', {timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false}).formatToParts(now);
+  const g = (t) => +(p.find((x) => x.type === t) || {value: 0}).value;
+  return (g('hour') % 24) * 3600 + g('minute') * 60 + g('second');
+}
+async function mon(token, metric, startIso, endIso, period, aligner){
+  const u = 'https://monitoring.googleapis.com/v3/projects/' + PID + '/timeSeries?filter=' + encodeURIComponent('metric.type="' + metric + '"') +
+    '&interval.startTime=' + encodeURIComponent(startIso) + '&interval.endTime=' + encodeURIComponent(endIso) +
+    '&aggregation.alignmentPeriod=' + period + 's&aggregation.perSeriesAligner=' + aligner + '&aggregation.crossSeriesReducer=REDUCE_SUM';
+  const r = await fetch(u, {headers: {Authorization: 'Bearer ' + token}});
+  const j = await r.json().catch(() => ({}));
+  if(!r.ok) throw new Error((j.error && j.error.message) || ('Errore ' + r.status));
+  return j.timeSeries || [];
+}
+const val = (pt) => +(pt.value.int64Value != null ? pt.value.int64Value : (pt.value.doubleValue || 0));
+function bar(lab, n, lim, fmt){
+  const pc = Math.min(100, n / lim * 100), cl = pc >= 90 ? 'rd' : pc >= 70 ? 'am' : '';
+  return `<div class="row"><span class="lab">${lab}</span><span class="bar"><i class="${cl}" style="width:${pc.toFixed(1)}%"></i></span><span class="val">${fmt(n)} / ${fmt(lim)} (${pc < 1 && n > 0 ? '<1' : Math.round(pc)}%)</span></div>`;
+}
+const fmtN = (n) => Math.round(n).toLocaleString('it-IT');
+const fmtB = (n) => n >= 1073741824 ? (n / 1073741824).toFixed(2) + ' GiB' : (n / 1048576).toFixed(1) + ' MiB';
+async function loadUsage(){
+  $('u-err').textContent = ''; const btn = $('u-load'); btn.disabled = true;
+  try{
+    const prov = new GoogleAuthProvider(); prov.addScope('https://www.googleapis.com/auth/monitoring.read');
+    const res = await signInWithPopup(auth, prov);
+    const cred = GoogleAuthProvider.credentialFromResult(res), token = cred && cred.accessToken;
+    if(!token) throw new Error('Google non ha fornito l\'autorizzazione richiesta.');
+    const now = new Date(), secs = Math.max(60, secsFromPacificMidnight(now)), start = new Date(now.getTime() - secs * 1000);
+    let html = '';
+    for(const [lab, metric, lim] of LIMITI){
+      const ts = await mon(token, metric, start.toISOString(), now.toISOString(), secs, 'ALIGN_SUM');
+      const n = ts.reduce((a, s) => a + (s.points || []).reduce((b, p) => b + val(p), 0), 0);
+      html += bar(lab, n, lim, fmtN);
+    }
+    try{
+      const s0 = new Date(now.getTime() - 3 * 3600 * 1000);
+      const ts = await mon(token, STORAGE_METRIC, s0.toISOString(), now.toISOString(), 3600, 'ALIGN_MAX');
+      const pts = ts.flatMap((s) => s.points || []); if(pts.length) html += bar('Archiviazione', pts.reduce((a, p) => a + val(p), 0) / Math.max(1, ts.length), STORAGE_LIM, fmtB);
+    }catch(e){ /* facoltativo */ }
+    $('u-body').innerHTML = html;
+    $('u-sub').textContent = 'Dall\'inizio della giornata (mezzanotte, ora del Pacifico), aggiornato alle ' + now.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'}) + '. I dati possono avere qualche minuto di ritardo.';
+  }catch(e){
+    const m = (e && e.message) || String(e);
+    $('u-err').textContent = /has not been used|disabled/i.test(m) ? 'Cloud Monitoring API non è attiva nel progetto: attivala dalla console Google Cloud (API e servizi) e riprova.' :
+      /permission|forbidden|403/i.test(m) ? 'L\'account non ha il permesso di leggere i dati di monitoraggio del progetto.' :
+      /popup|cancel|closed/i.test((e && e.code) + m) ? 'Accesso annullato.' : 'Non sono riuscito a leggere i consumi: ' + m;
+  }finally{ btn.disabled = false; }
+}
+$('u-load').addEventListener('click', loadUsage);
 $('copy-rules').addEventListener('click', async () => { try{ await navigator.clipboard.writeText(RULES); toast('Regole copiate'); }catch(e){ toast('Seleziona il testo e copialo a mano'); } });
 
 $('g-google').addEventListener('click', async () => { $('g-err').textContent = ''; try{ await signInWithPopup(auth, new GoogleAuthProvider()); }catch(e){ $('g-err').textContent = 'Accesso non riuscito.'; } });
