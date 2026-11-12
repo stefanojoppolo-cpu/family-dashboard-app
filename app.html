@@ -5069,7 +5069,7 @@ function dwAdminRow(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '12/11/2026 16:41';
+const SUPPORT_VER = '12/11/2026 16:57';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5130,7 +5130,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>12/11/2026 16:41</b></p>`;
+  <p class="st-ver">Versione app: <b>12/11/2026 16:57</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5899,7 +5899,7 @@ window.addEventListener('resize', () => { if(hqCur) hqHide(); });
 
 
 // ---- Avviso «nuova versione disponibile» ----
-const APP_BUILD = '20261112154152';
+const APP_BUILD = '20261112155705';
 let updShown = false, updLast = 0;
 function updBar(){
   let b = document.getElementById('upd-bar');
@@ -5931,11 +5931,13 @@ document.getElementById('medical-filter-stato').addEventListener('change', () =>
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    const cambia = !btn.classList.contains('active');
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
     renderSummary();
+    if(cambia){ try{ window.scrollTo(0, 0); const se = document.scrollingElement; if(se) se.scrollTop = 0; const mn = document.querySelector('main'); if(mn) mn.scrollTop = 0; }catch(e){} }
   });
 });
 
