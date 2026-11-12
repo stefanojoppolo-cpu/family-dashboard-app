@@ -31,7 +31,7 @@ header .btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);c
 .gate input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:#fff}
 .gate .btn{width:100%;margin-bottom:8px}
 .err{color:var(--red);font-size:13px;margin:6px 0}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
 .stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
 .stat b{display:block;font-size:26px;font-weight:800;line-height:1.1}
 .stat span{color:var(--soft);font-size:12.5px}
@@ -46,10 +46,10 @@ tbody tr:last-child td{border-bottom:0}
 .tw{overflow:auto;border:1px solid var(--line);border-radius:12px}
 td select,td input{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
 td input.note{width:100%;min-width:140px}
-.em{font-weight:700;word-break:break-all}
+.em{font-weight:700;white-space:nowrap}
 .mut{color:var(--soft);font-size:12.5px}
-.chip{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
-.chip.ok{background:#E3F6EC;color:var(--green)}.chip.sc{background:#FDE7E5;color:var(--red)}.chip.no{background:#EEF2F8;color:var(--soft)}
+.chip{display:inline-block;white-space:nowrap;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
+.chip.ok{background:#E3F6EC;color:var(--green)}.chip.sc{background:#FDE7E5;color:var(--red)}.chip.no{background:#EEF2F8;color:var(--soft)}.chip.am{background:#FFF0D1;color:var(--amber)}
 .warn{background:#FFF4E0;border:1px dashed #E6B455;border-radius:14px;padding:16px 18px;margin-bottom:16px}
 .warn h3{margin:0 0 6px;font-size:16px}
 .warn pre{background:#10243A;color:#E8F0FA;border-radius:10px;padding:12px;overflow:auto;font-size:12.5px;margin:10px 0}
@@ -66,7 +66,11 @@ td input.note{width:100%;min-width:140px}
 .empty{padding:26px;text-align:center;color:var(--soft)}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#10243A;color:#fff;border-radius:999px;padding:10px 18px;font-weight:700;display:none;z-index:9}
 .hide{display:none !important}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(3,1fr)}}
+table{min-width:1120px}
 @media(max-width:860px){
+  table{min-width:0}
+  .em{white-space:normal;word-break:break-all}
   .stats{grid-template-columns:1fr 1fr}
   .use .row{flex-wrap:wrap;gap:4px}.use .lab{width:100%}.use .bar{flex:1 1 60%}.use .val{width:auto}
   thead{display:none}
@@ -111,6 +115,7 @@ td input.note{width:100%;min-width:140px}
       <div class="stat"><b id="s-att">0</b><span>Attivi negli ultimi 7 giorni</span></div>
       <div class="stat"><b id="s-new">0</b><span>Nuovi negli ultimi 30 giorni</span></div>
       <div class="stat"><b id="s-pay">0</b><span>Con pacchetto a pagamento attivo</span></div>
+      <div class="stat"><b id="s-big">0</b><span>Archivi oltre il 70% del limite</span></div>
     </div>
     <div class="card use">
       <div class="top"><div><h3>Consumi Firebase di oggi</h3><div class="mut" id="u-sub">Limiti del piano gratuito (Spark). Premi il pulsante per leggere i dati reali.</div></div><div class="sp"></div>
@@ -127,7 +132,7 @@ td input.note{width:100%;min-width:140px}
         <button class="btn" id="reload">Aggiorna</button>
       </div>
       <div class="tw"><table>
-        <thead><tr><th>Email</th><th>Iscritto</th><th>Ultimo accesso</th><th>Versione</th><th>Pacchetto</th><th>Scade il</th><th>Stato</th><th>Nota</th><th></th></tr></thead>
+        <thead><tr><th>Email</th><th>Iscritto</th><th>Ultimo accesso</th><th>Versione</th><th>Archivio</th><th>Pacchetto</th><th>Scade il</th><th>Stato</th><th>Nota</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
       </table></div>
       <div class="empty hide" id="empty">Nessun iscritto trovato.</div>
@@ -173,6 +178,8 @@ $('rules').textContent = RULES;
 
 let users = [], access = {}, sortKey = 'ultimoAccesso';
 
+const DOC_LIM = 1048576; // limite di Firestore per documento: 1 MiB
+function fmtSize(b){ if(!b) return {t: '—', k: 'no'}; const pc = b / DOC_LIM * 100; return {t: (b >= 1048576 ? (b / 1048576).toFixed(2) + ' MiB' : Math.round(b / 1024) + ' KB') + ' (' + (pc < 1 ? '<1' : Math.round(pc)) + '%)', k: pc >= 90 ? 'sc' : pc >= 70 ? 'am' : 'ok'}; }
 const day = (iso) => (iso ? String(iso).slice(0, 10) : '');
 const today = () => new Date().toISOString().slice(0, 10);
 function fmtDate(iso){ const d = day(iso); return d ? d.split('-').reverse().join('/') : '—'; }
@@ -198,6 +205,7 @@ function stats(){
   $('s-att').textContent = users.filter((u) => u.ultimoAccesso && now - new Date(u.ultimoAccesso).getTime() <= 7 * 86400000).length;
   $('s-new').textContent = users.filter((u) => u.creato && now - new Date(u.creato).getTime() <= 30 * 86400000).length;
   $('s-pay').textContent = users.filter((u) => paying(access[u.uid])).length;
+  $('s-big').textContent = users.filter((u) => (u.dimensione || 0) / DOC_LIM >= 0.7).length;
 }
 
 function visible(){
@@ -221,6 +229,7 @@ function render(){
       <td data-l="Iscritto"><span class="mut">${fmtDate(u.creato)}</span></td>
       <td data-l="Ultimo accesso"><span class="mut">${ago(u.ultimoAccesso)}</span></td>
       <td data-l="Versione"><span class="mut">${esc(u.build ? String(u.build).slice(0, 8) : '—')}</span></td>
+      <td data-l="Archivio"><span class="chip ${fmtSize(u.dimensione).k}" title="Dimensione stimata dell'archivio dell'utente. Limite di Firestore: 1 MiB">${fmtSize(u.dimensione).t}</span></td>
       <td data-l="Pacchetto"><select class="f-p">${PACCHETTI.map(([v, l]) => `<option value="${v}"${(a.pacchetto || 'nessuno') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></td>
       <td data-l="Scade il"><input type="date" class="f-s" value="${esc(a.scade || '')}"></td>
       <td data-l="Stato"><span class="chip ${st.k}">${st.t}</span></td>
@@ -260,9 +269,9 @@ $('fp').addEventListener('change', render);
 $('reload').addEventListener('click', load);
 $('csv').addEventListener('click', () => {
   const q = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
-  const rows = [['email', 'iscritto', 'ultimo_accesso', 'versione', 'pacchetto', 'scade', 'stato', 'nota']].concat(visible().map((u) => {
+  const rows = [['email', 'iscritto', 'ultimo_accesso', 'versione', 'archivio_byte', 'pacchetto', 'scade', 'stato', 'nota']].concat(visible().map((u) => {
     const a = access[u.uid] || {};
-    return [u.email, day(u.creato), day(u.ultimoAccesso), u.build, a.pacchetto || 'nessuno', a.scade || '', stato(a).t, a.note];
+    return [u.email, day(u.creato), day(u.ultimoAccesso), u.build, u.dimensione || '', a.pacchetto || 'nessuno', a.scade || '', stato(a).t, a.note];
   }));
   const blob = new Blob(['﻿' + rows.map((r) => r.map(q).join(';')).join('\r\n')], {type: 'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'duewell-iscritti-' + today() + '.csv'; a.click();

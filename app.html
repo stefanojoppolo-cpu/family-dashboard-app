@@ -1826,6 +1826,7 @@ async function dwRegisterUser(user){
     let first = true;
     try{ const s = await getDoc(ref); first = !s.exists() || !(s.data() || {}).creato; }catch(e){}
     const d = {email: user.email || '', ultimoAccesso: now, build: (typeof APP_BUILD !== 'undefined' ? APP_BUILD : '')};
+    try{ if(typeof dwCacheData !== 'undefined' && dwCacheData) d.dimensione = new TextEncoder().encode(JSON.stringify(dwCacheData)).length; }catch(e){}
     if(first) d.creato = now;
     await setDoc(ref, d, {merge: true});
   }catch(e){ /* facoltativo: se le regole non lo permettono, l'app funziona lo stesso */ }
@@ -5036,7 +5037,7 @@ async function dwNotifToggle(){
 // ---- Supporto
 const SUPPORT_ENDPOINT = 'https://formspree.io/f/xpppevqe';   // se vuoto si apre l'email precompilata
 const SUPPORT_MAIL = 'stefano.joppolo@gmail.com';
-const SUPPORT_VER = '12/11/2026 15:35';
+const SUPPORT_VER = '12/11/2026 16:14';
 function supOpen(){
   const em = (auth.currentUser && auth.currentUser.email) || '';
   ckShow(`${ckHead('Scrivi al supporto')}<div class="md-body">
@@ -5088,7 +5089,7 @@ function dwAppSettingsHtml(){
 }
 function stAccountHtml(){
   return `<div class="st-card">${stIt('💬', '#0EA5E9', 'Supporto', 'Hai un problema o un dubbio? Scrivici: ti rispondiamo via email.', '<button type="button" class="btn small" data-sup="open">Scrivi</button>')}${stIt('🔐', '#1C8A5A', 'Codice di sicurezza', 'I tuoi dati sono cifrati: solo tu hai il codice per aprirli.', '<span class="st-pill ok">Attiva</span><button type="button" class="btn ghost small" data-enc="chpass">Cambia</button>')}${stIt('🗝️', '#B8860B', 'Chiave di recupero', 'Serve se perdi il codice. Se ne crei una nuova, quella vecchia smette di funzionare.', '<button type="button" class="btn ghost small" data-enc="newrec">Nuova chiave</button>')}${stIt('🧭', '#7C3AED', 'Configurazione guidata', 'Riapri il percorso per cambiare schede, persone ed etichette.', '<button type="button" class="btn ghost small" data-wz-rerun="1">Apri</button>')}${stIt('🔒', '#1C8A5A', 'Privacy e termini', 'Come vengono trattati i tuoi dati e le condizioni del servizio.', '<a class="st-lnk" href="privacy.html" target="_blank" rel="opener">Privacy</a><a class="st-lnk" href="termini.html" target="_blank" rel="opener">Termini</a>')}${stIt('🗑️', '#CF3A3A', 'Elimina il mio account', 'Cancella tutti i dati e l\'account. Non si può annullare.', '<button type="button" class="btn ghost small st-del" data-dw="del">Elimina</button>', 'st-danger')}</div>
-  <p class="st-ver">Versione app: <b>12/11/2026 15:35</b></p>`;
+  <p class="st-ver">Versione app: <b>12/11/2026 16:14</b></p>`;
 }
 // ---- eliminazione account
 function dwDeleteAsk(){
@@ -5857,7 +5858,7 @@ window.addEventListener('resize', () => { if(hqCur) hqHide(); });
 
 
 // ---- Avviso «nuova versione disponibile» ----
-const APP_BUILD = '20261112143549';
+const APP_BUILD = '20261112151428';
 let updShown = false, updLast = 0;
 function updBar(){
   let b = document.getElementById('upd-bar');
