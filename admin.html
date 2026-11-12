@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Duewell · Gestione</title>
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF2F8;--paper:#fff;--ink:#10243A;--soft:#5B6B7D;--line:#DDE3EC;--blue:#2F5BEA;--teal:#12A594;--red:#C2362F;--amber:#B96A00;--green:#0F7F4E}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Manrope',system-ui,Arial,sans-serif;font-size:14px;line-height:1.45}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{background:linear-gradient(120deg,#10243a 0%,#17406b 60%,#0f7f77 135%);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
+header .sub{opacity:.75;font-size:13px}
+header .sp{flex:1}
+header .me{font-size:13px;opacity:.85}
+button,select,input{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+header .btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px}
+.gate{max-width:420px;margin:40px auto}
+.gate h2{margin:0 0 4px;font-size:20px}
+.gate p{color:var(--soft);margin:0 0 14px}
+.gate input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:#fff}
+.gate .btn{width:100%;margin-bottom:8px}
+.err{color:var(--red);font-size:13px;margin:6px 0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stat b{display:block;font-size:26px;font-weight:800;line-height:1.1}
+.stat span{color:var(--soft);font-size:12.5px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tools input,.tools select{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.tools input[type=search]{flex:1;min-width:180px}
+table{width:100%;border-collapse:collapse}
+thead{background-color:#fff;background-image:linear-gradient(90deg,rgba(47,91,234,.10),rgba(18,165,148,.10)),linear-gradient(90deg,#2F5BEA,#12A594);background-size:100% 100%,100% 3px;background-position:0 0,0 100%;background-repeat:no-repeat}
+th{text-align:left;font-weight:700;font-size:12.5px;padding:11px 10px;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+.tw{overflow:auto;border:1px solid var(--line);border-radius:12px}
+td select,td input{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
+td input.note{width:100%;min-width:140px}
+.em{font-weight:700;word-break:break-all}
+.mut{color:var(--soft);font-size:12.5px}
+.chip{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
+.chip.ok{background:#E3F6EC;color:var(--green)}.chip.sc{background:#FDE7E5;color:var(--red)}.chip.no{background:#EEF2F8;color:var(--soft)}
+.warn{background:#FFF4E0;border:1px dashed #E6B455;border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.warn h3{margin:0 0 6px;font-size:16px}
+.warn pre{background:#10243A;color:#E8F0FA;border-radius:10px;padding:12px;overflow:auto;font-size:12.5px;margin:10px 0}
+.empty{padding:26px;text-align:center;color:var(--soft)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#10243A;color:#fff;border-radius:999px;padding:10px 18px;font-weight:700;display:none;z-index:9}
+.hide{display:none !important}
+@media(max-width:860px){
+  .stats{grid-template-columns:1fr 1fr}
+  thead{display:none}
+  table,tbody,tr,td{display:block}
+  .tw{border:0;overflow:visible}
+  tr{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+  td{border:0;padding:4px 0}
+  td[data-l]::before{content:attr(data-l);display:block;color:var(--soft);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+  td select,td input{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>Duewell · Gestione</h1><div class="sub">Iscritti, pacchetti e scadenze</div></div>
+    <div class="sp"></div>
+    <span class="me" id="me"></span>
+    <button class="btn hide" id="out">Esci</button>
+  </header>
+
+  <div id="gate" class="card gate">
+    <h2>Accesso riservato</h2>
+    <p>Entra con l'account amministratore.</p>
+    <button class="btn p" id="g-google">Accedi con Google</button>
+    <input type="email" id="g-email" placeholder="Email" autocomplete="username">
+    <input type="password" id="g-pw" placeholder="Password" autocomplete="current-password">
+    <button class="btn" id="g-login">Accedi con email</button>
+    <div class="err" id="g-err"></div>
+  </div>
+
+  <div id="denied" class="warn hide">
+    <h3>Questo account non è ancora abilitato</h3>
+    <div>Le regole di Firestore non permettono di leggere l'elenco degli iscritti. In Firebase → Firestore → Regole aggiungi queste righe dentro <code>match /databases/{database}/documents</code> (al posto delle regole attuali di <code>users</code> e <code>access</code>), poi premi Pubblica e ricarica la pagina.</div>
+    <pre id="rules"></pre>
+    <button class="btn" id="copy-rules">Copia le regole</button>
+  </div>
+
+  <div id="main" class="hide">
+    <div class="stats">
+      <div class="stat"><b id="s-tot">0</b><span>Iscritti</span></div>
+      <div class="stat"><b id="s-att">0</b><span>Attivi negli ultimi 7 giorni</span></div>
+      <div class="stat"><b id="s-new">0</b><span>Nuovi negli ultimi 30 giorni</span></div>
+      <div class="stat"><b id="s-pay">0</b><span>Con pacchetto a pagamento attivo</span></div>
+    </div>
+    <div class="card">
+      <div class="tools">
+        <input type="search" id="q" placeholder="Cerca per email o nota">
+        <select id="fp"><option value="">Tutti i pacchetti</option><option value="nessuno">Nessuno</option><option value="base">Base</option><option value="salute">Salute</option><option value="completo">Completo</option></select>
+        <button class="btn" id="csv">Esporta CSV</button>
+        <button class="btn" id="reload">Aggiorna</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Email</th><th>Iscritto</th><th>Ultimo accesso</th><th>Versione</th><th>Pacchetto</th><th>Scade il</th><th>Stato</th><th>Nota</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+      <div class="empty hide" id="empty">Nessun iscritto trovato.</div>
+      <p class="mut" style="margin:12px 2px 0">Qui vedi solo i dati dell'account. I contenuti degli utenti (spese, documenti, referti) sono cifrati e non sono leggibili da questa pagina.</p>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC-1H-1PXb0_AjSU8LY8Zu4EsF06Tolv8k",
+  authDomain: "family-dashboard-882b5.firebaseapp.com",
+  projectId: "family-dashboard-882b5",
+  storageBucket: "family-dashboard-882b5.firebasestorage.app",
+  messagingSenderId: "951441964256",
+  appId: "1:951441964256:web:1f7de881a0d01b7c93e485"
+};
+const auth = getAuth(initializeApp(firebaseConfig));
+const db = getFirestore(auth.app);
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PACCHETTI = [['nessuno','Nessuno'],['base','Base'],['salute','Salute'],['completo','Completo']];
+const RULES = `match /users/{uid} {
+  allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+  allow write: if request.auth != null && request.auth.uid == uid;
+}
+match /access/{uid} {
+  allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+  allow write: if isAdmin();
+}
+function isAdmin() {
+  return request.auth != null
+    && request.auth.token.email == 'stefano.joppolo@gmail.com'
+    && request.auth.token.email_verified == true;
+}`;
+$('rules').textContent = RULES;
+
+let users = [], access = {}, sortKey = 'ultimoAccesso';
+
+const day = (iso) => (iso ? String(iso).slice(0, 10) : '');
+const today = () => new Date().toISOString().slice(0, 10);
+function fmtDate(iso){ const d = day(iso); return d ? d.split('-').reverse().join('/') : '—'; }
+function ago(iso){
+  if(!iso) return '—';
+  const n = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if(isNaN(n)) return '—';
+  return n <= 0 ? 'oggi' : n === 1 ? 'ieri' : n + ' giorni fa';
+}
+function stato(a){
+  const p = (a && a.pacchetto) || 'nessuno';
+  if(p === 'nessuno') return {k: 'no', t: '—'};
+  if(a.scade && a.scade < today()) return {k: 'sc', t: 'Scaduto'};
+  return {k: 'ok', t: 'Attivo'};
+}
+function paying(a){ const p = a && a.pacchetto; return (p === 'salute' || p === 'completo') && stato(a).k === 'ok'; }
+
+function toast(t){ const e = $('toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(toast._t); toast._t = setTimeout(() => { e.style.display = 'none'; }, 2200); }
+
+function stats(){
+  const now = Date.now();
+  $('s-tot').textContent = users.length;
+  $('s-att').textContent = users.filter((u) => u.ultimoAccesso && now - new Date(u.ultimoAccesso).getTime() <= 7 * 86400000).length;
+  $('s-new').textContent = users.filter((u) => u.creato && now - new Date(u.creato).getTime() <= 30 * 86400000).length;
+  $('s-pay').textContent = users.filter((u) => paying(access[u.uid])).length;
+}
+
+function visible(){
+  const q = $('q').value.trim().toLowerCase(), fp = $('fp').value;
+  return users.filter((u) => {
+    const a = access[u.uid] || {};
+    if(fp && (a.pacchetto || 'nessuno') !== fp) return false;
+    if(q && !((u.email || '').toLowerCase().includes(q) || (a.note || '').toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((x, y) => String(y[sortKey] || '').localeCompare(String(x[sortKey] || '')));
+}
+
+function render(){
+  stats();
+  const list = visible();
+  $('empty').classList.toggle('hide', list.length > 0);
+  $('rows').innerHTML = list.map((u) => {
+    const a = access[u.uid] || {}, st = stato(a);
+    return `<tr data-uid="${esc(u.uid)}">
+      <td data-l="Email"><span class="em">${esc(u.email || '(senza email)')}</span></td>
+      <td data-l="Iscritto"><span class="mut">${fmtDate(u.creato)}</span></td>
+      <td data-l="Ultimo accesso"><span class="mut">${ago(u.ultimoAccesso)}</span></td>
+      <td data-l="Versione"><span class="mut">${esc(u.build ? String(u.build).slice(0, 8) : '—')}</span></td>
+      <td data-l="Pacchetto"><select class="f-p">${PACCHETTI.map(([v, l]) => `<option value="${v}"${(a.pacchetto || 'nessuno') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></td>
+      <td data-l="Scade il"><input type="date" class="f-s" value="${esc(a.scade || '')}"></td>
+      <td data-l="Stato"><span class="chip ${st.k}">${st.t}</span></td>
+      <td data-l="Nota"><input type="text" class="note f-n" maxlength="200" value="${esc(a.note || '')}" placeholder="Nota"></td>
+      <td><button class="btn p f-save" disabled>Salva</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function load(){
+  $('denied').classList.add('hide');
+  try{
+    const [us, ac] = await Promise.all([getDocs(collection(db, 'users')), getDocs(collection(db, 'access'))]);
+    users = us.docs.map((d) => Object.assign({uid: d.id}, d.data()));
+    access = {}; ac.docs.forEach((d) => { access[d.id] = d.data(); });
+    $('main').classList.remove('hide');
+    render();
+  }catch(e){
+    $('main').classList.add('hide');
+    if(e && (e.code === 'permission-denied' || /permission|insufficient/i.test(e.message || ''))) $('denied').classList.remove('hide');
+    else toast('Errore nel caricamento: ' + ((e && e.message) || e));
+  }
+}
+
+$('rows').addEventListener('input', (e) => { const tr = e.target.closest('tr'); if(tr) tr.querySelector('.f-save').disabled = false; });
+$('rows').addEventListener('change', (e) => { const tr = e.target.closest('tr'); if(tr) tr.querySelector('.f-save').disabled = false; });
+$('rows').addEventListener('click', async (e) => {
+  const b = e.target.closest('.f-save'); if(!b) return;
+  const tr = b.closest('tr'), uid = tr.dataset.uid;
+  const d = {pacchetto: tr.querySelector('.f-p').value, scade: tr.querySelector('.f-s').value || '', note: tr.querySelector('.f-n').value.trim(), aggiornato: new Date().toISOString()};
+  b.disabled = true;
+  try{ await setDoc(doc(db, 'access', uid), d); access[uid] = d; render(); toast('Salvato'); }
+  catch(err){ b.disabled = false; toast('Non salvato: ' + ((err && err.code) || (err && err.message) || err)); }
+});
+$('q').addEventListener('input', render);
+$('fp').addEventListener('change', render);
+$('reload').addEventListener('click', load);
+$('csv').addEventListener('click', () => {
+  const q = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+  const rows = [['email', 'iscritto', 'ultimo_accesso', 'versione', 'pacchetto', 'scade', 'stato', 'nota']].concat(visible().map((u) => {
+    const a = access[u.uid] || {};
+    return [u.email, day(u.creato), day(u.ultimoAccesso), u.build, a.pacchetto || 'nessuno', a.scade || '', stato(a).t, a.note];
+  }));
+  const blob = new Blob(['﻿' + rows.map((r) => r.map(q).join(';')).join('\r\n')], {type: 'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'duewell-iscritti-' + today() + '.csv'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+$('copy-rules').addEventListener('click', async () => { try{ await navigator.clipboard.writeText(RULES); toast('Regole copiate'); }catch(e){ toast('Seleziona il testo e copialo a mano'); } });
+
+$('g-google').addEventListener('click', async () => { $('g-err').textContent = ''; try{ await signInWithPopup(auth, new GoogleAuthProvider()); }catch(e){ $('g-err').textContent = 'Accesso non riuscito.'; } });
+$('g-login').addEventListener('click', async () => {
+  $('g-err').textContent = '';
+  try{ await signInWithEmailAndPassword(auth, $('g-email').value.trim(), $('g-pw').value); }
+  catch(e){ $('g-err').textContent = 'Email o password non corrette.'; }
+});
+$('out').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, (user) => {
+  $('gate').classList.toggle('hide', !!user);
+  $('out').classList.toggle('hide', !user);
+  $('me').textContent = user ? (user.email || '') : '';
+  if(user) load(); else { $('main').classList.add('hide'); $('denied').classList.add('hide'); }
+});
+</script>
+</body>
+</html>
