@@ -70,6 +70,7 @@ td input.note{width:100%;min-width:90px}
 .tk .a{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
 .tk select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff}
 a.btn{text-decoration:none;color:var(--ink);display:inline-block}
+.addbox{background:#FAF5FF;border:1px dashed #C9A7F5;border-radius:12px;padding:12px 14px;margin-bottom:12px}
 .empty{padding:26px;text-align:center;color:var(--soft)}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#10243A;color:#fff;border-radius:999px;padding:10px 18px;font-weight:700;display:none;z-index:9}
 .hide{display:none !important}
@@ -144,8 +145,16 @@ td{padding:10px 8px}td select,td input{font-size:13px}
       <div class="tools">
         <input type="search" id="q" placeholder="Cerca per email o nota">
         <select id="fp"><option value="">Tutti i pacchetti</option><option value="nessuno">Nessuno</option><option value="base">Base</option><option value="salute">Salute</option><option value="completo">Completo</option></select>
+        <select id="fa"><option value="">Qualsiasi accesso</option><option value="7">Attivi negli ultimi 7 giorni</option><option value="30">Attivi negli ultimi 30 giorni</option><option value="old">Fermi da più di 30 giorni</option><option value="mai">Mai registrati</option></select>
+        <button class="btn" id="add-open">Aggiungi utente</button>
         <button class="btn" id="csv">Esporta CSV</button>
         <button class="btn" id="reload">Aggiorna</button>
+      </div>
+      <div class="addbox hide" id="add-box">
+        <b>Aggiungi un utente non ancora registrato</b>
+        <div class="mut">Copia email e UID dalla scheda Authentication di Firebase. Resta «da registrare» finché non riapre l'app aggiornata.</div>
+        <div class="tools" style="margin:8px 0 0"><input type="email" id="add-mail" placeholder="Email"><input type="text" id="add-uid" placeholder="UID utente" style="min-width:260px"><button class="btn p" id="add-save">Aggiungi</button><button class="btn" id="add-cancel">Annulla</button></div>
+        <div class="err" id="add-err"></div>
       </div>
       <div class="tw"><table>
         <thead><tr><th>Email</th><th>Iscritto</th><th>Ultimo accesso</th><th>Versione</th><th>Archivio</th><th>Errori</th><th>Pacchetto</th><th>Scade il</th><th>Stato</th><th>Nota</th><th></th></tr></thead>
@@ -237,6 +246,11 @@ function visible(){
   return users.filter((u) => {
     const a = access[u.uid] || {};
     if(fp && (a.pacchetto || 'nessuno') !== fp) return false;
+    const fa = $('fa').value, dd = u.ultimoAccesso ? (Date.now() - new Date(u.ultimoAccesso).getTime()) / 86400000 : null;
+    if(fa === '7' && !(dd != null && dd <= 7)) return false;
+    if(fa === '30' && !(dd != null && dd <= 30)) return false;
+    if(fa === 'old' && !(dd != null && dd > 30)) return false;
+    if(fa === 'mai' && dd != null) return false;
     if(q && !((u.email || '').toLowerCase().includes(q) || (a.note || '').toLowerCase().includes(q))) return false;
     return true;
   }).sort((x, y) => String(y[sortKey] || '').localeCompare(String(x[sortKey] || '')));
@@ -251,7 +265,7 @@ function render(){
     return `<tr data-uid="${esc(u.uid)}">
       <td data-l="Email"><span class="em">${esc(u.email || '(senza email)')}</span></td>
       <td data-l="Iscritto"><span class="mut">${fmtDate(u.creato)}</span></td>
-      <td data-l="Ultimo accesso"><span class="mut">${ago(u.ultimoAccesso)}</span></td>
+      <td data-l="Ultimo accesso">${u.manuale ? '<span class="chip am" title="Inserito a mano: comparirà con i dati quando riapre l\'app aggiornata">da registrare</span>' : `<span class="mut">${ago(u.ultimoAccesso)}</span>`}</td>
       <td data-l="Versione"><span class="mut">${esc(u.build ? String(u.build).slice(0, 8) : '—')}</span></td>
       <td data-l="Archivio"><span class="chip ${fmtSize(u.dimensione).k}" title="Dimensione stimata dell'archivio dell'utente. Limite di Firestore: 1 MiB">${fmtSize(u.dimensione).t}</span></td>
       <td data-l="Errori">${u.errori ? `<span class="chip sc" title="${esc((u.ultimoErrore || '') + ' · ' + fmtDate(u.quandoErrore))}">${esc(u.errori)}</span>` : '<span class="mut">0</span>'}</td>
@@ -305,6 +319,9 @@ async function load(){
     const [us, ac] = await Promise.all([getDocs(collection(db, 'users')), getDocs(collection(db, 'access'))]);
     users = us.docs.map((d) => Object.assign({uid: d.id}, d.data()));
     access = {}; ac.docs.forEach((d) => { access[d.id] = d.data(); });
+    // utenti inseriti a mano (solo in `access`) che non hanno ancora scritto nel registro
+    const noti = new Set(users.map((u) => u.uid));
+    Object.keys(access).forEach((id) => { if(!noti.has(id) && access[id].email) users.push({uid: id, email: access[id].email, manuale: true}); });
     $('main').classList.remove('hide');
     render();
     loadTickets();
@@ -323,11 +340,12 @@ $('rows').addEventListener('click', async (e) => {
   const tr = b.closest('tr'), uid = tr.dataset.uid;
   const d = {pacchetto: tr.querySelector('.f-p').value, scade: tr.querySelector('.f-s').value || '', note: tr.querySelector('.f-n').value.trim(), aggiornato: new Date().toISOString()};
   b.disabled = true;
-  try{ await setDoc(doc(db, 'access', uid), d); access[uid] = d; render(); toast('Salvato'); }
+  try{ await setDoc(doc(db, 'access', uid), d, {merge: true}); access[uid] = Object.assign({}, access[uid], d); render(); toast('Salvato'); }
   catch(err){ b.disabled = false; toast('Non salvato: ' + ((err && err.code) || (err && err.message) || err)); }
 });
 $('q').addEventListener('input', render);
 $('fp').addEventListener('change', render);
+$('fa').addEventListener('change', render);
 $('reload').addEventListener('click', load);
 $('csv').addEventListener('click', () => {
   const q = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
@@ -416,6 +434,21 @@ async function loadUsage(auto){
 }
 $('u-load').addEventListener('click', () => loadUsage());
 setInterval(() => { if(!document.hidden && !$('main').classList.contains('hide')) loadUsage(true); }, 120000);
+$('add-open').addEventListener('click', () => { $('add-box').classList.toggle('hide'); $('add-err').textContent = ''; });
+$('add-cancel').addEventListener('click', () => { $('add-box').classList.add('hide'); });
+$('add-save').addEventListener('click', async () => {
+  const mail = $('add-mail').value.trim(), uid = $('add-uid').value.trim(), er = $('add-err');
+  er.textContent = '';
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) { er.textContent = 'Controlla l\'email.'; return; }
+  if(!/^[A-Za-z0-9]{20,40}$/.test(uid)) { er.textContent = 'L\'UID di Firebase ha 28 caratteri tra lettere e numeri: copialo per intero.'; return; }
+  try{
+    const d = {email: mail, pacchetto: (access[uid] && access[uid].pacchetto) || 'nessuno', manuale: true, aggiornato: new Date().toISOString()};
+    await setDoc(doc(db, 'access', uid), d, {merge: true});
+    access[uid] = Object.assign({}, access[uid], d);
+    if(!users.some((u) => u.uid === uid)) users.push({uid, email: mail, manuale: true});
+    $('add-mail').value = ''; $('add-uid').value = ''; $('add-box').classList.add('hide'); render(); toast('Utente aggiunto');
+  }catch(e){ er.textContent = 'Non salvato: ' + ((e && e.code) || (e && e.message) || e); }
+});
 $('copy-rules').addEventListener('click', async () => { try{ await navigator.clipboard.writeText(RULES); toast('Regole copiate'); }catch(e){ toast('Seleziona il testo e copialo a mano'); } });
 
 $('g-google').addEventListener('click', async () => { $('g-err').textContent = ''; try{ await signInWithPopup(auth, new GoogleAuthProvider()); }catch(e){ $('g-err').textContent = 'Accesso non riuscito.'; } });
