@@ -23,7 +23,7 @@ button,select,input{font:inherit;color:inherit}
 .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer}
 .btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
 .btn:disabled{opacity:.45;cursor:default}
-header .btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff}
+header .btn,header a.btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px}
 .gate{max-width:420px;margin:40px auto}
 .gate h2{margin:0 0 4px;font-size:20px}
@@ -96,6 +96,7 @@ td{padding:10px 8px}td select,td input{font-size:13px}
   <header>
     <div><h1>Duewell · Gestione</h1><div class="sub">Iscritti, pacchetti e scadenze</div></div>
     <div class="sp"></div>
+    <a class="btn" href="app.html" id="back" style="text-decoration:none">← Torna a Duewell</a>
     <span class="me" id="me"></span>
     <button class="btn hide" id="out">Esci</button>
   </header>
