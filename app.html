@@ -3737,7 +3737,7 @@ function ckState(c){
   if(c.attivo === false) return {k: 'chiuso'};
   const t = ckToday();
   if(c.prenotazione && c.prenotazione.data){ const d = c.prenotazione.data; return {k: d >= t ? 'prenotata' : 'conferma', data: d, g: ckGiorni(d)}; }
-  const due = ckDue(c); if(!due) return {k: 'senza'};
+  const due = ckDue(c); if(!due) return (c.prima && !c.ultima) ? {k: 'prenotare', data: t, g: 0, prima: true} : {k: 'senza'};
   const g = ckGiorni(due), pre = c.preavviso == null ? 30 : +c.preavviso;
   return {k: g < 0 ? 'scaduto' : g <= pre ? 'prenotare' : 'futuro', data: due, g};
 }
@@ -3873,7 +3873,7 @@ function ckTodoHtml(){
     const c = it.c, s = it.s, {sp, sede} = ckContatto(c);
     let sub = '', acts = '';
     if(s.k === 'scaduto' || s.k === 'prenotare'){
-      sub = (s.k === 'scaduto' ? 'Scaduto il ' : 'Entro il ') + ckFmt(s.data) + (c.ultima ? ' · ultima il ' + ckFmt(c.ultima) : '');
+      sub = s.prima ? 'Prima visita, ancora da prenotare' : (s.k === 'scaduto' ? 'Scaduto il ' : 'Entro il ') + ckFmt(s.data) + (c.ultima ? ' · ultima il ' + ckFmt(c.ultima) : (c.prima ? ' · prima visita' : ''));
       acts = `<button type="button" class="btn small" data-ck="book" data-id="${c.id}">Prenota</button>` + ckImpBtn(c);
       if(sede && sede.tel) acts += `<a class="btn small ghost" href="tel:${escHtml(String(sede.tel).replace(/[^\d+]/g, ''))}">Chiama ${escHtml(sp ? sp.nome : sede.struttura)}</a>`;
     } else if(s.k === 'conferma'){
@@ -4082,8 +4082,8 @@ function ckDetail(id){
     if(med && med.bozza) acts += `<button type="button" class="btn small ghost" data-ck="medcomplete" data-id="${med.id}">Completa la spesa</button>`;
     acts += `<button type="button" class="btn small ghost" data-ck="editck" data-id="${c.id}">Modifica</button><button type="button" class="btn small ghost danger" data-ck="delck" data-id="${c.id}">Elimina</button>`;
   }
-  ckShow(`${ckHead(escHtml(c.tipo) + ' <span class="md-who">' + escHtml(c.persona) + '</span>', ckPill(s.k) + (s.data ? ' · ' + (s.k === 'prenotata' || s.k === 'conferma' ? ckFmtLong(s.data, p && p.ora) : (s.k === 'scaduto' ? 'scaduto il ' : 'entro il ') + ckFmt(s.data)) : ''))}
-    <div class="md-body"><div class="md-top">${kv('Cadenza', ckCadLabel(c))}${kv('Ultima visita', c.ultima ? ckFmt(c.ultima) : '')}${kv('Prossima scadenza', due && !p ? ckFmt(due) : '')}${kv('Preavviso', (c.preavviso == null ? 30 : c.preavviso) + ' giorni')}</div>
+  ckShow(`${ckHead(escHtml(c.tipo) + ' <span class="md-who">' + escHtml(c.persona) + '</span>', ckPill(s.k) + (s.prima ? ' · prima visita' : s.data ? ' · ' + (s.k === 'prenotata' || s.k === 'conferma' ? ckFmtLong(s.data, p && p.ora) : (s.k === 'scaduto' ? 'scaduto il ' : 'entro il ') + ckFmt(s.data)) : ''))}
+    <div class="md-body"><div class="md-top">${kv('Cadenza', ckCadLabel(c))}${kv('Ultima visita', c.ultima ? ckFmt(c.ultima) : (c.prima ? 'Nessuna, è la prima' : ''))}${kv('Prossima scadenza', due && !p ? ckFmt(due) : '')}${kv('Preavviso', (c.preavviso == null ? 30 : c.preavviso) + ' giorni')}</div>
     ${(sp || sede) ? `<h4 class="md-h">${sp ? 'Specialista' : 'Struttura'}</h4><div class="md-top">${sp ? kv('Nome', escHtml(sp.nome) + (sp.specialita ? ' · ' + escHtml(sp.specialita) : '')) : ''}${kv('Struttura', sede ? escHtml(sede.struttura || '') : '')}${kv('Indirizzo', sede ? escHtml(sede.indirizzo || '') : '')}${kv('Contatti', contatti)}</div>${sede && sede.note ? `<p class="md-note">${escHtml(sede.note)}</p>` : ''}` : ''}
     ${p ? `<h4 class="md-h">Prenotazione</h4><div class="md-top">${kv('Quando', ckFmtLong(p.data, p.ora))}${kv('Struttura', escHtml(p.struttura || ''))}${kv('Impegnativa', imp)}${kv('Spesa in Sanità', med ? (med.bozza ? 'Bozza, da completare' : 'Registrata') : '')}</div>` : ''}
     ${c.note ? `<h4 class="md-h">Note</h4><p class="md-note">${escHtml(c.note)}</p>` : ''}
@@ -4104,8 +4104,8 @@ function ckForm(id, pre){
     ${ckFld('Tipo di controllo', `<input class="ck-in" id="ck-tipo" value="${escHtml(c ? c.tipo : pre.tipo || '')}" placeholder="es. Visita dermatologica, Check-up cardiologico">`)}
     ${ckFld('Cadenza', `<select class="ck-in" id="ck-cad">${[[0, 'Una tantum (visita singola)'], [6, 'Ogni 6 mesi'], [12, 'Ogni anno'], [24, 'Ogni 2 anni'], [36, 'Ogni 3 anni'], [60, 'Ogni 5 anni'], ['x', 'Personalizzata (mesi)…']].map(([v, l]) => `<option value="${v}"${(std ? cad === v : v === 'x') ? ' selected' : ''}>${l}</option>`).join('')}</select><input class="ck-in" id="ck-cadx" type="number" min="1" max="240" placeholder="mesi" value="${!std ? cad : ''}" style="margin-top:6px;${std ? 'display:none' : ''}">`)}
     ${ckFld('Avvisami prima di', `<select class="ck-in" id="ck-pre">${[7, 15, 30, 45, 60, 90].map(v => `<option value="${v}"${(c && c.preavviso != null ? +c.preavviso : 30) === v ? ' selected' : ''}>${v} giorni</option>`).join('')}</select>`)}
-    ${ckFld('Ultima visita', `<input class="ck-in" id="ck-ult" type="date" value="${escHtml(c ? c.ultima || '' : '')}">`)}
-    ${ckFld('Prossima scadenza <span class="ck-mut">· se vuota la calcolo dall\'ultima visita</span>', `<input class="ck-in" id="ck-scad" type="date" value="${escHtml(c ? c.scad || '' : pre.scad || '')}">`)}
+    ${ckFld('Ultima visita', `<input class="ck-in" id="ck-ult" type="date" value="${escHtml(c ? c.ultima || '' : '')}"${c && c.prima && !c.ultima ? ' disabled' : ''}><label style="display:flex;gap:8px;align-items:center;font-weight:600;margin-top:6px"><input type="checkbox" id="ck-prima"${c ? (c.prima && !c.ultima ? ' checked' : '') : (pre.prima ? ' checked' : '')}> È la prima visita</label>`)}
+    ${ckFld('<span id="ck-scad-l">' + ((c ? c.prima && !c.ultima : pre.prima) ? 'Entro quando farla <span class="ck-mut">· facoltativo</span>' : 'Prossima scadenza <span class="ck-mut">· se vuota la calcolo dall\'ultima visita</span>') + '</span>', `<input class="ck-in" id="ck-scad" type="date" value="${escHtml(c ? c.scad || '' : pre.scad || '')}">`)}
     ${ckFld('Specialista', `<select class="ck-in" id="ck-sp">${ckSpOpts(c ? c.specialistaId : pre.specialistaId)}</select>`)}
     ${ckFld('Sede / struttura', `<select class="ck-in" id="ck-sede">${ckSedeOpts(c ? c.specialistaId : pre.specialistaId, c ? c.sedeId : pre.sedeId)}</select>`)}
     ${ckFld('Struttura <span class="ck-mut">· anche senza specialista (es. risonanza, esami)</span>', `<select class="ck-in" id="ck-str">${ckStrOpts(c ? c.struttura : pre.struttura)}</select><input class="ck-in" id="ck-strx" placeholder="Nome della struttura" value="${escHtml(c && c.struttura && !ckStrutture().some(x => x.toLowerCase() === c.struttura.toLowerCase()) ? c.struttura : '')}" style="margin-top:6px;${(c && c.struttura && !ckStrutture().some(x => x.toLowerCase() === c.struttura.toLowerCase())) ? '' : 'display:none'}">`, 'ck-span')}
@@ -4117,13 +4117,13 @@ function ckForm(id, pre){
 async function ckSaveForm(id, thenBook){
   const persona = $ck('persona').value.trim(), tipo = $ck('tipo').value.trim();
   let cad = $ck('cad').value; cad = cad === 'x' ? parseInt($ck('cadx').value, 10) : parseInt(cad, 10);
-  const ult = $ck('ult').value, scad = $ck('scad').value;
+  const prima = $ck('prima').checked, ult = prima ? '' : $ck('ult').value, scad = $ck('scad').value;
   if(!persona){ showFormError('Indica per chi è il controllo.'); return; }
   if(!tipo){ showFormError('Indica il tipo di controllo.'); return; }
   if(isNaN(cad) || cad < 0){ showFormError('Indica la cadenza in mesi.'); return; }
-  if(!(ult && cad > 0) && !scad){ showFormError('Indica l\'ultima visita (con una cadenza) oppure la data di scadenza.'); return; }
+  if(!prima && !(ult && cad > 0) && !scad){ showFormError('Indica l\'ultima visita (con una cadenza), la data di scadenza oppure spunta «È la prima visita».'); return; }
   if((ult && normDate(ult) !== ult) || (scad && normDate(scad) !== scad)){ showFormError('Controlla le date inserite.'); return; }
-  const base = {persona, tipo, cadenza: cad, preavviso: parseInt($ck('pre').value, 10) || 30, ultima: ult, scad: scad, specialistaId: $ck('sp').value, sedeId: $ck('sede').value, struttura: ($ck('str').value === '__altra' ? $ck('strx').value.trim() : $ck('str').value), senzaImp: $ck('noimp').checked, note: $ck('note').value.trim()};
+  const base = {persona, tipo, cadenza: cad, preavviso: parseInt($ck('pre').value, 10) || 30, ultima: ult, scad: scad, prima, specialistaId: $ck('sp').value, sedeId: $ck('sede').value, struttura: ($ck('str').value === '__altra' ? $ck('strx').value.trim() : $ck('str').value), senzaImp: $ck('noimp').checked, note: $ck('note').value.trim()};
   let cid = id;
   if(id) checkups = checkups.map(c => c.id === id ? {...c, ...base} : c);
   else { cid = uid(); checkups.push({id: cid, attivo: true, storico: [], prenotazione: null, ...base}); }
@@ -4200,7 +4200,7 @@ async function ckDoneSave(id){
   const d = $ck('ddata').value; if(!d || normDate(d) !== d){ showFormError('Inserisci la data della visita.'); return; }
   const p = c.prenotazione;
   if(p.medId) medical = medical.map(m => m.id === p.medId && m.bozza ? {...m, dataDocumento: d} : m);
-  checkups = checkups.map(x => x.id !== id ? x : {...x, ultima: d, scad: '', prenotazione: null, attivo: +x.cadenza > 0, storico: (x.storico || []).concat([{data: d, medId: p.medId || '', struttura: p.struttura || ''}])});
+  checkups = checkups.map(x => x.id !== id ? x : {...x, ultima: d, scad: '', prima: false, prenotazione: null, attivo: +x.cadenza > 0, storico: (x.storico || []).concat([{data: d, medId: p.medId || '', struttura: p.struttura || ''}])});
   await saveMedical(); await saveCheckups(); ckClose(); renderAll();
   const n = checkups.find(x => x.id === id), nx = ckDue(n);
   showNotice(+c.cadenza > 0 && nx ? 'Fatto. Prossimo controllo: ' + ckFmt(nx) + '. Completa la spesa in Sanità integrativa.' : 'Visita completata. Completa la spesa in Sanità integrativa.', 'success');
@@ -4348,10 +4348,10 @@ function ckListShow(){
     .sort((a, b) => (rank[a.s.k] - rank[b.s.k]) || String(a.s.data || '9').localeCompare(String(b.s.data || '9')));
   const body = rows.map(({c, s: st}) => {
     const sp = ckSp(c.specialistaId), p = c.prenotazione;
-    const next = p ? 'Prenotata: ' + ckFmtLong(p.data, p.ora) : st.data ? (st.k === 'scaduto' ? 'Scaduto il ' : 'Scadenza ') + ckFmt(st.data) : '—';
+    const next = p ? 'Prenotata: ' + ckFmtLong(p.data, p.ora) : st.prima ? 'Da prenotare' : st.data ? (st.k === 'scaduto' ? 'Scaduto il ' : 'Scadenza ') + ckFmt(st.data) : '—';
     return `<button type="button" class="ck-lr" data-ck="open" data-id="${c.id}"><span class="ck-dot" style="background:${ckColor(c.persona)}"></span>
       <span class="ck-lr-m"><b>${escHtml(c.tipo)}</b><span class="ck-mut">${escHtml(c.persona)} · ${escHtml(ckCadLabel(c))}${sp ? ' · ' + escHtml(sp.nome) : ''}</span></span>
-      <span class="ck-lr-d"><span>${escHtml(next)}</span><span class="ck-mut">${c.ultima ? 'ultima ' + ckFmt(c.ultima) : 'mai fatto'}</span></span>${ckPill(st.k)}</button>`;
+      <span class="ck-lr-d"><span>${escHtml(next)}</span><span class="ck-mut">${c.ultima ? 'ultima ' + ckFmt(c.ultima) : (c.prima ? 'prima visita' : 'mai fatto')}</span></span>${ckPill(st.k)}</button>`;
   }).join('');
   ckShow(`${ckHead('Tutti i controlli', checkups.length + ' inseriti')}<div class="md-body">
     ${pers.length > 1 ? `<div class="ck-fld" style="margin-bottom:10px;max-width:240px"><select class="ck-in" id="ck-lpers"><option value="">Tutta la famiglia</option>${pers.map(x => `<option${x === ckListPers ? ' selected' : ''}>${escHtml(x)}</option>`).join('')}</select></div>` : ''}
@@ -4426,6 +4426,7 @@ document.addEventListener('change', (e) => {
     ckSpRead(); const dst = ckSpDraft.sedi[i]; ['struttura', 'indirizzo', 'tel', 'email', 'sito', 'note'].forEach(f => { dst[f] = x[f] || ''; }); return ckSpDraw();
   }
   if(t.id === 'ck-cad'){ $ck('cadx').style.display = t.value === 'x' ? '' : 'none'; }
+  else if(t.id === 'ck-prima'){ const u = $ck('ult'); u.disabled = t.checked; if(t.checked) u.value = ''; $ck('scad-l').innerHTML = t.checked ? 'Entro quando farla <span class="ck-mut">· facoltativo</span>' : 'Prossima scadenza <span class="ck-mut">· se vuota la calcolo dall\'ultima visita</span>'; }
   else if(t.id === 'ck-sp' || t.id === 'ck-sede'){
     if(t.id === 'ck-sp') $ck('sede').innerHTML = ckSedeOpts(t.value, '');
     const sd = ckSede(ckSp($ck('sp').value), $ck('sede').value);
@@ -4450,7 +4451,7 @@ function ckUrgent(items){
   const t = ckToday();
   checkups.forEach(c => {
     const s = ckState(c); if(!s.k || !s.data) return;
-    if(s.k === 'scaduto' || s.k === 'prenotare') items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — da prenotare`, giorni: s.g, tab: 'checkup'});
+    if(s.k === 'scaduto' || s.k === 'prenotare') items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — ${s.prima ? 'prima visita da prenotare' : 'da prenotare'}`, giorni: s.g, tab: 'checkup'});
     else if(s.k === 'conferma') items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — conferma la visita`, giorni: s.g, tab: 'checkup'});
     else if(s.k === 'prenotata' && s.g <= 14) items.push({icona: ICONA_MEDICAL, label: `${c.tipo} · ${c.persona} — visita${c.prenotazione.impegnativa || ckNoImp(c) ? '' : ' (manca impegnativa)'}`, giorni: s.g, tab: 'checkup'});
   });
@@ -4787,6 +4788,7 @@ showWelcome = function(rerun){ wzInit(!!rerun === true); document.getElementById
 (function(){
   const w = document.getElementById('welcome'); if(!w) return;
   w.addEventListener('click', async (e) => {
+    if(e.target.closest('.wz-imp')) return;
     const b = e.target.closest('[data-wz]'); if(!b || !wz) return;
     const a = b.dataset.wz, steps = wzSteps(), st = steps[wz.step];
     if(a === 'mod'){ const id = b.dataset.id; wz.mods.has(id) ? wz.mods.delete(id) : wz.mods.add(id); return wzRender(); }
