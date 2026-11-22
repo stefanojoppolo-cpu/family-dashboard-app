@@ -72,12 +72,14 @@ async function analizza(user){
   const d = cache.d;
   const stessaChiave = !srv._enc || !d._enc || srv._enc === d._enc;
   // campi da ripristinare: sul server non cifrati (scritti dalla vecchia app) o mancanti, nella copia cifrati
-  const righe = [], daFare = {};
+  const righe = [], daFare = {}, scelte = {};
   const chiavi = Array.from(new Set([...Object.keys(d), ...Object.keys(srv)])).filter(k => k !== '_enc').sort();
   for(const k of chiavi){
     const s = srv[k], c = d[k];
     let stato;
-    if(isEnc(s)) stato = s === c ? '<span class="ok">integro</span>' : '<span class="ok">integro (più recente sul server)</span>';
+    if(isEnc(s) && s === c) stato = '<span class="ok">uguale alla copia</span>';
+    else if(isEnc(s) && isEnc(c)){ const sel = k === 'settings'; if(sel) daFare[k] = c; stato = `<label><input type="checkbox" data-k="${esc(k)}"${sel ? ' checked' : ''}> diverso: ripristina la versione della copia</label>`; scelte[k] = c; }
+    else if(isEnc(s)) stato = '<span class="ok">presente solo sul server</span>';
     else if(isEnc(c)){ stato = s === undefined ? '<span class="ko">mancante: lo ripristino</span>' : '<span class="ko">sovrascritto: lo ripristino</span>'; daFare[k] = c; }
     else stato = '<span class="mut">non cifrato in entrambi</span>';
     righe.push(`<tr><td>${esc(nome(k))}</td><td>${stato}</td></tr>`);
@@ -86,13 +88,16 @@ async function analizza(user){
   out.innerHTML = `<p>Copia locale del <b>${esc(quando(cache.t))}</b> · account ${esc(user.email || '')}</p>
     <table>${righe.join('')}</table>
     ${stessaChiave ? '' : '<p class="ko">Attenzione: la protezione sul server è stata impostata di nuovo dopo questa copia. Il ripristino potrebbe non essere leggibile: scrivimi prima di procedere.</p>'}
-    ${n ? `<p>Ripristino <b>${n}</b> ${n === 1 ? 'sezione' : 'sezioni'} dalla copia cifrata. Prima scarico una copia di come sono adesso, per sicurezza.</p>
+    <p class="mut">Serve una copia di <b>prima</b> che comparisse la schermata vuota «Casa e Famiglia». Se la data è successiva, prova da un altro dispositivo.</p>
+    ${n || Object.keys(scelte).length ? `<p>Ripristino le sezioni indicate dalla copia cifrata. Prima scarico una copia di come sono adesso, per sicurezza.</p>
       <button id="rip"${stessaChiave ? '' : ' disabled'}>Ripristina</button><button class="g" id="dl">Scarica solo la copia locale</button>`
         : '<p class="ok">Sul server è tutto cifrato e integro: non c\'è niente da ripristinare. Apri app.html.</p><button class="g" id="dl">Scarica la copia locale</button>'}
     <div id="msg"></div>`;
   document.getElementById('dl').onclick = () => scarica('duewell-copia-locale.json', cache);
+  out.querySelectorAll('input[data-k]').forEach(i => i.onchange = () => { const k = i.dataset.k; if(i.checked) daFare[k] = scelte[k]; else delete daFare[k]; });
   const rb = document.getElementById('rip');
   if(rb) rb.onclick = async () => {
+    if(!Object.keys(daFare).length){ document.getElementById('msg').innerHTML = '<p class="ko">Non hai scelto niente da ripristinare.</p>'; return; }
     rb.disabled = true; rb.textContent = 'Ripristino…';
     try{
       scarica('duewell-prima-del-ripristino.json', {t: Date.now(), d: srv});
