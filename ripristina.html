@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duewell · Ripristino dati</title>
+<style>
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#EEF2F7;color:#10253A}
+  .w{max-width:640px;margin:0 auto;padding:20px 16px}
+  h1{font-size:22px;margin:8px 0 4px} p{line-height:1.45}
+  .card{background:#fff;border:1px solid #DCE3EC;border-radius:14px;padding:16px;margin:14px 0}
+  .ok{color:#1E7B46;font-weight:700} .ko{color:#B42318;font-weight:700} .mut{color:#5B6B7D;font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:14px} td{padding:6px 4px;border-top:1px solid #EEF2F7;vertical-align:top}
+  button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 16px;background:#2F5BEA;color:#fff;cursor:pointer;margin:6px 6px 0 0}
+  button.g{background:#fff;color:#10253A;border:1px solid #C8D2DE} button:disabled{opacity:.5;cursor:default}
+  input{font:inherit;padding:10px;border:1px solid #C8D2DE;border-radius:10px;width:100%;box-sizing:border-box;margin:4px 0 8px}
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>Ripristino dati Duewell</h1>
+  <p class="mut">Questa pagina riporta su Firebase la copia cifrata dei dati che Duewell aveva salvato in questo browser. Non legge il contenuto dei dati e non cambia il tuo codice di sicurezza.</p>
+  <div id="out" class="card">Controllo l'accesso…</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyC-1H-1PXb0_AjSU8LY8Zu4EsF06Tolv8k",
+  authDomain: "family-dashboard-882b5.firebaseapp.com",
+  projectId: "family-dashboard-882b5",
+  storageBucket: "family-dashboard-882b5.firebasestorage.app",
+  messagingSenderId: "951441964256",
+  appId: "1:951441964256:web:1f7de881a0d01b7c93e485"
+});
+const auth = getAuth(app), db = getFirestore(app);
+const out = document.getElementById('out');
+const PFX = 'enc1:';
+const NOMI = {settings: 'Impostazioni', recurring: 'Pagamenti ricorrenti', 'medical-expenses': 'Sanità integrativa', checkups: 'Check-up e visite', specialists: 'Specialisti', bilancio: 'Bilancio annuale', contratti: 'Contratti', documenti: 'Documenti personali', detrazioni: 'Detrazioni fiscali'};
+const nome = (k) => NOMI[k] || k;
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const quando = (t) => t ? new Date(t).toLocaleString('it-IT', {dateStyle: 'medium', timeStyle: 'short'}) : 'data sconosciuta';
+const isEnc = (v) => typeof v === 'string' && v.indexOf(PFX) === 0;
+
+function scarica(nomeFile, obj){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 1)], {type: 'application/json'}));
+  a.download = nomeFile; document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 500);
+}
+
+function login(){
+  out.innerHTML = `<b>Accedi con il tuo account Duewell</b><p class="mut">Se di solito entri con Google, apri prima app.html, fai l'accesso, poi torna su questa pagina <b>senza premere Esci</b>.</p>
+    <input id="em" type="email" placeholder="Email" autocomplete="email"><input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="go">Accedi</button><div id="er" class="ko"></div>`;
+  document.getElementById('go').onclick = async () => {
+    try{ await signInWithEmailAndPassword(auth, document.getElementById('em').value, document.getElementById('pw').value); }
+    catch(e){ document.getElementById('er').textContent = 'Accesso non riuscito: controlla email e password.'; }
+  };
+}
+
+async function analizza(user){
+  const ck = 'dw-cache-' + user.uid;
+  let cache = null; try{ cache = JSON.parse(localStorage.getItem(ck) || 'null'); }catch(e){}
+  const snap = await getDoc(doc(db, 'app2', user.uid));
+  const srv = snap.exists() ? snap.data() : {};
+  if(!cache || !cache.d){
+    out.innerHTML = `<p class="ko">In questo browser non c'è una copia locale di Duewell.</p><p>Prova da un altro dispositivo o browser dove usavi Duewell (iPhone con Edge, l'altro PC…). Non premere «Esci» in Duewell su quei dispositivi: cancellerebbe la copia.</p>`;
+    return;
+  }
+  const d = cache.d;
+  const stessaChiave = !srv._enc || !d._enc || srv._enc === d._enc;
+  // campi da ripristinare: sul server non cifrati (scritti dalla vecchia app) o mancanti, nella copia cifrati
+  const righe = [], daFare = {};
+  const chiavi = Array.from(new Set([...Object.keys(d), ...Object.keys(srv)])).filter(k => k !== '_enc').sort();
+  for(const k of chiavi){
+    const s = srv[k], c = d[k];
+    let stato;
+    if(isEnc(s)) stato = s === c ? '<span class="ok">integro</span>' : '<span class="ok">integro (più recente sul server)</span>';
+    else if(isEnc(c)){ stato = s === undefined ? '<span class="ko">mancante: lo ripristino</span>' : '<span class="ko">sovrascritto: lo ripristino</span>'; daFare[k] = c; }
+    else stato = '<span class="mut">non cifrato in entrambi</span>';
+    righe.push(`<tr><td>${esc(nome(k))}</td><td>${stato}</td></tr>`);
+  }
+  const n = Object.keys(daFare).length;
+  out.innerHTML = `<p>Copia locale del <b>${esc(quando(cache.t))}</b> · account ${esc(user.email || '')}</p>
+    <table>${righe.join('')}</table>
+    ${stessaChiave ? '' : '<p class="ko">Attenzione: la protezione sul server è stata impostata di nuovo dopo questa copia. Il ripristino potrebbe non essere leggibile: scrivimi prima di procedere.</p>'}
+    ${n ? `<p>Ripristino <b>${n}</b> ${n === 1 ? 'sezione' : 'sezioni'} dalla copia cifrata. Prima scarico una copia di come sono adesso, per sicurezza.</p>
+      <button id="rip"${stessaChiave ? '' : ' disabled'}>Ripristina</button><button class="g" id="dl">Scarica solo la copia locale</button>`
+        : '<p class="ok">Sul server è tutto cifrato e integro: non c\'è niente da ripristinare. Apri app.html.</p><button class="g" id="dl">Scarica la copia locale</button>'}
+    <div id="msg"></div>`;
+  document.getElementById('dl').onclick = () => scarica('duewell-copia-locale.json', cache);
+  const rb = document.getElementById('rip');
+  if(rb) rb.onclick = async () => {
+    rb.disabled = true; rb.textContent = 'Ripristino…';
+    try{
+      scarica('duewell-prima-del-ripristino.json', {t: Date.now(), d: srv});
+      try{ localStorage.setItem('dw-pre-ripristino', JSON.stringify({t: Date.now(), d: srv})); }catch(e){}
+      await setDoc(doc(db, 'app2', user.uid), daFare, {merge: true});
+      const v = (await getDoc(doc(db, 'app2', user.uid))).data();
+      const ok = Object.keys(daFare).every(k => v[k] === daFare[k]);
+      document.getElementById('msg').innerHTML = ok
+        ? '<p class="ok">Fatto. Ora apri app.html e sblocca con il tuo codice: i dati dovrebbero essere tornati.</p><button id="vai">Apri Duewell</button>'
+        : '<p class="ko">La verifica non torna. Non usare l\'app e scrivimi.</p>';
+      const vb = document.getElementById('vai'); if(vb) vb.onclick = () => { location.href = 'app.html'; };
+      rb.textContent = 'Ripristinato';
+    }catch(e){ console.error(e); rb.disabled = false; rb.textContent = 'Ripristina'; document.getElementById('msg').innerHTML = '<p class="ko">Non riuscito: controlla la connessione e riprova.</p>'; }
+  };
+}
+
+onAuthStateChanged(auth, (user) => {
+  if(!user) return login();
+  analizza(user).catch(e => { console.error(e); out.innerHTML = '<p class="ko">Non riesco a leggere i dati. Controlla la connessione e ricarica la pagina.</p>'; });
+});
+</script>
+</body>
+</html>
