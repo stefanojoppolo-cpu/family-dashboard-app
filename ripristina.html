@@ -21,6 +21,12 @@
   <h1>Ripristino dati Duewell</h1>
   <p class="mut">Questa pagina riporta su Firebase la copia cifrata dei dati che Duewell aveva salvato in questo browser. Non legge il contenuto dei dati e non cambia il tuo codice di sicurezza.</p>
   <div id="out" class="card">Controllo l'accesso…</div>
+  <div id="bk" class="card" style="display:none">
+    <b>Ripristina solo le impostazioni da un file di backup</b>
+    <p class="mut">Scegli il file <b>registro-pagamenti-backup.csv</b> più recente che hai. Prendo soltanto la sezione «Impostazioni» (pagatori, massimali, persone, profilo…): spese, check-up e tutti gli altri dati restano come sono adesso.</p>
+    <input type="file" id="bkf" accept=".csv,.txt,text/csv,text/plain">
+    <div id="bkr"></div>
+  </div>
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
@@ -91,7 +97,7 @@ async function analizza(user){
     <p class="mut">Serve una copia di <b>prima</b> che comparisse la schermata vuota «Casa e Famiglia». Se la data è successiva, prova da un altro dispositivo.</p>
     ${n || Object.keys(scelte).length ? `<p>Ripristino le sezioni indicate dalla copia cifrata. Prima scarico una copia di come sono adesso, per sicurezza.</p>
       <button id="rip"${stessaChiave ? '' : ' disabled'}>Ripristina</button><button class="g" id="dl">Scarica solo la copia locale</button>`
-        : '<p class="ok">Sul server è tutto cifrato e integro: non c\'è niente da ripristinare. Apri app.html.</p><button class="g" id="dl">Scarica la copia locale</button>'}
+        : '<p class="mut">Da questa copia non c\'è niente da recuperare.</p><button class="g" id="dl">Scarica la copia locale</button>'}
     <div id="msg"></div>`;
   document.getElementById('dl').onclick = () => scarica('duewell-copia-locale.json', cache);
   out.querySelectorAll('input[data-k]').forEach(i => i.onchange = () => { const k = i.dataset.k; if(i.checked) daFare[k] = scelte[k]; else delete daFare[k]; });
@@ -114,8 +120,40 @@ async function analizza(user){
   };
 }
 
+function bkSetup(user){
+  const box = document.getElementById('bk'); box.style.display = 'block';
+  document.getElementById('bkf').onchange = async (e) => {
+    const f = e.target.files[0], r = document.getElementById('bkr'); if(!f) return;
+    const t = await f.text();
+    const i = t.indexOf('### IMPOSTAZIONI');
+    if(i < 0) return r.innerHTML = '<p class="ko">In questo file non c\'è la sezione Impostazioni.</p>';
+    const riga = t.slice(i).split('\n').slice(1).map(l => l.trim()).find(l => l.startsWith('{'));
+    let st; try{ st = JSON.parse(riga); }catch(x){ return r.innerHTML = '<p class="ko">Non riesco a leggere le impostazioni di questo file.</p>'; }
+    const pg = (st.pagatori || []).map(p => esc(p.nome) + (p.quota ? ' (' + p.quota + '%' + (p.per ? ', solo per ' + esc(p.per) : '') + ')' : '')).join(', ') || 'nessuno';
+    const pers = ((st.elenchi && st.elenchi.persone) || st.persone || []).map(esc).join(', ');
+    r.innerHTML = `<table><tr><td>Pagatori</td><td>${pg}</td></tr><tr><td>Massimali</td><td>${(st.massimali || []).length}</td></tr>${pers ? `<tr><td>Persone</td><td>${pers}</td></tr>` : ''}<tr><td>Profilo</td><td>${esc((st.profilo && (st.profilo.nome || st.profilo.famiglia)) || st.nomeFamiglia || '—')}</td></tr></table>
+      <p>Se sono le tue impostazioni, premi il pulsante. Prima scarico una copia di come sono adesso.</p><button id="bkgo">Ripristina solo le impostazioni</button><div id="bkm"></div>`;
+    document.getElementById('bkgo').onclick = async () => {
+      const b = document.getElementById('bkgo'); b.disabled = true; b.textContent = 'Ripristino…';
+      try{
+        const ref = doc(db, 'app2', user.uid);
+        const srv = (await getDoc(ref)).data() || {};
+        if(isEnc(srv.settings) && !confirm('Sul server le impostazioni risultano già cifrate da Duewell. Le sostituisco comunque con quelle del backup?')){ b.disabled = false; b.textContent = 'Ripristina solo le impostazioni'; return; }
+        scarica('duewell-prima-del-ripristino.json', {t: Date.now(), d: srv});
+        const val = JSON.stringify(st);
+        await setDoc(ref, {settings: val}, {merge: true});
+        const ok = ((await getDoc(ref)).data() || {}).settings === val;
+        document.getElementById('bkm').innerHTML = ok ? '<p class="ok">Impostazioni ripristinate. Apri Duewell: in Impostazioni salva una volta qualcosa (anche senza cambiare nulla) così vengono di nuovo cifrate.</p><button id="bkv">Apri Duewell</button>' : '<p class="ko">La verifica non torna: scrivimi prima di usare l\'app.</p>';
+        const v = document.getElementById('bkv'); if(v) v.onclick = () => { location.href = 'app.html'; };
+        b.textContent = 'Fatto';
+      }catch(x){ console.error(x); b.disabled = false; b.textContent = 'Ripristina solo le impostazioni'; document.getElementById('bkm').innerHTML = '<p class="ko">Non riuscito: controlla la connessione e riprova.</p>'; }
+    };
+  };
+}
+
 onAuthStateChanged(auth, (user) => {
   if(!user) return login();
+  bkSetup(user);
   analizza(user).catch(e => { console.error(e); out.innerHTML = '<p class="ko">Non riesco a leggere i dati. Controlla la connessione e ricarica la pagina.</p>'; });
 });
 </script>
